@@ -56,18 +56,12 @@ int do_pll_cmd(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 
 	if (strncmp(argv[1], "pa", 2) == 0)
 		cmd_pll_data.pll = PASS_PLL;
-#ifdef CONFIG_SOC_TCI6638
 	else if (strncmp(argv[1], "arm", 3) == 0)
 		cmd_pll_data.pll = TETRIS_PLL;
 	else if (strncmp(argv[1], "ddr3a", 5) == 0)
 		cmd_pll_data.pll = DDR3A_PLL;
 	else if (strncmp(argv[1], "ddr3b", 5) == 0)
 		cmd_pll_data.pll = DDR3B_PLL;
-#endif
-#ifdef CONFIG_SOC_TCI6614
-	else if (strncmp(argv[1], "ddr3", 4) == 0)
-		cmd_pll_data.pll = DDR3_PLL;
-#endif
 	else
 		goto pll_cmd_usage;
 
@@ -86,20 +80,11 @@ pll_cmd_usage:
 	return cmd_usage(cmdtp);
 }
 
-#ifdef CONFIG_SOC_TCI6638
 U_BOOT_CMD(
 	pllset,	5,	0,	do_pll_cmd,
 	"set pll multiplier and pre divider",
 	"<pa|arm|ddr3a|ddr3b> <mult> <div> <OD>\n"
 );
-#endif
-#ifdef CONFIG_SOC_TCI6614
-U_BOOT_CMD(
-	pllset,	5,	0,	do_pll_cmd,
-	"set pll multiplier and pre divider",
-	"<pa|ddr3> <mult> <div> <OD>\n"
-);
-#endif
 
 int do_getclk_cmd(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
@@ -123,11 +108,7 @@ U_BOOT_CMD(
 	getclk,	2,	0,	do_getclk_cmd,
 	"get clock rate",
 	"<clk index>\n"
-#ifdef CONFIG_SOC_TCI6638
 	"See the 'enum clk_e' in the tci6638 clock.h for clk indexes\n"
-#else
-	"See the hardware-tci6614.h for clk indexes\n"
-#endif
 );
 
 int do_psc_cmd(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])

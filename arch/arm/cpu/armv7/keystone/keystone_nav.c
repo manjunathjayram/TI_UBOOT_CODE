@@ -24,29 +24,7 @@
 extern int cpu_to_bus(u32 *ptr, u32 length);
 
 static int soc_type = 
-#ifdef CONFIG_SOC_TCI6638
 	tci6638;
-#endif
-#ifdef CONFIG_SOC_TCI6614
-	tci6614;
-#endif
-
-struct qm_config tci6614_qm_memmap = {
-	.stat_cfg	= 0x02a00000,
-	.queue		= (struct qm_reg_queue *)0x02a20000,
-	.mngr_vbusm	= 0x34020000,
-	.i_lram		= 0x00080000,
-	.proxy		= (struct qm_reg_queue *)0x02a40000,
-	.status_ram	= 0x02a62000,
-	.mngr_cfg	= (struct qm_cfg_reg *)0x02a68000,
-	.intd_cfg	= 0x02aa0000,
-	.desc_mem	= (struct descr_mem_setup_reg *)0x02a6a000,
-	.region_num	= 20,
-	.pdsp_cmd	= 0x02ab8000,
-	.pdsp_ctl	= 0x02a6e000,
-	.pdsp_iram	= 0x02a60000,
-	.qpool_num	= 4000,
-};
 
 struct qm_config tci6638_qm_memmap = {
 	.stat_cfg	= 0x02a40000,
@@ -117,9 +95,6 @@ static int _qm_init(struct qm_config * cfg)
 int qm_init(void)
 {
 	switch (soc_type) {
-		case tci6614:
-			return _qm_init(&tci6614_qm_memmap);
-
 		case tci6638:
 			return _qm_init(&tci6638_qm_memmap);
 	}
@@ -203,22 +178,6 @@ void queue_close(u32 qnum)
 /************************************************
  * DMA API
  ***********************************************/
-
-struct pktdma_cfg tci6614_netcp_pktdma = {
-	.global		= (struct global_ctl_regs*)0x02004000,
-	.tx_ch		= (struct tx_chan_regs*)0x02004400,
-	.tx_ch_num	= 9,
-	.rx_ch		= (struct rx_chan_regs*)0x02004800,
-	.rx_ch_num	= 24,
-	.tx_sched	= (u32*)0x02004c00,
-	.rx_flows	= (struct rx_flow_regs*)0x02005000,
-	.rx_flow_num	= 32,
-
-	.rx_free_q	= 4001,
-	.rx_rcv_q	= 4002,
-	.tx_snd_q	= 648,
-};
-
 struct pktdma_cfg tci6638_netcp_pktdma = {
 	.global		= (struct global_ctl_regs*)0x02004000,
 	.tx_ch		= (struct tx_chan_regs*)0x02004400,
@@ -364,10 +323,6 @@ static int _netcp_init(struct pktdma_cfg *netcp_cfg, struct rx_buff_desc *rx_buf
 int netcp_init(struct rx_buff_desc *rx_buffers)
 {
 	switch (soc_type) {
-		case tci6614:
-			_netcp_init(&tci6614_netcp_pktdma, rx_buffers);
-			return QM_OK;
-
 		case tci6638:
 			_netcp_init(&tci6638_netcp_pktdma, rx_buffers);
 			return QM_OK;

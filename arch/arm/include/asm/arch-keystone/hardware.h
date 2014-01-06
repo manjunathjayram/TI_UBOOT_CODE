@@ -104,23 +104,11 @@ struct ddr3_emif_config {
 
 #define		BIT(x)	(1 << (x))
 
-#ifdef CONFIG_SOC_TCI6614
-#include <asm/arch/hardware-tci6614.h>
-#endif
-
 #ifdef CONFIG_SOC_TCI6638
 #include <asm/arch/hardware-tci6638.h>
 #endif
 
 #ifndef __ASSEMBLY__
-static inline int cpu_is_tci6614(void)
-{
-	unsigned int jtag_id	= __raw_readl(JTAG_ID_REG);
-	unsigned int part_no	= (jtag_id >> 12) & 0xffff;
-
-	return ((part_no == 0xb962) ? 1 : 0);
-}
-
 static inline int cpu_is_tci6638(void)
 {
 	unsigned int jtag_id	= __raw_readl(JTAG_ID_REG);

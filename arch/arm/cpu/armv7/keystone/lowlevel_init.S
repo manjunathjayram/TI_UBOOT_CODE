@@ -1,5 +1,5 @@
 /*
- * TCI6614: Low-level pre-relocation initialization
+ * KS2: Low-level pre-relocation initialization
  *
  * See file CREDITS for list of people who contributed to this
  * project.

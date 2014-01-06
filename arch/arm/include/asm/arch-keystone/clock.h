@@ -22,10 +22,6 @@
 #ifndef __ASM_ARCH_CLOCK_H
 #define __ASM_ARCH_CLOCK_H
 
-#ifdef CONFIG_SOC_TCI6614
-#include <asm/arch/clock-tci6614.h>
-#endif
-
 #ifdef CONFIG_SOC_TCI6638
 #include <asm/arch/clock-tci6638.h>
 #endif

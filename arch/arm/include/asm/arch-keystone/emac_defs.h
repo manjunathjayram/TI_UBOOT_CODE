@@ -38,13 +38,6 @@ typedef enum { FALSE = 0, TRUE = 1 } bool;
 
 #define MAC_ID_BASE_ADDR			(TCI66XX_DEVICE_STATE_CTRL_BASE + 0x110)
 
-#ifdef CONFIG_SOC_TCI6614
-/* MDIO module input frequency */
-#define EMAC_MDIO_BUS_FREQ			(clk_get_rate(TCI6614_LPSC_PA)/3)
-/* MDIO clock output frequency */
-#define EMAC_MDIO_CLOCK_FREQ		1000000		/* 1.0 MHz */
-#endif
-
 #ifdef CONFIG_SOC_TCI6638
 /* MDIO module input frequency */
 #define EMAC_MDIO_BUS_FREQ			(clk_get_rate(pass_pll_clk))
@@ -266,9 +259,6 @@ struct pa_config {
 #define DEVICE_PSTREAM_CFG_REG_ADDR                 (TCI66XX_PASS_BASE + 0x604)
 #define DEVICE_PSTREAM_CFG_REG_VAL_ROUTE_PDSP0      0
 
-#ifdef CONFIG_SOC_TCI6614
-#define DEVICE_PSTREAM_CFG_REG_VAL_ROUTE_CPPI      0x00000606
-#endif
 #ifdef CONFIG_SOC_TCI6638
 #define DEVICE_PSTREAM_CFG_REG_VAL_ROUTE_CPPI      0x06060606
 #endif

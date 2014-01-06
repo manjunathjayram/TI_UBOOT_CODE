@@ -51,9 +51,6 @@ struct pll_regs {
 };
 
 
-#ifdef CONFIG_SOC_TCI6614
-#include "clock-tci6614.c"
-#endif
 #ifdef CONFIG_SOC_TCI6638
 #include "clock-tci6638.c"
 #endif
@@ -75,18 +72,12 @@ void init_pll(const struct pll_init_data *data)
 		if (tmp & (PLLCTL_BYPASS)) {
 			/* PLL BYPASS is enabled, we assume if not in Bypass ENSAT = 1 */
 
-#ifdef CONFIG_SOC_TCI6614
-			reg_setbits( pll_regs[data->pll].reg1, BIT(MAIN_ENSAT_OFFSET));
-
-			pllctl_reg_clrbits(data->pll, ctl, PLLCTL_PLLEN);
-#else
 			reg_setbits( pll_regs[data->pll].reg1, BIT(MAIN_ENSAT_OFFSET));
 
 			pllctl_reg_clrbits(data->pll, ctl, PLLCTL_PLLEN | PLLCTL_PLLENSRC);
 			pll_delay(225); /* Wait for 4 RefClks */
 
 			pllctl_reg_setbits(data->pll, secctl, PLLCTL_BYPASS);
-#endif
 			pllctl_reg_setbits(data->pll, ctl, PLLCTL_PLLPWRDN);
 			pll_delay(14000);
 
@@ -118,18 +109,6 @@ void init_pll(const struct pll_init_data *data)
 		pllctl_reg_rmw(data->pll, secctl, 0x00780000, (pllod << 19));
 		wait_for_completion(data);
 
-#ifdef CONFIG_SOC_TCI6614
-		/* If necessary program PLLDIVn.  Note that must aplly the GO operation
-		   to change these dividers to new ratios*/
-		if (data->div_enable) {
-			pllctl_reg_write(data->pll, div2, (data->pll_div2-1) | 0x00008000);
-			pllctl_reg_write(data->pll, div5, (data->pll_div5-1) | 0x00008000);
-			pllctl_reg_write(data->pll, div8, (data->pll_div8-1) | 0x00008000);
-		}
-
-		/* Program ALNCTLn */
-		pllctl_reg_setbits(data->pll, alnctl, (1 << 1) | (1 << 4) | (1 << 7));
-#else
 		pllctl_reg_write(data->pll, div1, 0x00008000);
 		pllctl_reg_write(data->pll, div2, 0x00008000);
 		pllctl_reg_write(data->pll, div3, 0x00008001);
@@ -137,8 +116,6 @@ void init_pll(const struct pll_init_data *data)
 		pllctl_reg_write(data->pll, div5, 0x000080017);
 
 		pllctl_reg_setbits(data->pll, alnctl, 0x1f);
-
-#endif
 
 		/* Set GOSET bit in PLLCMD to initiate the GO operation to change the divide */
 		pllctl_reg_setbits(data->pll, cmd, 0x1);
@@ -158,7 +135,6 @@ void init_pll(const struct pll_init_data *data)
 		tmp = pllctl_reg_setbits(data->pll, ctl, PLLCTL_PLLEN);
 
 	}
-#ifdef CONFIG_SOC_TCI6638
 	else if (data->pll == TETRIS_PLL) {
 		bwadj = pllm >> 1;
 //1.5 Set PLLCTL0[BYPASS] =1 (enable bypass),
@@ -190,7 +166,6 @@ void init_pll(const struct pll_init_data *data)
 //9 Set CHIPMISCCTL1[13] = 1 (disable glitchfree bypass) only applicable for Kepler
 		reg_setbits( 0x02620c7c, (1<<13));
 	}
-#endif	
 	else {
 
 		reg_setbits(pll_regs[data->pll].reg1, 0x00000040); /* Set ENSAT bit = 1 */
@@ -217,11 +192,6 @@ void init_pll(const struct pll_init_data *data)
 
 		/* Reset bit: bit 14 for both DDR3 & PASS PLL */
 		tmp = 0x00004000;
-#ifdef CONFIG_SOC_TCI6614
-		/* Reset bit: bit 13 for DDR3 PLL */
-		if (data->pll == DDR3_PLL)
-			tmp = 0x00002000;
-#endif
 		/* Set RESET bit = 1 */
 		reg_setbits(pll_regs[data->pll].reg1, tmp);
 		/* Wait for a minimum of 7 us*/

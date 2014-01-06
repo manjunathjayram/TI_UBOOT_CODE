@@ -39,9 +39,6 @@
 #define DEVICE_REG32_R(addr)			__raw_readl((u32 *)(addr))
 #define DEVICE_REG32_W(addr, val)		__raw_writel(val, (u32 *)(addr))
 
-#ifdef CONFIG_SOC_TCI6614
-#define DEVICE_PSC_BASE				TCI6614_PSC_BASE
-#endif
 #ifdef CONFIG_SOC_TCI6638
 #define DEVICE_PSC_BASE				TCI6638_PSC_BASE
 #endif

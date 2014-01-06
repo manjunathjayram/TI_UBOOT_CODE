@@ -25,11 +25,6 @@
 #include <asm/io.h>
 #include <asm/arch/clock.h>
 
-#ifdef CONFIG_SOC_TCI6614
-#define ASYNC_EMIF_BASE			TCI6614_ASYNC_EMIF_CNTRL_BASE
-#define NUM_CS				4
-#endif
-
 #ifdef CONFIG_SOC_TCI6638
 #define ASYNC_EMIF_BASE			TCI6638_ASYNC_EMIF_CNTRL_BASE
 #endif
