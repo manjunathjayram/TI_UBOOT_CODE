@@ -32,6 +32,9 @@ int arch_cpu_init(void)
 #ifdef CONFIG_SOC_K2E
 	msmc_share_all_segments(13); /* PCIE 1 */
 #endif
+#ifdef CONFIG_SOC_K2L
+	msmc_share_all_segments(14); /* PCIE 1 */
+#endif
 
 	/*
 	 * just initialise the COM2 port so that TI specific
