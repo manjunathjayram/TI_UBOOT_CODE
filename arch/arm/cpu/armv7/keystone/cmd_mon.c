@@ -42,8 +42,8 @@ static int mon_install(u32 addr, u32 dpsc, u32 freq)
 	return result;
 }
 
-static int do_mon_install(cmd_tbl_t *cmdtp, int flag, int argc,
-			  char * const argv[])
+int do_mon_install(cmd_tbl_t *cmdtp, int flag, int argc,
+		   char * const argv[])
 {
 	u32 addr, dpsc_base = 0x1E80000, freq;
 	int     rcode = 0;
