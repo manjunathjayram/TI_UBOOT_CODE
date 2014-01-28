@@ -292,4 +292,8 @@
 #define K2_AEMIF_PERF_DEGRADE_ERRATA_FIX
 #define CONFIG_SUPPORT_RAW_INITRD
 
+/* RapidIO support */
+#define CONFIG_CMD_RIO
+#define CONFIG_DRIVER_KEYSTONE_RIO
+
 #endif /* __CONFIG_H */
