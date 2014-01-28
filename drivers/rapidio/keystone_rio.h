@@ -1,10 +1,12 @@
 /*
- * Copyright (C) 2010, 2011, 2012 Texas Instruments Incorporated
- * Author: Aurelien Jacquiot <a-jacquiot@ti.com>
+ * Copyright (C) 2010, 2011, 2012, 2013, 2014 Texas Instruments Incorporated
+ * Authors: Aurelien Jacquiot <a-jacquiot@ti.com>
+ * - Main driver implementation.
+ * - Updated for support on TI KeyStone 2 platform.
  *
  * Copyright (C) 2012 Texas Instruments Incorporated
  * WingMan Kwok <w-kwok2@ti.com>
- * - Updated for support on TI KeyStone platform.
+ * - Updated for support on TI KeyStone 1 platform.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -22,17 +24,17 @@
 #include <asm/cache.h>
 #include <asm/io.h>
 
-#define BIT(x)  (1 << (x))
+#define BIT(x) (1 << (x))
 
 /*#########################################################################*/
 /*#########################################################################*/
 /*#########################################################################*/
 
 /* Direct I/O modes */
-#define RIO_DIO_MODE_READ    0x0000
-#define RIO_DIO_MODE_WRITER  0x0001
-#define RIO_DIO_MODE_WRITE   0x0002
-#define RIO_DIO_MODE_SWRITE  0x0003
+#define RIO_DIO_MODE_READ               0x0000
+#define RIO_DIO_MODE_WRITER             0x0001
+#define RIO_DIO_MODE_WRITE              0x0002
+#define RIO_DIO_MODE_SWRITE             0x0003
 
 /*
  * In RapidIO, each device has a 2MB configuration space that is
@@ -325,8 +327,6 @@
 /*#########################################################################*/
 /*#########################################################################*/
 
-
-
 #define KEYSTONE_RIO_MAP_FLAG_SEGMENT		BIT(0)
 #define KEYSTONE_RIO_MAP_FLAG_SRC_PROMISC	BIT(1)
 #define KEYSTONE_RIO_MAP_FLAG_TT_16		BIT(13)
@@ -355,40 +355,59 @@
 /*
  * LSU defines
  */
-#define KEYSTONE_RIO_LSU_PRIO             0
+#define KEYSTONE_RIO_LSU_PRIO           0
 
-#define KEYSTONE_RIO_LSU_BUSY_MASK        BIT(31)
-#define KEYSTONE_RIO_LSU_FULL_MASK        BIT(30)
+#define KEYSTONE_RIO_LSU_BUSY_MASK      BIT(31)
+#define KEYSTONE_RIO_LSU_FULL_MASK      BIT(30)
 
-#define KEYSTONE_RIO_LSU_CC_MASK          0x0f
-#define KEYSTONE_RIO_LSU_CC_TIMEOUT       0x01
-#define KEYSTONE_RIO_LSU_CC_XOFF          0x02
-#define KEYSTONE_RIO_LSU_CC_ERROR         0x03
-#define KEYSTONE_RIO_LSU_CC_INVALID       0x04
-#define KEYSTONE_RIO_LSU_CC_DMA           0x05
-#define KEYSTONE_RIO_LSU_CC_RETRY         0x06
-#define KEYSTONE_RIO_LSU_CC_CANCELED      0x07
+#define KEYSTONE_RIO_LSU_CC_MASK        0x0f
+#define KEYSTONE_RIO_LSU_CC_TIMEOUT     0x01
+#define KEYSTONE_RIO_LSU_CC_XOFF        0x02
+#define KEYSTONE_RIO_LSU_CC_ERROR       0x03
+#define KEYSTONE_RIO_LSU_CC_INVALID     0x04
+#define KEYSTONE_RIO_LSU_CC_DMA         0x05
+#define KEYSTONE_RIO_LSU_CC_RETRY       0x06
+#define KEYSTONE_RIO_LSU_CC_CANCELED    0x07
 
 /* Mask for receiving both error and good completion LSU interrupts */
 #define KEYSTONE_RIO_ICSR_LSU0(src_id)    ((0x10001) << (src_id))
+
+/* Keystone2 supported baud rates */
+#define KEYSTONE_RIO_BAUD_1_250		0
+#define KEYSTONE_RIO_BAUD_2_500		1
+#define KEYSTONE_RIO_BAUD_3_125		2
+#define KEYSTONE_RIO_BAUD_5_000		3
+
+#define KEYSTONE_RIO_FULL_RATE		0
+#define KEYSTONE_RIO_HALF_RATE		1
+#define KEYSTONE_RIO_QUARTER_RATE	2
+
+/* Max ports configuration per path modes */
+#define KEYSTONE_MAX_PORTS_PATH_MODE_0  0xf /* 4 ports */
+#define KEYSTONE_MAX_PORTS_PATH_MODE_1  0x7 /* 3 ports */
+#define KEYSTONE_MAX_PORTS_PATH_MODE_2  0x7 /* 3 ports */
+#define KEYSTONE_MAX_PORTS_PATH_MODE_3  0x3 /* 2 ports */ 
+#define KEYSTONE_MAX_PORTS_PATH_MODE_4  0x1 /* 1 ports */
+
+#define SERDES_LANE(lane_num)	                (0x01 << lane_num)
+#define IS_SERDES_LANE_USED(lanes, lane_num)	(lanes & SERDES_LANE(lane_num))
 
 /*
  * Various RIO defines
  */
 #define KEYSTONE_RIO_TIMEOUT_CNT	1000
-#define KEYSTONE_RIO_REGISTER_DELAY	(2*HZ)
 
 /*
  * RIO error, reset and special event interrupt defines
  */
-#define KEYSTONE_RIO_PORT_ERROR_OUT_PKT_DROP		BIT(26)
-#define KEYSTONE_RIO_PORT_ERROR_OUT_FAILED		BIT(25)
-#define KEYSTONE_RIO_PORT_ERROR_OUT_DEGRADED		BIT(24)
-#define KEYSTONE_RIO_PORT_ERROR_OUT_RETRY		BIT(20)
-#define KEYSTONE_RIO_PORT_ERROR_OUT_ERROR		BIT(17)
-#define KEYSTONE_RIO_PORT_ERROR_IN_ERROR		BIT(9)
-#define KEYSTONE_RIO_PORT_ERROR_PW_PENDING		BIT(4)
-#define KEYSTONE_RIO_PORT_ERROR_PORT_ERR		BIT(2)
+#define KEYSTONE_RIO_PORT_ERROR_OUT_PKT_DROP	BIT(26)
+#define KEYSTONE_RIO_PORT_ERROR_OUT_FAILED	BIT(25)
+#define KEYSTONE_RIO_PORT_ERROR_OUT_DEGRADED	BIT(24)
+#define KEYSTONE_RIO_PORT_ERROR_OUT_RETRY	BIT(20)
+#define KEYSTONE_RIO_PORT_ERROR_OUT_ERROR	BIT(17)
+#define KEYSTONE_RIO_PORT_ERROR_IN_ERROR	BIT(9)
+#define KEYSTONE_RIO_PORT_ERROR_PW_PENDING	BIT(4)
+#define KEYSTONE_RIO_PORT_ERROR_PORT_ERR	BIT(2)
 
 #define KEYSTONE_RIO_PORT_ERROR_MASK   \
 	(KEYSTONE_RIO_PORT_ERROR_OUT_PKT_DROP	|\
@@ -409,14 +428,9 @@
 /*
  * RapidIO global definitions
  */
-#define KEYSTONE_RIO_MAX_PORT		4
-#define KEYSTONE_RIO_BLK_NUM		9
-#define KEYSTONE_RIO_MAX_MBOX		4	/* 4 in multi-segment,
-						64 in single-segment */
-
-#define KEYSTONE_RIO_MAINT_BUF_SIZE	64
-#define KEYSTONE_RIO_MSG_SSIZE		0xe
-#define KEYSTONE_RIO_SGLIST_SIZE	3
+#define KEYSTONE_RIO_MAX_PORT	       4
+#define KEYSTONE_RIO_BLK_NUM	       9
+#define KEYSTONE_RIO_MAINT_BUF_SIZE    64
 
 /*
  * Dev Id and dev revision
@@ -427,20 +441,8 @@
 #define KEYSTONE_RIO_DEV_INFO_VAL \
 	(((__raw_readl(krio_priv->jtagid_reg)) >> 28) & 0xf)
 
-#define KEYSTONE_RIO_ID_TI		(0x00000030)
-#define KEYSTONE_RIO_EXT_FEAT_PTR	(0x00000100)
-
-/*
- * Maximum message size fo RIONET
- */
-#define MACH_RIO_MAX_MSG_SIZE   1552
-
-/*
- * Definition of the different RapidIO packet types according to the RapidIO
- * specification 2.0
- */
-#define RIO_PACKET_TYPE_STREAM  9  /* Data Streaming */
-#define RIO_PACKET_TYPE_MESSAGE 11 /* Message */
+#define KEYSTONE_RIO_ID_TI	       (0x00000030)
+#define KEYSTONE_RIO_EXT_FEAT_PTR      (0x00000100)
 
 /*
  * SerDes configurations
@@ -455,8 +457,6 @@ struct keystone_serdes_config {
 
 	/* SerDes transmit channel configuration (per-port) */
 	u32 tx_chan_config[KEYSTONE_RIO_MAX_PORT];
-
-	u32 path_mode[KEYSTONE_RIO_MAX_PORT];      /* path config for SerDes */
 };
 
 /*
@@ -469,6 +469,9 @@ struct keystone_rio_board_controller_info {
 	u32		boot_cfg_regs_base;
 	u32		boot_cfg_regs_size;
 
+	u32		serdes_cfg_regs_base;
+	u32		serdes_cfg_regs_size;
+
 	u16 ports;      /* bitfield of port(s) to probe on this controller */
 	u16 mode;       /* hw mode (default serdes config).
 			   index into serdes_config[] */
@@ -476,7 +479,11 @@ struct keystone_rio_board_controller_info {
 	u16 size;       /* RapidIO common transport system size.
 			 * 0 - Small size. 256 devices.
 			 * 1 - Large size, 65536 devices. */
+	u16 keystone2_serdes;
 	u16 serdes_config_num;
+	u32 serdes_baudrate;
+	u32 path_mode;
+
 	struct keystone_serdes_config serdes_config[4];
 };
 
@@ -892,11 +899,64 @@ struct keystone_rio_fabric_regs {
 	u32	sp_fabric_status[4];	/* 1be40 - 1be4c */
 };
 
-#ifdef CONFIG_RIONET
-/* built-in rionet */
-extern int  rionet_init(void);
-extern void rionet_exit(void);
-#endif
+/**
+ * keystone_rio_config_read - Generate a KeyStone read maintenance transaction
+ * @portid: Output port ID of transaction
+ * @destid: Destination ID of transaction
+ * @hopcount: Number of hops to target device
+ * @offset: Offset into configuration space
+ * @len: Length (in bytes) of the maintenance transaction
+ * @val: Location to be read into
+ *
+ * Generates a KeyStone read maintenance transaction. Returns %0 on
+ * success or %-1 on failure.
+ */
+int keystone_rio_config_read(int  portid, 
+			     u16  destid,
+			     u8   hopcount,
+			     u32  offset,
+			     int  len,
+			     u32 *val);
+
+/**
+ * keystone_rio_config_write - Generate a KeyStone write maintenance transaction
+ * @portid: Output port ID of transaction
+ * @destid: Destination ID of transaction
+ * @hopcount: Number of hops to target device
+ * @offset: Offset into configuration space
+ * @len: Length (in bytes) of the maintenance transaction
+ * @val: Value to be written
+ *
+ * Generates an KeyStone write maintenance transaction. Returns %0 on
+ * success or %-1 on failure.
+ */
+int keystone_rio_config_write(int portid,
+			      u16 destid,
+			      u8  hopcount,
+			      u32 offset,
+			      int len,
+			      u32 val);
+
+/**
+ * keystone_local_config_read - Generate a KeyStone local config space read
+ * @offset: Offset into configuration space
+ * @len: Length (in bytes) of the maintenance transaction
+ * @data: Value to be read into
+ *
+ * Generates a KeyStone local configuration space read. Returns %0 on
+ * success or %-1 on failure.
+ */
+int keystone_local_config_read(u32 offset, int len, u32 *data);
+
+/**
+ * keystone_local_config_write - Generate a KeyStone local config space write
+ * @offset: Offset into configuration space
+ * @len: Length (in bytes) of the maintenance transaction
+ * @data: Value to be written
+ *
+ * Generates a KeyStone local configuration space write. Returns %0 on
+ * success or %-EINVAL on failure.
+ */
+int keystone_local_config_write(u32 offset, int len, u32 data);
 
 #endif /* KEYSTONE_RIO_H */
-
