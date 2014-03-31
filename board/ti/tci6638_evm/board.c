@@ -95,6 +95,7 @@ int dram_init(void)
 	gd->ram_size = get_ram_size(CONFIG_SYS_SDRAM_BASE,
 				    CONFIG_MAX_RAM_BANK_SIZE);
 	init_async_emif(ARRAY_SIZE(async_emif_config), async_emif_config);
+	init_ddr3_ecc(TCI6638_DDR3A_EMIF_CTRL_BASE);
 	return 0;
 }
 
@@ -390,6 +391,7 @@ void ft_board_setup(void *blob, bd_t *bd)
 			}
 		}
 	}
+	check_ddr3_ecc_int(TCI6638_DDR3A_EMIF_CTRL_BASE);
 }
 #endif
 

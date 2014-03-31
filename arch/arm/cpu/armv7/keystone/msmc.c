@@ -74,6 +74,7 @@ void share_all_segments(int priv_id)
 	}
 }
 
+
 void map_ses_segment(int priv_id, int ses_pair,
 		     u32 src_pfn, u32 dst_pfn, mpax_seg_size size)
 {
@@ -83,6 +84,21 @@ void map_ses_segment(int priv_id, int ses_pair,
 	msmc->ses[priv_id][ses_pair].mpaxl = dst_pfn << 8 | 0x3f;
 }
 
+void get_ses_mpax(int priv_id, int ses_pair, u32 *mpax)
+{
+	struct msms_regs *msmc = (struct msms_regs *) TCI6638_MSMC_CTRL_BASE;
+
+	*mpax++ = msmc->ses[priv_id][ses_pair].mpaxl;
+	*mpax = msmc->ses[priv_id][ses_pair].mpaxh;
+}
+
+void set_ses_mpax(int priv_id, int ses_pair, u32 *mpax)
+{
+	struct msms_regs *msmc = (struct msms_regs *) TCI6638_MSMC_CTRL_BASE;
+
+	msmc->ses[priv_id][ses_pair].mpaxl = *mpax++;
+	msmc->ses[priv_id][ses_pair].mpaxh = *mpax;
+}
 
 int do_setmpax_cmd(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {

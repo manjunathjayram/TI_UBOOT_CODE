@@ -294,4 +294,8 @@
 #define K2_AEMIF_PERF_DEGRADE_ERRATA_FIX
 #define CONFIG_SUPPORT_RAW_INITRD
 
+/* Maximum memory size for relocated U-boot at the end of the DDR3 memory
+   which is NOT applicable for DDR ECC test */
+#define CONFIG_MAX_UBOOT_MEM_SIZE      (4 << 20)       /* 4 MiB */
+
 #endif /* __CONFIG_H */

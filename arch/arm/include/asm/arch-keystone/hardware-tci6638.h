@@ -194,6 +194,91 @@
 #define TCI6638_DDR3_PMCTL_OFFSET		0x38
 #define TCI6638_DDR3_ZQCFG_OFFSET		0xC8
 
+/* DDR3 ECC */
+#define TCI6638_DDR3_ECC_INT_RAW_STATUS_OFFSET		0x0A4
+#define TCI6638_DDR3_ECC_INT_STATUS_OFFSET		0x0AC
+#define TCI6638_DDR3_ECC_INT_ENABLE_SET_SYS_OFFSET	0x0B4
+#define TCI6638_DDR3_ECC_CTRL_OFFSET			0x110
+#define TCI6638_DDR3_ECC_ADDR_RANGE1_OFFSET		0x114
+#define TCI6638_DDR3_ECC_ADDR_RANGE2_OFFSET		0x118
+#define TCI6638_DDR3_ONE_BIT_ECC_ERR_CNT_OFFSET		0x130
+#define TCI6638_DDR3_ONE_BIT_ECC_ERR_THRSH_OFFSET	0x134
+#define TCI6638_DDR3_ONE_BIT_ECC_ERR_DIST_1_OFFSET	0x138
+#define TCI6638_DDR3_ONE_BIT_ECC_ERR_ADDR_LOG_OFFSET	0x13C
+#define TCI6638_DDR3_TWO_BIT_ECC_ERR_ADDR_LOG_OFFSET	0x140
+#define TCI6638_DDR3_ONE_BIT_ECC_ERR_DIST_2_OFFSET	0x144
+
+/* DDR3 ECC Interrupt Status register definitions */
+#define DDR3_1B_ECC_ERR_SYS	BIT(5)
+#define DDR3_2B_ECC_ERR_SYS	BIT(4)
+#define DDR3_WR_ECC_ERR_SYS	BIT(3)
+
+/* DDR3 ECC Control register definiations */
+#define DDR3_ECC_EN		BIT(31)
+#define DDR3_ECC_ADDR_RNG_PROT	BIT(30)
+#define DDR3_ECC_VERIFY_EN	BIT(29)
+#define DDR3_ECC_RMW_EN		BIT(28)
+#define DDR3_ECC_ADDR_RNG_2_EN	BIT(1)
+#define DDR3_ECC_ADDR_RNG_1_EN	BIT(0)
+
+#define DDR3_ECC_ENABLE		(DDR3_ECC_EN | DDR3_ECC_ADDR_RNG_PROT | \
+				DDR3_ECC_VERIFY_EN)
+
+/* EDMA3 register offsets */
+#define EDMA_QCHMAP0		0x0200
+#define EDMA_IPR		0x1068
+#define EDMA_ICR		0x1070
+#define EDMA_QEECR		0x1088
+#define EDMA_QEESR		0x108c
+#define EDMA_PARAM_1(x)		(0x4020 + (4 * x))
+
+/* Chip Interrupt Controller register offsets */
+#define CIC_REV				0x00
+#define CIC_CTRL			0x04
+#define CIC_HOST_CTRL			0x0C
+#define CIC_GLOBAL_ENABLE		0x10
+#define CIC_GLOBAL_NESTING_LEVEL	0x1C
+#define CIC_SYS_STAT_IDX_SET		0x20
+#define CIC_SYS_STAT_IDX_CLR		0x24
+#define CIC_SYS_ENABLE_IDX_SET		0x28
+#define CIC_SYS_ENABLE_IDX_CLR		0x2C
+#define CIC_GLOBAL_WAKEUP_ENABLE	0x30
+#define CIC_HOST_ENABLE_IDX_SET		0x34
+#define CIC_HOST_ENABLE_IDX_CLR		0x38
+#define CIC_PACING_PRESCALE		0x40
+#define CIC_VECTOR_BASE			0x50
+#define CIC_VECTOR_SIZE			0x54
+#define CIC_VECTOR_NULL			0x58
+#define CIC_PRIO_IDX			0x80
+#define CIC_PRIO_VECTOR			0x84
+#define CIC_SECURE_ENABLE		0x90
+#define CIC_SECURE_PRIO_IDX		0x94
+#define CIC_PACING_PARAM(n)		(0x0100 + (n << 4))
+#define CIC_PACING_DEC(n)		(0x0104 + (n << 4))
+#define CIC_PACING_MAP(n)		(0x0108 + (n << 4))
+#define CIC_SYS_RAW_STAT(n)		(0x0200 + (n << 2))
+#define CIC_SYS_STAT_CLR(n)		(0x0280 + (n << 2))
+#define CIC_SYS_ENABLE_SET(n)		(0x0300 + (n << 2))
+#define CIC_SYS_ENABLE_CLR(n)		(0x0380 + (n << 2))
+#define CIC_CHAN_MAP(n)			(0x0400 + (n << 2))
+#define CIC_HOST_MAP(n)			(0x0800 + (n << 2))
+#define CIC_HOST_PRIO_IDX(n)		(0x0900 + (n << 2))
+#define CIC_SYS_POLARITY(n)		(0x0D00 + (n << 2))
+#define CIC_SYS_TYPE(n)			(0x0D80 + (n << 2))
+#define CIC_WAKEUP_ENABLE(n)		(0x0E00 + (n << 2))
+#define CIC_DEBUG_SELECT(n)		(0x0F00 + (n << 2))
+#define CIC_SYS_SECURE_ENABLE(n)	(0x1000 + (n << 2))
+#define CIC_HOST_NESTING_LEVEL(n)	(0x1100 + (n << 2))
+#define CIC_HOST_ENABLE(n)		(0x1500 + (n << 2))
+#define CIC_HOST_PRIO_VECTOR(n)		(0x1600 + (n << 2))
+#define CIC_VECTOR_ADDR(n)		(0x2000 + (n << 2))
+
+/* MSMC segment size shift bits */
+#define MSMC_SEG_SIZE_SHIFT	12
+#define MSMC_MAP_SEG_NUM	(2 << (30 - MSMC_SEG_SIZE_SHIFT))
+#define MSMC_DST_SEG_BASE	(CONFIG_SYS_LPAE_SDRAM_BASE >> \
+				 MSMC_SEG_SIZE_SHIFT)
+
 /* Queue manager */
 #define DEVICE_QM_MANAGER_BASE          0x02a02000
 #define DEVICE_QM_DESC_SETUP_BASE       0x02a03000
@@ -214,5 +299,15 @@
 
 /* MSMC control */
 #define TCI6638_MSMC_CTRL_BASE		0x0bc00000
+
+/* EDMA */
+#define TCI6638_EDMA0_BASE			0x02700000
+
+/* Chip Interrupt Controller */
+#define TCI6638_CIC2_BASE			0x02608000
+
+#define DDR3_ECC_CIC2_IRQ_NUM		0x0D3   /* DDR3 ECC system irq # */
+#define DDR3_ECC_CIC2_CHAN_NUM		0x01D   /* DDR3 ECC int mapped to CIC2
+						   channel 29 */
 
 #endif /* __ASM_ARCH_HARDWARE_H */

@@ -164,6 +164,14 @@ typedef enum {
 void map_ses_segment(int priv_id, int ses_pair,
 		     u32 src_pfn, u32 dst_pfn, mpax_seg_size size);
 void share_all_segments(int priv_id);
+void get_ses_mpax(int priv_id, int ses_pair, u32 *mpax);
+void set_ses_mpax(int priv_id, int ses_pair, u32 *mpax);
+void check_ddr3_ecc_int(u32 base);
+int init_ddr3_ecc(u32 base);
+int ddr_memory_test(u32 start_address, u32 end_address, int quick);
+void ddr3_enable_ecc(u32 base, int test);
+void ddr3_disable_ecc(u32 base);
+u32 get_ddr_seg_num(void);
 
 extern u32 debug_options;
 #endif
