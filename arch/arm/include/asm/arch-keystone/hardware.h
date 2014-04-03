@@ -161,6 +161,9 @@ void ddr3_enable_ecc(u32 base, int test);
 void ddr3_disable_ecc(u32 base);
 u32 get_ddr_seg_num(void);
 void init_ddr3(void);
+void init_ddrphy(u32 base, struct ddr3_phy_config *phy_cfg);
+void init_ddremif(u32 base, struct ddr3_emif_config *emif_cfg);
+void ddr_reset_workaround(void);
 
 extern u32 debug_options;
 #endif
