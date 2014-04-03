@@ -159,29 +159,13 @@ int board_eth_init(bd_t *bis)
 {
 	int	j;
 	int	res;
-	int	has_mdio = 0; /* doesn't have mdio by default */
 	int	link_type_name[32];
-
-	res = get_eth_env_param("has_mdio");
-	if (res >= 0)
-		has_mdio = res;
-
-	keystone2_emac_set_has_mdio(has_mdio);
 
 	for (j = 0; j < get_num_eth_ports(); j++) {
 		sprintf(link_type_name, "sgmii%d_link_type", j);
 		res = get_eth_env_param(link_type_name);
-		if (res < 0) {
-			/* setting default type */
-			if (has_mdio == 1)
-				eth_priv_cfg[j].sgmii_link_type =
-					SGMII_LINK_MAC_PHY;
-			else
-				eth_priv_cfg[j].sgmii_link_type =
-					SGMII_LINK_MAC_PHY_FORCED;
-		} else {
+		if (res >= 0)
 			eth_priv_cfg[j].sgmii_link_type = res;
-		}
 
 		keystone2_emac_initialize(&eth_priv_cfg[j]);
 	}

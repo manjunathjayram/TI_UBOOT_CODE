@@ -550,6 +550,9 @@ static int keystone2_eth_open(struct eth_device *dev, bd_t *bis)
 
 	net_rx_buffs.rx_flow	= eth_priv->rx_flow;
 
+	sys_has_mdio =
+		(eth_priv->sgmii_link_type == SGMII_LINK_MAC_PHY) ? 1 : 0;
+
 	psc_enable_module(KS2_LPSC_PA);
 	psc_enable_module(KS2_LPSC_CPGMAC);
 
@@ -583,7 +586,6 @@ static int keystone2_eth_open(struct eth_device *dev, bd_t *bis)
 	 * If present this is usually defined to a series of register writes
 	 */
 	hwConfigStreamingSwitch();
-
 	if (sys_has_mdio) {
 		/* Init MDIO & get link state */
 		clkdiv = (EMAC_MDIO_BUS_FREQ / EMAC_MDIO_CLOCK_FREQ) - 1;
@@ -699,16 +701,6 @@ static int keystone2_eth_rcv_packet(struct eth_device *dev)
 	return (pkt_size);
 }
 
-inline void keystone2_emac_set_has_mdio(int has_mdio)
-{
-	sys_has_mdio = has_mdio;
-}
-
-inline int keystone2_emag_get_has_mdio(void)
-{
-	return sys_has_mdio;
-}
-
 inline void keystone2_emac_set_loopback_test(int val)
 {
 	loopback_test = val;
@@ -742,7 +734,8 @@ int keystone2_emac_initialize(eth_priv_t *eth_priv)
 	eth_priv->dev		= dev;
 	eth_register(dev);
 
-	if (sys_has_mdio && !phy_registered) {
+	if ((eth_priv->sgmii_link_type == SGMII_LINK_MAC_PHY) &&
+	    !phy_registered) {
 		phy_registered = 1;
 #ifdef CONFIG_ETH_PHY_MARVEL_88E1111
 		sprintf(phy.name, "88E1111");

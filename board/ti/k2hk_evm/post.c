@@ -282,14 +282,15 @@ int post_emac_test(void)
 	int port;
 	int ret = 0;
 
-	if (0 == keystone2_emag_get_has_mdio()) {
-		printf("Board doesn't have MDIO - EMAC test skipped\n");
-		return 0;
-	}
-
 	for (port = 0; port < get_num_eth_ports(); port++) {
 		printf("POST EMAC TEST for port %d ... ", port);
 		eth_priv = get_eth_priv_ptr(port);
+
+		if (eth_priv->sgmii_link_type != SGMII_LINK_MAC_PHY) {
+			printf("Port doesn't have mdio - test skipped\n");
+			continue;
+		}
+
 		if (eth_priv == NULL) {
 			printf("ERROR: cannot get eth_priv\n");
 			ret = 1;

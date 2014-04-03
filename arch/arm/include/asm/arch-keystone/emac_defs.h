@@ -373,6 +373,4 @@ typedef struct
 	struct	eth_device *dev;
 } eth_priv_t;
 
-void keystone2_emac_set_has_mdio(int has_mdio);
-
 #endif  /* _EMAC_DEFS_H_ */
