@@ -39,13 +39,14 @@ static unsigned int hatoi(char *p, char **errp)
 		else if (*p >= 'A' && *p <= 'F')
 			res |= (*p - 'A' + 10);
 		else if (*p >= '0' && *p <= '9')
-			res |= (*p - 'A' + 10);
+			res |=  *p - '0';
 		else {
 			if (errp)
 				*errp = p;
 			return res;
 		}
 
+		p++;
 		if (*p == 0)
 			break;
 
