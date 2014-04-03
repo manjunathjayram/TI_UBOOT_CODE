@@ -297,7 +297,7 @@ int post_eth_loopback_test(struct eth_device *dev)
 
 	eth_priv_t *eth_priv = (eth_priv_t *)dev->priv;
 
-	tci6614_emac_set_loopback_test(1);
+	keystone2_emac_set_loopback_test(1);
 
 	if (dev->init(dev, NULL)) {
 		ret = 1;
@@ -305,10 +305,10 @@ int post_eth_loopback_test(struct eth_device *dev)
 	}
 
 	/* PHY loopback: */
-	tci6614_eth_phy_read(eth_priv->phy_addr, 0, &phy_save);
-	tci6614_eth_phy_write(eth_priv->phy_addr, 0, 0x8140);
-	if (!tci6614_eth_phy_read(eth_priv->phy_addr, 0, &tmp))
-		tci6614_eth_phy_write(eth_priv->phy_addr, 0, 0x4140);
+	keystone2_eth_phy_read(eth_priv->phy_addr, 0, &phy_save);
+	keystone2_eth_phy_write(eth_priv->phy_addr, 0, 0x8140);
+	if (!keystone2_eth_phy_read(eth_priv->phy_addr, 0, &tmp))
+		keystone2_eth_phy_write(eth_priv->phy_addr, 0, 0x4140);
 
 	memcpy(mac_addr, dev->enetaddr, 6);
 	for (j = 0; j < get_num_eth_ports(); j++) {
@@ -347,10 +347,10 @@ int post_eth_loopback_test(struct eth_device *dev)
 	}
 
 err1:
-	tci6614_eth_phy_write(eth_priv->phy_addr, 0, phy_save);
+	keystone2_eth_phy_write(eth_priv->phy_addr, 0, phy_save);
 	dev->halt(dev);
 err2:
-	tci6614_emac_set_loopback_test(0);
+	keystone2_emac_set_loopback_test(0);
 
 	return ret;
 }
@@ -361,7 +361,7 @@ int post_emac_test(void)
 	int port;
 	int ret = 0;
 
-	if (0 == tci6614_emag_get_has_mdio()) {
+	if (0 == keystone2_emag_get_has_mdio()) {
 		printf("Board doesn't have MDIO - EMAC test skipped\n");
 		return 0;
 	}

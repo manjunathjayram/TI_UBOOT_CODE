@@ -166,7 +166,7 @@ int board_eth_init(bd_t *bis)
 	if ((res = get_eth_env_param("has_mdio")) >= 0 )
 		has_mdio = res;
 
-	tci6614_emac_set_has_mdio(has_mdio);
+	keystone2_emac_set_has_mdio(has_mdio);
 
 	for (j=0; j < get_num_eth_ports(); j++) {
 		sprintf(link_type_name, "sgmii%d_link_type", j);
@@ -181,7 +181,7 @@ int board_eth_init(bd_t *bis)
 			eth_priv_cfg[j].sgmii_link_type = res;
 		}
 
-		tci6614_emac_initialize(&eth_priv_cfg[j]);
+		keystone2_emac_initialize(&eth_priv_cfg[j]);
 	}
 
 #ifdef CONFIG_SOC_TCI6638

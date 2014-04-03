@@ -1,5 +1,5 @@
 /*
- * Ethernet driver for TI TMS320TCI6614 EVM.
+ * Ethernet driver for TI KS2 EVM.
  *
  * Copyright (C) 2012 Texas Instruments Incorporated
  *
@@ -34,8 +34,8 @@ unsigned int emac_open = 0;
 static unsigned int loopback_test = 0;
 static unsigned int sys_has_mdio = 1;
 
-#ifdef TCI6614_EMAC_GIG_ENABLE
-#define emac_gigabit_enable(x)	tci6614_eth_gigabit_enable(x)
+#ifdef KS2_EMAC_GIG_ENABLE
+#define emac_gigabit_enable(x)	keystone2_eth_gigabit_enable(x)
 #else
 #define emac_gigabit_enable(x)	/* no gigabit to enable */
 #endif
@@ -55,7 +55,7 @@ struct rx_buff_desc net_rx_buffs = {
 
 extern int cpu_to_bus(u32 *ptr, u32 length);
 
-static void tci6614_eth_mdio_enable(void);
+static void keystone2_eth_mdio_enable(void);
 
 static int gen_init_phy(int phy_addr);
 static int gen_is_phy_connected(int phy_addr);
@@ -66,10 +66,8 @@ static int marvell_88e1111_init_phy(int phy_addr);
 static int marvell_88e1111_is_phy_connected(int phy_addr);
 static int marvell_88e1111_get_link_speed(int phy_addr);
 static int marvell_88e1111_auto_negotiate(int phy_addr);
-#ifdef CONFIG_SOC_TCI6638
 void sgmii_serdes_setup_156p25mhz(void);
 void sgmii_serdes_shutdown(void);
-#endif
 
 /* EMAC Addresses */
 static volatile emac_regs	*adap_emac = (emac_regs *)EMAC_EMACSL_BASE_ADDR;
@@ -84,7 +82,7 @@ static void chip_delay(u32 del)
 	for (i = 0; i < (del / 8); i++);
 }
 
-int tci6614_eth_read_mac_addr(struct eth_device *dev)
+int keystone2_eth_read_mac_addr(struct eth_device *dev)
 {
 	eth_priv_t *eth_priv;
 	u32 maca = 0;
@@ -108,7 +106,7 @@ int tci6614_eth_read_mac_addr(struct eth_device *dev)
 	return 0;
 }
 
-static void tci6614_eth_mdio_enable(void)
+static void keystone2_eth_mdio_enable(void)
 {
 	u_int32_t	clkdiv;
 
@@ -125,7 +123,7 @@ static void tci6614_eth_mdio_enable(void)
 }
 
 /* Read a PHY register via MDIO inteface. Returns 1 on success, 0 otherwise */
-int tci6614_eth_phy_read(u_int8_t phy_addr, u_int8_t reg_num, u_int16_t *data)
+int keystone2_eth_phy_read(u_int8_t phy_addr, u_int8_t reg_num, u_int16_t *data)
 {
 	int	tmp;
 
@@ -152,7 +150,7 @@ int tci6614_eth_phy_read(u_int8_t phy_addr, u_int8_t reg_num, u_int16_t *data)
 }
 
 /* Write to a PHY register via MDIO inteface. Blocks until operation is complete. */
-int tci6614_eth_phy_write(u_int8_t phy_addr, u_int8_t reg_num, u_int16_t data)
+int keystone2_eth_phy_write(u_int8_t phy_addr, u_int8_t reg_num, u_int16_t data)
 {
 
 	while (readl(&adap_mdio->USERACCESS0) & MDIO_USERACCESS0_GO)
@@ -189,14 +187,14 @@ static int __attribute__((unused)) gen_is_phy_connected(int phy_addr)
 {
 	u_int16_t	dummy;
 
-	return(tci6614_eth_phy_read(phy_addr, MII_PHYSID1, &dummy));
+	return keystone2_eth_phy_read(phy_addr, MII_PHYSID1, &dummy);
 }
 
 static int gen_get_link_speed(int phy_addr)
 {
 	u_int16_t	tmp;
 
-	if ((!tci6614_eth_phy_read(phy_addr, MII_STATUS_REG, &tmp)) &&
+	if ((!keystone2_eth_phy_read(phy_addr, MII_STATUS_REG, &tmp)) &&
 			(tmp & 0x04)) {
 		return(0);
 	}
@@ -208,16 +206,16 @@ static int __attribute__((unused)) gen_auto_negotiate(int phy_addr)
 {
 	u_int16_t	tmp;
 
-	if (tci6614_eth_phy_read(phy_addr, MII_BMCR, &tmp))
+	if (keystone2_eth_phy_read(phy_addr, MII_BMCR, &tmp))
 		return(-1);
 
 	/* Restart Auto_negotiation  */
 	tmp |= BMCR_ANENABLE;
-	tci6614_eth_phy_write(phy_addr, MII_BMCR, tmp);
+	keystone2_eth_phy_write(phy_addr, MII_BMCR, tmp);
 
 	/*check AutoNegotiate complete */
 	udelay (10000);
-	if (tci6614_eth_phy_read(phy_addr, MII_BMSR, &tmp))
+	if (keystone2_eth_phy_read(phy_addr, MII_BMSR, &tmp))
 		return(-1);
 
 	if (!(tmp & BMSR_ANEGCOMPLETE))
@@ -243,14 +241,14 @@ static int marvell_88e1111_is_phy_connected(int phy_addr)
 {
 	u_int16_t	dummy;
 
-	return(tci6614_eth_phy_read(phy_addr, MII_PHYSID1, &dummy));
+	return keystone2_eth_phy_read(phy_addr, MII_PHYSID1, &dummy);
 }
 
 static int marvell_88e1111_get_link_speed(int phy_addr)
 {
 	u_int16_t	tmp;
 
-	if ((!tci6614_eth_phy_read(phy_addr, MII_STATUS_REG, &tmp)) &&
+	if ((!keystone2_eth_phy_read(phy_addr, MII_STATUS_REG, &tmp)) &&
 			(tmp & MII_STATUS_LINK_MASK)) {
 
 		return(0);
@@ -263,16 +261,16 @@ static int marvell_88e1111_auto_negotiate(int phy_addr)
 {
 	u_int16_t	tmp;
 
-	if (tci6614_eth_phy_read(phy_addr, MII_BMCR, &tmp))
+	if (keystone2_eth_phy_read(phy_addr, MII_BMCR, &tmp))
 		return(-1);
 
 	/* Restart Auto_negotiation  */
 	tmp |= BMCR_ANENABLE;
-	tci6614_eth_phy_write(phy_addr, MII_BMCR, tmp);
+	keystone2_eth_phy_write(phy_addr, MII_BMCR, tmp);
 
 	/*check AutoNegotiate complete */
 	udelay (10000);
-	if (tci6614_eth_phy_read(phy_addr, MII_BMSR, &tmp))
+	if (keystone2_eth_phy_read(phy_addr, MII_BMSR, &tmp))
 		return(-1);
 
 	if (!(tmp & BMSR_ANEGCOMPLETE))
@@ -282,27 +280,27 @@ static int marvell_88e1111_auto_negotiate(int phy_addr)
 }
 
 #if defined(CONFIG_MII) || defined(CONFIG_CMD_MII)
-static int tci6614_mii_phy_read(const char *devname, unsigned char addr,
+static int keystone2_mii_phy_read(const char *devname, unsigned char addr,
 				unsigned char reg, unsigned short *value)
 {
-	return(tci6614_eth_phy_read(addr, reg, value) ? -1 : 0);
+	return keystone2_eth_phy_read(addr, reg, value) ? -1 : 0;
 }
 
-static int tci6614_mii_phy_write(const char *devname, unsigned char addr,
+static int keystone2_mii_phy_write(const char *devname, unsigned char addr,
 				 unsigned char reg, unsigned short value)
 {
-	return(tci6614_eth_phy_write(addr, reg, value) ? -1 : 0);
+	return keystone2_eth_phy_write(addr, reg, value) ? -1 : 0;
 }
 #endif
 
 static void  __attribute__((unused)) 
-	tci6614_eth_gigabit_enable(struct eth_device *dev)
+	keystone2_eth_gigabit_enable(struct eth_device *dev)
 {
 	u_int16_t data;
 	eth_priv_t *eth_priv = (eth_priv_t*)dev->priv;
 
 	if (sys_has_mdio) {
-		if (tci6614_eth_phy_read(eth_priv->phy_addr, 0, &data) ||
+		if (keystone2_eth_phy_read(eth_priv->phy_addr, 0, &data) ||
 			!(data & (1 << 6))) /* speed selection MSB */
 			return;
 	}
@@ -315,71 +313,6 @@ static void  __attribute__((unused))
 	        EMAC_MACCONTROL_GIGFORCE | EMAC_MACCONTROL_GIGABIT_ENABLE, 
 		&(adap_emac[eth_priv->slave_port - 1].MACCONTROL));
 }
-
-#ifndef CONFIG_SOC_TCI6638
-void serdes_configure(u32 base, struct serdes_config *scfg)
-{
-	u32 reg, regb;
-	int i;
-
-	/*
-	 * If the serdes is already enabled and the new value does not match
-	 * the current value, the serdes is first disabled. Dont compare
-	 * the sleep value in the register, which can be toggled dynamically
-	 */
-	reg  = DEVICE_REG32_R(base + SERDES_REG_CFG);
-	reg  = SERDES_SET_CFG_SLEEP(reg, 0);
-	regb = SERDES_SET_CFG_SLEEP(scfg->cfg, 0);
-
-	if ((SERDES_GET_ENABLE(reg) == 1) &&
-		(SERDES_GET_ENABLE(scfg->cfg) == 1) &&
-		(reg != regb)) {
-
-		reg = SERDES_SET_ENABLE(reg, 0);
-		DEVICE_REG32_W(base + SERDES_REG_CFG, reg);
-		chip_delay (100);
-	}
-
-	/*
-	 * Config register. After enable it takes upt to 350ns, or 200 cycles to
-	 * stabalize. Although these are serdes clock cycles the delay here is
-	 * in cpu cycles. The PLL status will be checked by the peripheral
-	 * using the PLL
-	 */
-
-	DEVICE_REG32_W(base + SERDES_REG_CFG, regb);
-	chip_delay (200);
-
-	/*
-	 * Some devices have unreliable lock status bits. Add an extra delay
-	 * to allow the serdes to lock
-	 */
-	chip_delay (TARGET_SERDES_LOCK_DELAY);
-
-	/* rx and tx config registers */
-	for (i = 0; i < scfg->n_lanes; i++) {
-		DEVICE_REG32_W(base + SERDES_REG_RX(i), scfg->rx_cfg[i]);
-		DEVICE_REG32_W(base + SERDES_REG_TX(i), scfg->tx_cfg[i]);
-	}
-
-	chipKickClosedSerdes(base);
-}
- 
-int serdes_wait_lock(u32 status_base)
-{
-	u32 reg, i;
-
-	for (i = 0; i < 100; i++)  {
-		reg = DEVICE_REG32_R(status_base);
-		if (reg & 1)
-			return (0);
-
-		chip_delay (1000);
-	}
-
-	return (-1);
-}
-#endif
 
 int keystone_sgmii_link_status(int port)
 {
@@ -484,35 +417,6 @@ int keystone_sgmii_config(int port, int interface)
 
 	return 0;
 }
-
-#ifndef CONFIG_SOC_TCI6638
-int serdes_config()
-{
-	struct serdes_config scfg;
-	u32 mult, mpy;
-	u32 status;
-
-	mult = ((CONFIG_SYS_SGMII_LINERATE_MHZ * CONFIG_SYS_SGMII_RATESCALE) /
-		CONFIG_SYS_SGMII_REFCLK_MHZ);
-
-	mpy = mult << 2;
-	scfg.cfg = (SERDES_ENABLE_PLL | (mpy << 1));
-
-	scfg.n_lanes = 2;
-	scfg.rx_cfg[0] = scfg.rx_cfg[1] = (SERDES_RX_ENABLE | SERDES_RX_RATE |
-					SERDES_RX_TERM | SERDES_RX_ALIGN |
-					SERDES_RX_ENOC | SERDES_RX_EQ);
-	scfg.tx_cfg[0] = scfg.tx_cfg[1] = (SERDES_TX_ENABLE | SERDES_TX_RATE |
-					SERDES_TX_CM | SERDES_TX_SWING |
-					SERDES_TX_MSYNC);
-
-	serdes_configure(TARGET_SGMII_SERDES_BASE, &scfg);
-
-	status = serdes_wait_lock(TARGET_SGMII_SERDES_STATUS_BASE);
-
-	return status;
-}
-#endif 
 
 int mac_sl_reset(u32 port)
 {
@@ -635,40 +539,24 @@ int32_t cpmac_drv_send(u32* buffer, int num_bytes, int slave_port_num)
 }
 
 /* Eth device open */
-static int tci6614_eth_open(struct eth_device *dev, bd_t *bis)
+static int keystone2_eth_open(struct eth_device *dev, bd_t *bis)
 {
 	u_int32_t clkdiv;
 	int link;
-#ifndef CONFIG_SOC_TCI6638
-	int status;
-#endif
+
 	eth_priv_t *eth_priv = (eth_priv_t*)dev->priv;
 
 	debug_emac("+ emac_open\n");
 
 	net_rx_buffs.rx_flow	= eth_priv->rx_flow;
 
-#ifdef TCI6614_U_BOOT_MIN
-	psc_disable_module(TCI66XX_LPSC_CPGMAC);
-	psc_disable_module(TCI66XX_LPSC_PA);
-	udelay(100);
-#endif
-
 	psc_enable_module(TCI66XX_LPSC_PA);
 	psc_enable_module(TCI66XX_LPSC_CPGMAC);
 
-#ifdef CONFIG_SOC_TCI6638
 	sgmii_serdes_setup_156p25mhz();
-#endif
 
 	if (sys_has_mdio)
-		tci6614_eth_mdio_enable();
-
-#ifndef CONFIG_SOC_TCI6638
-	status = serdes_config();
-	if (status == -1)
-		return status;
-#endif
+		keystone2_eth_mdio_enable();
 
 	keystone_sgmii_config(eth_priv->slave_port - 1,
 			      eth_priv->sgmii_link_type);
@@ -728,7 +616,7 @@ static int tci6614_eth_open(struct eth_device *dev, bd_t *bis)
 }
 
 /* Eth device close */
-void tci6614_eth_close(struct eth_device *dev)
+void keystone2_eth_close(struct eth_device *dev)
 {
 	debug_emac("+ emac_close\n");
 
@@ -741,9 +629,7 @@ void tci6614_eth_close(struct eth_device *dev)
 	qm_close();
 
 #if 0
-#ifdef CONFIG_SOC_TCI6638
  	sgmii_serdes_shutdown();
-#endif
 	psc_disable_module(TCI66XX_LPSC_CPGMAC);
 	psc_disable_module(TCI66XX_LPSC_PA);
 	psc_disable_domain(2);
@@ -753,13 +639,11 @@ void tci6614_eth_close(struct eth_device *dev)
 	debug_emac("- emac_close\n");
 }
 
-#ifdef CONFIG_SOC_TCI6638
 void tci6638_eth_open_close(struct eth_device *dev)
 {
-	tci6614_eth_open(dev, NULL);
-	tci6614_eth_close(dev);
+	keystone2_eth_open(dev, NULL);
+	keystone2_eth_close(dev);
 }
-#endif
 
 static int tx_send_loop = 0;
 
@@ -767,8 +651,8 @@ static int tx_send_loop = 0;
  * This function sends a single packet on the network and returns
  * positive number (number of bytes transmitted) or negative for error
  */
-static int tci6614_eth_send_packet (struct eth_device *dev,
-					volatile void *packet, int length)
+static int keystone2_eth_send_packet(struct eth_device *dev,
+				     volatile void *packet, int length)
 {
 	int ret_status = -1;
 	eth_priv_t *eth_priv = (eth_priv_t*)dev->priv;
@@ -798,7 +682,7 @@ static int tci6614_eth_send_packet (struct eth_device *dev,
 /*
  * This function handles receipt of a packet from the network
  */
-static int tci6614_eth_rcv_packet (struct eth_device *dev)
+static int keystone2_eth_rcv_packet(struct eth_device *dev)
 {
 	void *hd;
 	u32  pkt_size;
@@ -815,17 +699,17 @@ static int tci6614_eth_rcv_packet (struct eth_device *dev)
 	return (pkt_size);
 }
 
-inline void tci6614_emac_set_has_mdio(int has_mdio)
+inline void keystone2_emac_set_has_mdio(int has_mdio)
 {
 	sys_has_mdio = has_mdio;
 }
 
-inline int tci6614_emag_get_has_mdio(void)
+inline int keystone2_emag_get_has_mdio(void)
 {
 	return sys_has_mdio;
 }
 
-inline void tci6614_emac_set_loopback_test(int val)
+inline void keystone2_emac_set_loopback_test(int val)
 {
 	loopback_test = val;
 }
@@ -834,7 +718,7 @@ inline void tci6614_emac_set_loopback_test(int val)
  * EMAC modules power or pin multiplexors, that is done by board_init()
  * much earlier in bootup process. Returns 1 on success, 0 otherwise.
  */
-int tci6614_emac_initialize(eth_priv_t *eth_priv)
+int keystone2_emac_initialize(eth_priv_t *eth_priv)
 {
 	struct eth_device *dev;
 	static int phy_registered = 0;
@@ -848,13 +732,13 @@ int tci6614_emac_initialize(eth_priv_t *eth_priv)
 	strcpy(dev->name, eth_priv->int_name);
 	dev->priv = eth_priv;
 
-	tci6614_eth_read_mac_addr(dev);
+	keystone2_eth_read_mac_addr(dev);
 
 	dev->iobase		= 0;
-	dev->init		= tci6614_eth_open;
-	dev->halt		= tci6614_eth_close;
-	dev->send		= tci6614_eth_send_packet;
-	dev->recv		= tci6614_eth_rcv_packet;
+	dev->init		= keystone2_eth_open;
+	dev->halt		= keystone2_eth_close;
+	dev->send		= keystone2_eth_send_packet;
+	dev->recv		= keystone2_eth_rcv_packet;
 	eth_priv->dev		= dev;
 	eth_register(dev);
 
@@ -873,13 +757,13 @@ int tci6614_emac_initialize(eth_priv_t *eth_priv)
 		phy.get_link_speed = gen_get_link_speed;
 		phy.auto_negotiate = gen_auto_negotiate;
 #endif
-		miiphy_register(phy.name, tci6614_mii_phy_read, tci6614_mii_phy_write);
+		miiphy_register(phy.name, keystone2_mii_phy_read,
+				keystone2_mii_phy_write);
 	}
 
 	return(0);
 }
 
-#ifdef CONFIG_SOC_TCI6638
 #define reg_rmw(addr, value, mask) \
 	writel(((readl(addr) & (~(mask))) | (value) ), (addr))
 
@@ -1015,5 +899,4 @@ void sgmii_serdes_shutdown()
 	reg_rmw(0x02320034, 0, 3 << 29);
 	reg_rmw(0x02320010, 1 << 28, 1 << 28);
 }
-#endif
 

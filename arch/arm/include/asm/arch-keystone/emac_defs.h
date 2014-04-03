@@ -34,7 +34,7 @@ typedef enum { FALSE = 0, TRUE = 1 } bool;
 #define EMAC_MDIO_BASE_ADDR			(TCI66XX_PASS_BASE + 0x00090300)
 #define EMAC_SGMII_BASE_ADDR			(TCI66XX_PASS_BASE + 0x00090100)
 
-#define TCI6614_EMAC_GIG_ENABLE
+#define KS2_EMAC_GIG_ENABLE
 
 #define MAC_ID_BASE_ADDR			(TCI66XX_DEVICE_STATE_CTRL_BASE + 0x110)
 
@@ -373,6 +373,6 @@ typedef struct
 	struct	eth_device *dev;
 } eth_priv_t;
 
-void tci6614_emac_set_has_mdio(int has_mdio);
+void keystone2_emac_set_has_mdio(int has_mdio);
 
 #endif  /* _EMAC_DEFS_H_ */
