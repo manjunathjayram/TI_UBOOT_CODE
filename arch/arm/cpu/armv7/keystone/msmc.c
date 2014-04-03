@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Texas Instruments, Inc.
+ * Copyright 2013 - 2014 Texas Instruments, Inc.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -68,7 +68,7 @@ void share_all_segments(int priv_id)
 	struct msms_regs *msmc = (struct msms_regs *) KS2_MSMC_CTRL_BASE;
 	int j;
 
-	for (j=0; j<8; j++) {
+	for (j = 0; j < 8; j++) {
 		msmc->sms[priv_id][j].mpaxh &= 0xffffff7ful;
 		msmc->ses[priv_id][j].mpaxh &= 0xffffff7ful;
 	}
