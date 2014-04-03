@@ -1,5 +1,5 @@
 /*
- * TCI6638-EVM: Power On Self Test
+ * K2HK-EVM: Power On Self Test
  *
  * Copyright (C) 2013 Texas Instruments
  *
@@ -97,7 +97,7 @@
 # define CONFIG_SF_DEFAULT_MODE		SPI_MODE_3
 #endif
 
-#define PLATFORM_INFO_BOARD_NAME     "TCI6638_EVM"
+#define PLATFORM_INFO_BOARD_NAME     "K2HK_EVM"
 
 extern int ddr_memory_test (u32 start_address, u32 end_address, int quick);
 

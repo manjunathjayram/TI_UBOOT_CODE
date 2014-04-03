@@ -108,7 +108,7 @@ U_BOOT_CMD(
 	getclk,	2,	0,	do_getclk_cmd,
 	"get clock rate",
 	"<clk index>\n"
-	"See the 'enum clk_e' in the tci6638 clock.h for clk indexes\n"
+	"See the 'enum clk_e' in the k2hk clock.h for clk indexes\n"
 );
 
 int do_psc_cmd(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])

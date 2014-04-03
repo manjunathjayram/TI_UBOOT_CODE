@@ -22,8 +22,8 @@
 #ifndef __ASM_ARCH_CLOCK_H
 #define __ASM_ARCH_CLOCK_H
 
-#ifdef CONFIG_SOC_TCI6638
-#include <asm/arch/clock-tci6638.h>
+#ifdef CONFIG_SOC_K2HK
+#include <asm/arch/clock-k2hk.h>
 #endif
 
 #endif

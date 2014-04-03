@@ -1,5 +1,5 @@
 /*
- * TCI6638-EVM: Power On Self Test
+ * K2HK-EVM: Power On Self Test
  *
  * Copyright (C) 2012 Texas Instruments
  *
@@ -37,16 +37,16 @@
 #include <asm/arch/keystone_nav.h>
 #include "post.h"
 
-#define WAIT_OR_RETURN for(;;)
+#define WAIT_OR_RETURN for (;;)
 /* #define WAIT_OR_RETURN return (1) */
 
 /******************************************************************************
  * Function:    post_test_external_memory
  ******************************************************************************/
-int post_test_external_memory ( void )
+int post_test_external_memory(void)
 {
 	puts("POST external memory ... ");
-	if(ddr_memory_test(POST_DDR3_START_ADDR, POST_DDR3_END_ADDR, 1) != 0) {
+	if (ddr_memory_test(POST_DDR3_START_ADDR, POST_DDR3_END_ADDR, 1) != 0) {
 		puts("FAILED\r\n");
 		WAIT_OR_RETURN;
 	}
@@ -58,13 +58,14 @@ int post_test_external_memory ( void )
 /******************************************************************************
  * Function:    post_test_eeprom
  ******************************************************************************/
-int post_test_eeprom (void)
+int post_test_eeprom(void)
 {
 	u8 test_buf[POST_EEPROM_TEST_READ_LENGTH];
 
 	puts("POST I2C eeprom read ... ");
-	if (eeprom_read(POST_EEPROM_TEST_DEVICE_ID, POST_EEPROM_TEST_READ_ADDRESS,
-			 test_buf, POST_EEPROM_TEST_READ_LENGTH)) {
+	if (eeprom_read(POST_EEPROM_TEST_DEVICE_ID,
+			POST_EEPROM_TEST_READ_ADDRESS,
+			test_buf, POST_EEPROM_TEST_READ_LENGTH)) {
 		puts("FAILED\r\n");
 		WAIT_OR_RETURN;
 	}
@@ -75,7 +76,7 @@ int post_test_eeprom (void)
 /******************************************************************************
  * Function:    post_test_nand
  ******************************************************************************/
-int post_test_nand ( void )
+int post_test_nand(void)
 {
 	u8 test_buf[POST_NAND_TEST_READ_LENGTH];
 	size_t rwsize = POST_NAND_TEST_READ_LENGTH;
@@ -83,7 +84,7 @@ int post_test_nand ( void )
 
 	puts("POST EMIF NAND read ... ");
 
-	if(nand_read_skip_bad(nand, POST_NAND_TEST_READ_ADDR, &rwsize,
+	if (nand_read_skip_bad(nand, POST_NAND_TEST_READ_ADDR, &rwsize,
 					 (u_char *)test_buf)) {
 		puts("FAILED\r\n");
 		WAIT_OR_RETURN;
@@ -110,7 +111,7 @@ int post_uart_read(u8 *buf, NS16550_t com_port, u32 delay)
 {
 	u32 delay_count = delay/1000000;
 
-	while(NS16550_tstc(com_port) == 0) {
+	while (NS16550_tstc(com_port) == 0) {
 		if (delay_count-- == 0)
 			return -1;
 		udelay(1000000);
@@ -121,89 +122,9 @@ int post_uart_read(u8 *buf, NS16550_t com_port, u32 delay)
 }
 
 /******************************************************************************
- * Function:    post_write_serial_no
- ******************************************************************************/
-void post_write_serial_no ( void )
-{
-	u32	i, j;
-	u8	msg[20], msg2[2];
-
-	/* Check if user key in the passcode "ti" to enter board serial# */
-	if (post_uart_read(msg, (NS16550_t)CONFIG_SYS_NS16550_COM1,
-			POST_UART_READ_TIMEOUT))
-		return;
-
-	if (msg[0] != 't')
-		return;
-
-	if (post_uart_read(msg, (NS16550_t)CONFIG_SYS_NS16550_COM1,
-			POST_UART_READ_TIMEOUT))
-		return;
-
-	if (msg[0] != 'i')
-		return;
-
-	/* Passcode verified, prompt the user to enter serial number */
-	puts("\r\n\r\nPlease enter the 10 digit serial number for this board, and then press ENTER key:\r\n\r\n");
-
-	i = 0;
-	msg2[1] = 0;
-	while (TRUE) {
-		if (post_uart_read(&msg[i], (NS16550_t)CONFIG_SYS_NS16550_COM1,
-				   POST_UART_READ_TIMEOUT)) {
-			puts("\r\n\r\nSerial number input time out!");
-			return;
-		}
-
-		if (msg[i] == '\r')
-			break;
-#if 0
-		if ((i < POST_MAX_SN_SIZE) &&  !post_serial_num_isvalid(msg[i])) {
-			msg2[0] = msg[i];
-			puts((char *)msg2);
-			i++;
-		}
-#endif
-	}
-
-	if (i < POST_MAX_SN_SIZE) {
-		for (j = i; j < POST_MAX_SN_SIZE; j++)
-			msg[j] = 0xff;
-	}
-
-#if 0
-	if (eeprom_write(CONFIG_SYS_I2C_EEPROM_ADDR, POST_SERIAL_NUM_ADDR, msg, 16) == 0)
-		puts("\r\n\r\nSerial number programmed to EEPROM successfully!\r\n\r\n");
-	else
-#endif
-		puts("\r\n\r\nFailed to program the serial number to EEPROM!\r\n\r\n");
-
-}
-#if 0
-void get_serial_number(char *buf)
-{
-	u32	i;
-
-	buf[0] = 0;
-
-	/* Serial number stored in the last 128 bytes of the EEPROM 0x50 */
-	if (eeprom_read(POST_EEPROM_TEST_DEVICE_ID, POST_SERIAL_NUM_ADDR, (u_char  *)buf, 16))
-		return;
-
-	for (i = 0; i < POST_MAX_SN_SIZE; i++) {
-		if (post_serial_num_isvalid(buf[i]))
-			break;
-	}
-
-	buf[i] = 0;
-
-	return;
-}
-#endif
-/******************************************************************************
  * Function:    post_dump_register_val
  ******************************************************************************/
-void post_dump_register_val( u32 reg_addr, char* desc_string)
+void post_dump_register_val(u32 reg_addr, char *desc_string)
 {
 	char	msg[10];
 	u32	reg_val;
@@ -216,7 +137,7 @@ void post_dump_register_val( u32 reg_addr, char* desc_string)
 	puts(msg);
 }
 
-int post_get_macaddr(u8* p_mac_address)
+int post_get_macaddr(u8 *p_mac_address)
 {
 	u32 mac_addr2, mac_addr1;
 	/* Read the e-fuse mac address */
@@ -389,7 +310,7 @@ int post_emac_test(void)
 /******************************************************************************
  * Function:    main function for POST
  ******************************************************************************/
-void tci6638_post ( void )
+void k2hk_post(void)
 {
 	u32	reset_type;
 	int	i;
@@ -420,13 +341,6 @@ void tci6638_post ( void )
 
 	puts("\r\n\r------------------------------------------");
 	puts("\r\n\rSOC Information");
-#if 0
-	get_serial_number(serial_num);
-	if (serial_num[0] != 0) {
-		puts("\r\n\rBoard Serial Number: ");
-		puts(serial_num);
-	}
-#endif
 	/* Display the EFUSE MAC address */
 	post_get_macaddr(mac_addr);
 	puts("\r\n\rEFUSE MAC ID is: ");
@@ -436,14 +350,6 @@ void tci6638_post ( void )
 		msg[3] = 0;
 		puts(msg);
 	}
-
-#if 0
-	/* Read the PLL Reset Type Status register and display on UART */
-	reset_type = __raw_readl(TCI6614_PLL_CNTRL_RSTYPE);
-	post_hex_to_string(reset_type, 8, msg);
-	puts("\r\n\rPLL Reset Type Status Register: 0x");
-	puts(msg);
-#endif
 
 	puts("\r\n\r------------------------------------------");
 	puts("\r\n\r\nPower On Self Test\n");
@@ -463,6 +369,4 @@ void tci6638_post ( void )
 #endif
 
 	puts("Test complete\r\n");
-
-	/* post_write_serial_no(); */
 }

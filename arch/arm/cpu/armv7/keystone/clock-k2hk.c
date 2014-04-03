@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2012 Texas Instruments.
  *
- * TCI6638: Clock management APIs
+ * K2HK: Clock management APIs
  *
  * See file CREDITS for list of people who contributed to this
  * project.
@@ -22,11 +22,11 @@
  */
 
 static const struct pll_regs pll_regs[] = {
-	[CORE_PLL]	= { TCI6638_MAINPLLCTL0, TCI6638_MAINPLLCTL1},
-	[PASS_PLL]	= { TCI6638_PASSPLLCTL0, TCI6638_PASSPLLCTL1},
-	[TETRIS_PLL]	= { TCI6638_ARMPLLCTL0,  TCI6638_ARMPLLCTL1},
-	[DDR3A_PLL]	= { TCI6638_DDR3APLLCTL0,TCI6638_DDR3APLLCTL1},
-	[DDR3B_PLL]	= { TCI6638_DDR3BPLLCTL0,TCI6638_DDR3BPLLCTL1},
+	[CORE_PLL]	= { K2HK_MAINPLLCTL0, K2HK_MAINPLLCTL1},
+	[PASS_PLL]	= { K2HK_PASSPLLCTL0, K2HK_PASSPLLCTL1},
+	[TETRIS_PLL]	= { K2HK_ARMPLLCTL0, K2HK_ARMPLLCTL1},
+	[DDR3A_PLL]	= { K2HK_DDR3APLLCTL0, K2HK_DDR3APLLCTL1},
+	[DDR3B_PLL]	= { K2HK_DDR3BPLLCTL0, K2HK_DDR3BPLLCTL1},
 };
 
 /* Fout = Fref * NF(mult) / NR(prediv) / OD */
@@ -40,37 +40,37 @@ static unsigned long pll_freq_get(int pll)
 		ret = external_clk[sys_clk];
 		if (pllctl_reg_read(pll, ctl) & PLLCTL_PLLEN) {
 			/* PLL mode */
-			tmp = __raw_readl(TCI6638_MAINPLLCTL0);
+			tmp = __raw_readl(K2HK_MAINPLLCTL0);
 			prediv = (tmp & 0x3f) + 1;
 			mult = (((tmp & 0x7f000) >> 6) | (pllctl_reg_read(pll,
 							mult) & 0x3f)) + 1;
-			output_div = ((pllctl_reg_read(pll, secctl) >> 19) & 0xf) + 1;
+			output_div = ((pllctl_reg_read(pll, secctl) >> 19) &
+				      0xf) + 1;
 
 			ret = ret / prediv / output_div * mult;
 		}
-	}
-	else {
+	} else {
 		switch (pll) {
 		case PASS_PLL:
 			ret = external_clk[pa_clk];
-			reg = TCI6638_PASSPLLCTL0;
+			reg = K2HK_PASSPLLCTL0;
 			break;
 		case TETRIS_PLL:
 			ret = external_clk[tetris_clk];
-			reg = TCI6638_ARMPLLCTL0;
+			reg = K2HK_ARMPLLCTL0;
 			break;
 		case DDR3A_PLL:
 			ret = external_clk[ddr3a_clk];
-			reg = TCI6638_DDR3APLLCTL0;
+			reg = K2HK_DDR3APLLCTL0;
 			break;
 		case DDR3B_PLL:
 			ret = external_clk[ddr3b_clk];
-			reg = TCI6638_DDR3BPLLCTL0;
+			reg = K2HK_DDR3BPLLCTL0;
 			break;
 		default:
 			return 0;
 		}
-		
+
 		tmp = __raw_readl(reg);
 
 		if (!(tmp & 0x00800000)) {

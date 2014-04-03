@@ -34,21 +34,21 @@ static unsigned int hatoi(char *p, char **errp)
 		p += 2;
 
 	while (1) {
-		if ( *p >= 'a' && *p <= 'f' )
+		if (*p >= 'a' && *p <= 'f')
 			res |= (*p - 'a' + 10);
-		else if ( *p >= 'A' && *p <= 'F' ) 
+		else if (*p >= 'A' && *p <= 'F')
 			res |= (*p - 'A' + 10);
-		else if ( *p >= '0' && *p <= '9' ) 
+		else if (*p >= '0' && *p <= '9')
 			res |= (*p - 'A' + 10);
 		else {
 			if (errp)
 				*errp = p;
 			return res;
 		}
-		
-		if (*p == 0) {
+
+		if (*p == 0)
 			break;
-		}
+
 		res <<= 4;
 	}
 
@@ -86,7 +86,7 @@ int do_oob_format(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 			data_buf = (u_char *)DATA_ADDR;
 			oobbuf_rd = (u_char *)OOB_RD_ADDR;
 			oobbuf_wr = (u_char *)OOB_WR_ADDR;
-			memset (oobbuf_wr, 0xff, fmt_pages*nand->oobsize);
+			memset(oobbuf_wr, 0xff, fmt_pages*nand->oobsize);
 
 			memset(&oob_ops, 0, sizeof(oob_ops));
 			oob_ops.len = nand->writesize;
@@ -98,27 +98,41 @@ int do_oob_format(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 			size = 0;
 			while (size < fmt_size) {
 				/* skip the  bad blocks */
-				while(nand->block_isbad(nand, (loff_t)off))
-				{
-					off += (nand->writesize * NAND_NUM_PAGES_PER_BLOCK);
+				while (nand->block_isbad(nand, (loff_t)off)) {
+					off += (nand->writesize *
+						NAND_NUM_PAGES_PER_BLOCK);
 				}
 
 				/* Read the data and oob of the page */
 				oob_ops.datbuf = data_buf;
-				oob_ops.oobbuf = oobbuf_rd; /* must exist, but oob data will be appended to oob_ops.datbuf */
-				ret = nand->read_oob(nand, (loff_t)off, &oob_ops);
+				/*
+				 * must exist, but oob data will be appended
+				 * to oob_ops.datbuf
+				 */
+				oob_ops.oobbuf = oobbuf_rd;
+				ret = nand->read_oob(nand, (loff_t)off,
+						     &oob_ops);
 				if (ret < 0) {
-					printf("Error (%d) reading page %08lx\n", ret, off);
+					printf("Error (%d) reading page %08lx\n"
+					       , ret, off);
 					return -1;
 				}
 
-				/* re-format the oob layout for the RBL readable format, Linux uses
-				   the last 40 bytes of ECC in the 64-byte oob, while RBL uses last 10 bytes
-				   of each 16 bytes oob (total 4x16 bytes) */
-				memcpy(&oobbuf_wr[16*0+6], &data_buf[nand->writesize+24+10*0], 10);
-				memcpy(&oobbuf_wr[16*1+6], &data_buf[nand->writesize+24+10*1], 10);
-				memcpy(&oobbuf_wr[16*2+6], &data_buf[nand->writesize+24+10*2], 10);
-				memcpy(&oobbuf_wr[16*3+6], &data_buf[nand->writesize+24+10*3], 10);
+				/*
+				 * re-format the oob layout for the RBL
+				 * readable format, Linux uses the last 40
+				 * bytes of ECC in the 64-byte oob, while RBL
+				 * uses last 10 bytes of each 16 bytes oob
+				 * (total 4x16 bytes)
+				 */
+				memcpy(&oobbuf_wr[16*0+6],
+				       &data_buf[nand->writesize+24+10*0], 10);
+				memcpy(&oobbuf_wr[16*1+6],
+				       &data_buf[nand->writesize+24+10*1], 10);
+				memcpy(&oobbuf_wr[16*2+6],
+				       &data_buf[nand->writesize+24+10*2], 10);
+				memcpy(&oobbuf_wr[16*3+6],
+				       &data_buf[nand->writesize+24+10*3], 10);
 
 				/* Increment one page */
 				data_buf += (nand->writesize + nand->oobsize);
@@ -136,7 +150,8 @@ int do_oob_format(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 			erase_ops.quiet = 1;
 			ret = nand_erase_opts(nand, &erase_ops);
 			if (ret < 0) {
-				printf("Error (%d) erase off %08lx\n", ret, start_addr);
+				printf("Error (%d) erase off %08lx\n", ret,
+				       start_addr);
 				return -1;
 			}
 
@@ -151,9 +166,9 @@ int do_oob_format(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 
 			while (size < fmt_size) {
 				/* skip the  bad blocks */
-				while(nand->block_isbad(nand, (loff_t)off))
-				{
-					off += (nand->writesize * NAND_NUM_PAGES_PER_BLOCK);
+				while (nand->block_isbad(nand, (loff_t)off)) {
+					off += nand->writesize *
+						NAND_NUM_PAGES_PER_BLOCK;
 				}
 
 				/* Write a raw page and oob */
@@ -161,22 +176,25 @@ int do_oob_format(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 				chip->ops.len = nand->writesize;
 				chip->ops.datbuf = data_buf;
 				memcpy(chip->oob_poi, oobbuf_wr, nand->oobsize);
-				page = (int)(off >> chip->page_shift) & chip->pagemask;
-				ret = chip->write_page(nand, chip, chip->ops.datbuf, page, 0, 1);
+				page = (int)(off >> chip->page_shift) &
+					chip->pagemask;
+				ret = chip->write_page(nand, chip,
+						       chip->ops.datbuf,
+						       page, 0, 1);
 				if (ret < 0) {
-					printf("Error (%d) write page off %08lx\n", ret, off);
+					printf("Error (%d) write page off %08lx\n",
+					       ret, off);
 					return -1;
 				}
-				chip->select_chip(nand, -1);	/* De-select the NAND device */
-
+				/* De-select the NAND device */
+				chip->select_chip(nand, -1);
 				/* Increment one page */
 				data_buf += (nand->writesize + nand->oobsize);
 				oobbuf_wr += nand->oobsize;
 				size += nand->writesize;
 				off += nand->writesize;
 			}
-		}
-		else {
+		} else {
 			goto oob_cmd_usage;
 		}
 	} else {
@@ -231,20 +249,27 @@ int do_factory_image(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		size = 0;
 		while (size < img_size) {
 			/* skip the  bad blocks */
-			while(nand->block_isbad(nand, (loff_t)off))
-					off += (nand->writesize * NAND_NUM_PAGES_PER_BLOCK);
+			while (nand->block_isbad(nand, (loff_t)off))
+					off += (nand->writesize *
+						NAND_NUM_PAGES_PER_BLOCK);
 
 			/* Read the data and oob of the page */
 			oob_ops.datbuf = data_buf;
-			oob_ops.oobbuf = oob_buf_rd; /* must exist, but oob data will be appended to oob_ops.datbuf */
+			/*
+			 * must exist, but oob data will be
+			 * appended to oob_ops.datbuf
+			 */
+			oob_ops.oobbuf = oob_buf_rd;
 			ret = nand->read_oob(nand, (loff_t)off, &oob_ops);
 			if (ret < 0) {
-				printf("Error (%d) reading page %08lx\n", ret, off);
+				printf("Error (%d) reading page %08lx\n",
+				       ret, off);
 				return -1;
 			}
 
 			/* Copy the oob data to oob_buf_rd */
-			memcpy(oob_buf_rd, &data_buf[nand->writesize], nand->oobsize);
+			memcpy(oob_buf_rd, &data_buf[nand->writesize],
+			       nand->oobsize);
 
 			/* Increment one page */
 			data_buf += nand->writesize;
@@ -277,8 +302,9 @@ int do_factory_image(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 
 		while (size < img_size) {
 			/* skip the  bad blocks */
-			while(nand->block_isbad(nand, (loff_t)off))
-				off += (nand->writesize * NAND_NUM_PAGES_PER_BLOCK);
+			while (nand->block_isbad(nand, (loff_t)off))
+				off += nand->writesize *
+					NAND_NUM_PAGES_PER_BLOCK;
 
 			/* Write a raw page and oob */
 			chip->state = FL_WRITING; /* Get the device */
@@ -286,12 +312,15 @@ int do_factory_image(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 			chip->ops.datbuf = data_buf;
 			memcpy(chip->oob_poi, oob_buf_wr, nand->oobsize);
 			page = (int)(off >> chip->page_shift) & chip->pagemask;
-			ret = chip->write_page(nand, chip, chip->ops.datbuf, page, 0, 1);
+			ret = chip->write_page(nand, chip, chip->ops.datbuf,
+					       page, 0, 1);
 			if (ret < 0) {
-				printf("Error (%d) write page off %08lx\n", ret, off);
+				printf("Error (%d) write page off %08lx\n",
+				       ret, off);
 				return -1;
 			}
-			chip->select_chip(nand, -1);	/* De-select the NAND device */
+			/* De-select the NAND device */
+			chip->select_chip(nand, -1);
 
 			/* Increment one page */
 			data_buf += nand->writesize;
@@ -314,5 +343,6 @@ U_BOOT_CMD(
 	"Read nand page data and oob data in raw format to memory",
 	"<off in hex> <size in hex> <data_addr in hex> <oob_addr in hex>\n"
 	"    read 'size' bytes starting at offset 'off'\n"
-	"    to memory address 'data_addr' and 'oob_addr', skipping bad blocks.\n"
+	"    to memory address 'data_addr' and 'oob_addr',"
+	" skipping bad blocks.\n"
 );

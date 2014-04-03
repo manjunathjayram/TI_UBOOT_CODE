@@ -188,7 +188,7 @@ int ddr_memory_ecc_err(u32 base, u32 address, u32 ecc_err)
 		address, value1, value2, ecc_err, value3);
 
 	__raw_writel(ECC_START_ADDR1 | (ECC_END_ADDR1 << 16),
-			base + TCI6638_DDR3_ECC_ADDR_RANGE1_OFFSET);
+			base + K2HK_DDR3_ECC_ADDR_RANGE1_OFFSET);
 
 	printf("Enabling DDR ECC ...\n");
 	ddr3_enable_ecc(base, 1);
@@ -249,7 +249,7 @@ int do_ddr_test(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 			printf("Invalid address!\n");
 			goto ddr_cmd_usage;
 		}
-		ddr_memory_ecc_err(TCI6638_DDR3A_EMIF_CTRL_BASE, start_addr,
+		ddr_memory_ecc_err(K2HK_DDR3A_EMIF_CTRL_BASE, start_addr,
 				   ecc_err);
 	} else {
 		goto ddr_cmd_usage;

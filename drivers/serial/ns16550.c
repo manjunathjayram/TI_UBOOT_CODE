@@ -26,7 +26,7 @@
 #define serial_out(x, y)	out_le32(y, x)
 #define serial_in(y)		in_le32(y)
 #else
-#if (defined(CONFIG_TCI6638_SIM) || defined(CONFIG_TCI6638_EVM))
+#if (defined(CONFIG_K2HK_SIM) || defined(CONFIG_K2HK_EVM))
 #define UART_REG_VAL_PWREMU_MGMT_UART_DISABLE   0
 #define UART_REG_VAL_PWREMU_MGMT_UART_ENABLE    ((1 << 14) | (1 << 13) | (1 << 0))
 #define serial_out(x,y) writel(x,y)
@@ -74,7 +74,7 @@ void NS16550_init(NS16550_t com_port, int baud_divisor)
 	serial_out(0, &com_port->mdr1);
 #endif
 #endif /* CONFIG_OMAP */
-#if defined(CONFIG_TCI6638_EVM)
+#if defined(CONFIG_K2HK_EVM)
 	serial_out(UART_REG_VAL_PWREMU_MGMT_UART_ENABLE, &com_port->regC);
 #endif
 }

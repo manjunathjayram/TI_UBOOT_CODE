@@ -30,17 +30,17 @@ typedef enum { FALSE = 0, TRUE = 1 } bool;
 
 /*#define chipLmbd(x,y) _lmbd(x,y) */
 
-#define EMAC_EMACSL_BASE_ADDR			(TCI66XX_PASS_BASE + 0x00090900)
-#define EMAC_MDIO_BASE_ADDR			(TCI66XX_PASS_BASE + 0x00090300)
-#define EMAC_SGMII_BASE_ADDR			(TCI66XX_PASS_BASE + 0x00090100)
+#define EMAC_EMACSL_BASE_ADDR		(KS2_PASS_BASE + 0x00090900)
+#define EMAC_MDIO_BASE_ADDR		(KS2_PASS_BASE + 0x00090300)
+#define EMAC_SGMII_BASE_ADDR		(KS2_PASS_BASE + 0x00090100)
 
 #define KS2_EMAC_GIG_ENABLE
 
-#define MAC_ID_BASE_ADDR			(TCI66XX_DEVICE_STATE_CTRL_BASE + 0x110)
+#define MAC_ID_BASE_ADDR		(KS2_DEVICE_STATE_CTRL_BASE + 0x110)
 
-#ifdef CONFIG_SOC_TCI6638
+#ifdef CONFIG_SOC_K2HK
 /* MDIO module input frequency */
-#define EMAC_MDIO_BUS_FREQ			(clk_get_rate(pass_pll_clk))
+#define EMAC_MDIO_BUS_FREQ		(clk_get_rate(pass_pll_clk))
 /* MDIO clock output frequency */
 #define EMAC_MDIO_CLOCK_FREQ		1000000		/* 1.0 MHz */
 #endif
@@ -184,7 +184,7 @@ struct pa_config {
 	u_int8_t   *cmd_buf;    /* Buffer used to create PA command */
 };
 
-#define DEVICE_PA_BASE                  TCI66XX_PASS_BASE
+#define DEVICE_PA_BASE                  KS2_PASS_BASE
 #define DEVICE_PA_NUM_PDSPS             6
 #define DEVICE_PA_RUN_CHECK_COUNT       100         /* Number of loops to verify PA firmware is running */
 #define chipLower8(x)                   ((x) & 0x00ff)
@@ -222,13 +222,13 @@ struct pa_config {
 
 #define TARGET_SGMII_EXTERNAL_SERDES
 #define TARGET_SGMII_TYPE_2             /* Use second sgmii setup sequence */
-#define TARGET_SGMII_BASE		TCI66XX_PASS_BASE + 0x00090100
-#define TARGET_SGMII_BASE_ADDRESSES    {TCI66XX_PASS_BASE+0x00090100, \
-					TCI66XX_PASS_BASE+0x00090200, \
-					TCI66XX_PASS_BASE+0x00090400, \
-					TCI66XX_PASS_BASE+0x00090500  }
-#define TARGET_SGMII_SERDES_BASE        (TCI66XX_DEVICE_STATE_CTRL_BASE + 0x340)
-#define TARGET_SGMII_SERDES_STATUS_BASE (TCI66XX_DEVICE_STATE_CTRL_BASE + 0x158)
+#define TARGET_SGMII_BASE		KS2_PASS_BASE + 0x00090100
+#define TARGET_SGMII_BASE_ADDRESSES    {KS2_PASS_BASE+0x00090100, \
+					KS2_PASS_BASE+0x00090200, \
+					KS2_PASS_BASE+0x00090400, \
+					KS2_PASS_BASE+0x00090500  }
+#define TARGET_SGMII_SERDES_BASE        (KS2_DEVICE_STATE_CTRL_BASE + 0x340)
+#define TARGET_SGMII_SERDES_STATUS_BASE (KS2_DEVICE_STATE_CTRL_BASE + 0x158)
 #define TARGET_SGMII_SOFT_RESET         0x04
 #define TARGET_SGMII_CONTROL            0x10
 #define TARGET_SGMII_MR_ADV_ABILITY     0x18
@@ -252,14 +252,14 @@ struct pa_config {
 #define chipKickClosedSerdes(x)         ;       /* never lock the registers */
 #define TARGET_SERDES_LOCK_DELAY        (1600*1000)
 
-#define DEVICE_EMACSL_BASE(x)           (TCI66XX_PASS_BASE + 0x00090900 + (x)*0x040)
+#define DEVICE_EMACSL_BASE(x)           (KS2_PASS_BASE + 0x00090900 + (x)*0x040)
 #define DEVICE_N_GMACSL_PORTS           4
 #define DEVICE_EMACSL_RESET_POLL_COUNT  100
 
-#define DEVICE_PSTREAM_CFG_REG_ADDR                 (TCI66XX_PASS_BASE + 0x604)
+#define DEVICE_PSTREAM_CFG_REG_ADDR                 (KS2_PASS_BASE + 0x604)
 #define DEVICE_PSTREAM_CFG_REG_VAL_ROUTE_PDSP0      0
 
-#ifdef CONFIG_SOC_TCI6638
+#ifdef CONFIG_SOC_K2HK
 #define DEVICE_PSTREAM_CFG_REG_VAL_ROUTE_CPPI      0x06060606
 #endif
 

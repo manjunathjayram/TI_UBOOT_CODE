@@ -39,8 +39,8 @@
 #define DEVICE_REG32_R(addr)			__raw_readl((u32 *)(addr))
 #define DEVICE_REG32_W(addr, val)		__raw_writel(val, (u32 *)(addr))
 
-#ifdef CONFIG_SOC_TCI6638
-#define DEVICE_PSC_BASE				TCI6638_PSC_BASE
+#ifdef CONFIG_SOC_K2HK
+#define DEVICE_PSC_BASE				K2HK_PSC_BASE
 #endif
 
 int psc_delay (void)

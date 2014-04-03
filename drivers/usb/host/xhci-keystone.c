@@ -249,7 +249,7 @@ int xhci_hcd_init(int index, struct xhci_hccr **ret_hccr,
 	mdelay(100);
 
 	/* Release USB from reset */
-	ret = psc_enable_module(TCI6638_LPSC_USB);
+	ret = psc_enable_module(K2HK_LPSC_USB);
 
 	mdelay(100);
 
@@ -371,7 +371,7 @@ void xhci_hcd_stop(int index)
 	if (keystone_xhci_phy_suspend())
 		return;
 
-	if (psc_disable_module(TCI6638_LPSC_USB)) {
+	if (psc_disable_module(K2HK_LPSC_USB)) {
 		debug("PSC disable module USB failed!\n");
 		return;
 	}

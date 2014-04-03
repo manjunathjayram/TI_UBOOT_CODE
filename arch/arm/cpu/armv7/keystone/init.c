@@ -43,7 +43,7 @@ int arch_cpu_init(void)
 	chip_configuration_unlock();
 	icache_enable();
 
-#ifdef CONFIG_SOC_TCI6638
+#ifdef CONFIG_SOC_K2HK
 	share_all_segments(8);
 	share_all_segments(9);
 	share_all_segments(10); /* QM PDSP */

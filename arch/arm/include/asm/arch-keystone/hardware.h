@@ -104,12 +104,12 @@ struct ddr3_emif_config {
 
 #define		BIT(x)	(1 << (x))
 
-#ifdef CONFIG_SOC_TCI6638
-#include <asm/arch/hardware-tci6638.h>
+#ifdef CONFIG_SOC_K2HK
+#include <asm/arch/hardware-k2hk.h>
 #endif
 
 #ifndef __ASSEMBLY__
-static inline int cpu_is_tci6638(void)
+static inline int cpu_is_k2hk(void)
 {
 	unsigned int jtag_id	= __raw_readl(JTAG_ID_REG);
 	unsigned int part_no	= (jtag_id >> 12) & 0xffff;
@@ -160,6 +160,7 @@ int ddr_memory_test(u32 start_address, u32 end_address, int quick);
 void ddr3_enable_ecc(u32 base, int test);
 void ddr3_disable_ecc(u32 base);
 u32 get_ddr_seg_num(void);
+void init_ddr3(void);
 
 extern u32 debug_options;
 #endif

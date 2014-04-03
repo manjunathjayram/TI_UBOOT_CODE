@@ -24,7 +24,7 @@ include $(TOPDIR)/config.mk
 LIB	= $(obj)lib$(SOC).o
 
 COBJS	+= aemif.o init.o psc.o clock.o cmd_clock.o keystone_nav.o
-ifdef CONFIG_SOC_TCI6638
+ifdef CONFIG_SOC_K2HK
 COBJS	+= cmd_mon.o
 COBJS	+= cmd_fmtimg.o
 COBJS	+= msmc.o

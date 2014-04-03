@@ -20,13 +20,13 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-#define CONFIG_SOC_TCI6638
+#define CONFIG_SOC_K2HK
 
 #include <asm/arch/hardware.h>
 #include <asm/arch/clock.h>
 
-/* TCI6638 SIM board */
-#define CONFIG_TCI6638_SIM
+/* K2HK SIM board */
+#define CONFIG_K2HK_SIM
 
 #define CONFIG_SKIP_LOWLEVEL_INIT	/* U-Boot is a 2nd stage loader */
 #define CONFIG_SYS_NO_FLASH		/* that is, no *NOR* flash */
@@ -36,7 +36,7 @@
 #define CONFIG_ARMV7						/* ARM Cortex A8 CPU */
 #define CONFIG_ARCH_CPU_INIT
 #define CONFIG_SYS_ARCH_TIMER
-#define CONFIG_SYS_HZ_CLOCK		clk_get_rate(TCI6638_CLK1_6)
+#define CONFIG_SYS_HZ_CLOCK		clk_get_rate(K2HK_CLK1_6)
 #define CONFIG_SYS_HZ			1000			/* ticks per second */
 #define CONFIG_BOARD_EARLY_INIT_F
 
@@ -61,8 +61,8 @@
 #define CONFIG_SYS_NS16550
 #define CONFIG_SYS_NS16550_SERIAL
 #define CONFIG_SYS_NS16550_REG_SIZE	-4
-#define CONFIG_SYS_NS16550_COM1		TCI6638_UART0_BASE
-#define CONFIG_SYS_NS16550_CLK		clk_get_rate(TCI6638_CLK1_6)
+#define CONFIG_SYS_NS16550_COM1		K2HK_UART0_BASE
+#define CONFIG_SYS_NS16550_CLK		clk_get_rate(K2HK_CLK1_6)
 #define CONFIG_SYS_BAUDRATE_TABLE	{ 9600, 19200, 38400, 57600, 115200 }
 #define CONFIG_CONS_INDEX		1
 #define CONFIG_BAUDRATE			115200
@@ -132,7 +132,7 @@
 /* U-Boot general configuration */
 #undef CONFIG_USE_IRQ				/* No IRQ/FIQ in U-Boot */
 #define CONFIG_BOOTFILE		"uImage"	/* Boot file name */
-#define CONFIG_SYS_PROMPT	"TCI6638 EVM # "	/* Monitor Command Prompt */
+#define CONFIG_SYS_PROMPT	"K2HK EVM # "	/* Monitor Command Prompt */
 #define CONFIG_SYS_CBSIZE	1024		/* Console I/O Buffer Size  */
 #define CONFIG_SYS_PBSIZE			/* Print buffer size */ \
 		(CONFIG_SYS_CBSIZE + sizeof(CONFIG_SYS_PROMPT) + 16)

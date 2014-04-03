@@ -24,7 +24,7 @@
 #include <asm/io.h>
 
 enum soc_type_t {
-	tci6638
+	k2hk
 };
 
 

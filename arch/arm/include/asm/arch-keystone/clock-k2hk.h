@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2012 Texas Instruments.
  *
- * TCI6638: Clock management APIs
+ * K2HK: Clock management APIs
  *
  * See file CREDITS for list of people who contributed to this
  * project.
@@ -21,8 +21,8 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef __ASM_ARCH_CLOCK_TCI6638_H
-#define __ASM_ARCH_CLOCK_TCI6638_H
+#ifndef __ASM_ARCH_CLOCK_K2HK_H
+#define __ASM_ARCH_CLOCK_K2HK_H
 
 #include <asm/arch/hardware.h>
 
@@ -70,7 +70,7 @@ enum clk_e {
 	sys_clk3_clk
 };
 
-#define TCI6638_CLK1_6	sys_clk0_6_clk
+#define K2HK_CLK1_6	sys_clk0_6_clk
 
 /* PLL identifiers */
 enum pll_type_e {
@@ -107,10 +107,10 @@ struct pll_init_data {
 #define TETRIS_PLL_1200 { TETRIS_PLL,	48,	5,	1 }
 #define TETRIS_PLL_1375 { TETRIS_PLL,	22,	2,	1 }
 #define TETRIS_PLL_1400 { TETRIS_PLL,	56,	5,	1 }
-#define DDR3_PLL_200(x)	{ DDR3##x##_PLL,4,	1,	2 }
-#define DDR3_PLL_400(x)	{ DDR3##x##_PLL,16,	1,	4 }
-#define DDR3_PLL_800(x)	{ DDR3##x##_PLL,16,	1,	2 }
-#define DDR3_PLL_333(x)	{ DDR3##x##_PLL,20,	1,	6 }
+#define DDR3_PLL_200(x)	{ DDR3##x##_PLL, 4,	1,	2 }
+#define DDR3_PLL_400(x)	{ DDR3##x##_PLL, 16,	1,	4 }
+#define DDR3_PLL_800(x)	{ DDR3##x##_PLL, 16,	1,	2 }
+#define DDR3_PLL_333(x)	{ DDR3##x##_PLL, 20,	1,	6 }
 
 void init_plls(int num_pll, struct pll_init_data *config);
 void init_pll(const struct pll_init_data *data);

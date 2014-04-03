@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2012 Texas Instruments Inc.
  *
- * TCI6638 SIM: Board initialization
+ * K2HK SIM: Board initialization
  *
  * See file CREDITS for list of people who contributed to this
  * project.
@@ -63,7 +63,7 @@ int board_early_init_f(void)
 int board_init(void)
 {
 
-	gd->bd->bi_arch_number = -1; /* MACH_TYPE_TCI6638_EVM; */
+	gd->bd->bi_arch_number = -1; /* MACH_TYPE_K2HK_EVM; */
 	gd->bd->bi_boot_params = LINUX_BOOT_PARAM_ADDR;
 
 	return 0;

@@ -550,8 +550,8 @@ static int keystone2_eth_open(struct eth_device *dev, bd_t *bis)
 
 	net_rx_buffs.rx_flow	= eth_priv->rx_flow;
 
-	psc_enable_module(TCI66XX_LPSC_PA);
-	psc_enable_module(TCI66XX_LPSC_CPGMAC);
+	psc_enable_module(KS2_LPSC_PA);
+	psc_enable_module(KS2_LPSC_CPGMAC);
 
 	sgmii_serdes_setup_156p25mhz();
 
@@ -630,8 +630,8 @@ void keystone2_eth_close(struct eth_device *dev)
 
 #if 0
  	sgmii_serdes_shutdown();
-	psc_disable_module(TCI66XX_LPSC_CPGMAC);
-	psc_disable_module(TCI66XX_LPSC_PA);
+	psc_disable_module(KS2_LPSC_CPGMAC);
+	psc_disable_module(KS2_LPSC_PA);
 	psc_disable_domain(2);
 #endif
 	emac_open = 0;
@@ -639,7 +639,7 @@ void keystone2_eth_close(struct eth_device *dev)
 	debug_emac("- emac_close\n");
 }
 
-void tci6638_eth_open_close(struct eth_device *dev)
+void k2hk_eth_open_close(struct eth_device *dev)
 {
 	keystone2_eth_open(dev, NULL);
 	keystone2_eth_close(dev);

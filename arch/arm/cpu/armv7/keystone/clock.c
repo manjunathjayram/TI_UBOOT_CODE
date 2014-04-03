@@ -51,8 +51,8 @@ struct pll_regs {
 };
 
 
-#ifdef CONFIG_SOC_TCI6638
-#include "clock-tci6638.c"
+#ifdef CONFIG_SOC_K2HK
+#include "clock-k2hk.c"
 #endif
 
 void init_pll(const struct pll_init_data *data)

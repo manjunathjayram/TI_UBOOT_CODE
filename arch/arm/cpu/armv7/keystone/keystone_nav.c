@@ -24,9 +24,9 @@
 extern int cpu_to_bus(u32 *ptr, u32 length);
 
 static int soc_type = 
-	tci6638;
+	k2hk;
 
-struct qm_config tci6638_qm_memmap = {
+struct qm_config k2hk_qm_memmap = {
 	.stat_cfg	= 0x02a40000,
 	.queue		= (struct qm_reg_queue *)0x02a80000,
 	.mngr_vbusm	= 0x23a80000,
@@ -95,8 +95,8 @@ static int _qm_init(struct qm_config * cfg)
 int qm_init(void)
 {
 	switch (soc_type) {
-		case tci6638:
-			return _qm_init(&tci6638_qm_memmap);
+	case k2hk:
+		return _qm_init(&k2hk_qm_memmap);
 	}
 
 	return QM_ERR;
@@ -178,7 +178,7 @@ void queue_close(u32 qnum)
 /************************************************
  * DMA API
  ***********************************************/
-struct pktdma_cfg tci6638_netcp_pktdma = {
+struct pktdma_cfg k2hk_netcp_pktdma = {
 	.global		= (struct global_ctl_regs*)0x02004000,
 	.tx_ch		= (struct tx_chan_regs*)0x02004400,
 	.tx_ch_num	= 9,
@@ -306,7 +306,7 @@ static int _netcp_init(struct pktdma_cfg *netcp_cfg, struct rx_buff_desc *rx_buf
 	writel(0, &netcp->global->emulation_control);
 
 /* TODO: make it dependend on a soc type variable */
-#ifdef CONFIG_SOC_TCI6638
+#ifdef CONFIG_SOC_K2HK
 	/* Set QM base address, only for K2x devices */
 	writel(0x23a80000, &netcp->global->qm_base_addr[0]);
 #endif
@@ -323,9 +323,9 @@ static int _netcp_init(struct pktdma_cfg *netcp_cfg, struct rx_buff_desc *rx_buf
 int netcp_init(struct rx_buff_desc *rx_buffers)
 {
 	switch (soc_type) {
-		case tci6638:
-			_netcp_init(&tci6638_netcp_pktdma, rx_buffers);
-			return QM_OK;
+	case k2hk:
+		_netcp_init(&k2hk_netcp_pktdma, rx_buffers);
+		return QM_OK;
 	}
 	return QM_ERR;
 }

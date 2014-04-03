@@ -25,8 +25,8 @@
 #include <asm/io.h>
 #include <asm/arch/clock.h>
 
-#ifdef CONFIG_SOC_TCI6638
-#define ASYNC_EMIF_BASE			TCI6638_ASYNC_EMIF_CNTRL_BASE
+#ifdef CONFIG_SOC_K2HK
+#define ASYNC_EMIF_BASE			K2HK_ASYNC_EMIF_CNTRL_BASE
 #endif
 
 #define ASYNC_EMIF_CONFIG(cs)		(ASYNC_EMIF_BASE+0x10+(cs)*4)

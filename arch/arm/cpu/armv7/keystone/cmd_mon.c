@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2012 Texas Instruments.
  *
- * TCI6638: secure kernel command file
+ * K2HK: secure kernel command file
  *
  * See file CREDITS for list of people who contributed to this
  * project.

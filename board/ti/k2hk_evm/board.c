@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2012 Texas Instruments Inc.
  *
- * TCI6638 EVM : Board initialization
+ * K2HK EVM : Board initialization
  *
  * See file CREDITS for list of people who contributed to this
  * project.
@@ -36,7 +36,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-u32 device_big_endian = 0;
+u32 device_big_endian;
 
 unsigned int external_clk[ext_clk_count] = {
 	[sys_clk]	=	122880000,
@@ -47,10 +47,11 @@ unsigned int external_clk[ext_clk_count] = {
 	[ddr3b_clk]	=	100000000,
 	[mcm_clk]	=	312500000,
 	[pcie_clk]	=	100000000,
-	[sgmii_srio_clk]=	156250000,
+	[sgmii_srio_clk] =	156250000,
 	[xgmii_clk]	=	156250000,
 	[usb_clk]	=	100000000,
-	[rp1_clk]	=	123456789    /* TODO: cannot find what is that */
+	[rp1_clk]	=	123456789    /* TODO: cannot find
+						what is that */
 };
 
 static struct async_emif_config async_emif_config[ASYNC_EMIF_NUM_CS] = {
@@ -86,8 +87,6 @@ void spl_init_keystone_plls(void)
 }
 #endif
 
-void init_ddr3( void );
-
 int dram_init(void)
 {
 	init_ddr3();
@@ -95,21 +94,21 @@ int dram_init(void)
 	gd->ram_size = get_ram_size(CONFIG_SYS_SDRAM_BASE,
 				    CONFIG_MAX_RAM_BANK_SIZE);
 	init_async_emif(ARRAY_SIZE(async_emif_config), async_emif_config);
-	init_ddr3_ecc(TCI6638_DDR3A_EMIF_CTRL_BASE);
+	init_ddr3_ecc(K2HK_DDR3A_EMIF_CTRL_BASE);
 	return 0;
 }
 
 #ifdef CONFIG_DRIVER_TI_KEYSTONE_NET
 eth_priv_t eth_priv_cfg[] = {
 	{
-		.int_name	= "TCI6638_EMAC",
+		.int_name	= "K2HK_EMAC",
 		.rx_flow	= 22,
 		.phy_addr	= 0,
 		.slave_port	= 1,
 		.sgmii_link_type = SGMII_LINK_MAC_PHY,
 	},
 	{
-		.int_name	= "TCI6638_EMAC1",
+		.int_name	= "K2HK_EMAC1",
 		.rx_flow	= 23,
 		.phy_addr	= 1,
 		.slave_port	= 2,
@@ -133,7 +132,7 @@ eth_priv_t eth_priv_cfg[] = {
 
 inline int get_num_eth_ports(void)
 {
-	return (sizeof(eth_priv_cfg) / sizeof(eth_priv_t));
+	return sizeof(eth_priv_cfg) / sizeof(eth_priv_t);
 }
 
 eth_priv_t *get_eth_priv_ptr(int port_num)
@@ -141,12 +140,12 @@ eth_priv_t *get_eth_priv_ptr(int port_num)
 	if (port_num < 0 || port_num >= get_num_eth_ports())
 		return NULL;
 
-	return &eth_priv_cfg[port_num]; 
+	return &eth_priv_cfg[port_num];
 }
 
 int get_eth_env_param(char *env_name)
 {
-	char * env;
+	char *env;
 	int  res = -1;
 
 	env = getenv(env_name);
@@ -163,20 +162,23 @@ int board_eth_init(bd_t *bis)
 	int	has_mdio = 0; /* doesn't have mdio by default */
 	int	link_type_name[32];
 
-	if ((res = get_eth_env_param("has_mdio")) >= 0 )
+	res = get_eth_env_param("has_mdio");
+	if (res >= 0)
 		has_mdio = res;
 
 	keystone2_emac_set_has_mdio(has_mdio);
 
-	for (j=0; j < get_num_eth_ports(); j++) {
+	for (j = 0; j < get_num_eth_ports(); j++) {
 		sprintf(link_type_name, "sgmii%d_link_type", j);
 		res = get_eth_env_param(link_type_name);
 		if (res < 0) {
 			/* setting default type */
 			if (has_mdio == 1)
-				eth_priv_cfg[j].sgmii_link_type = SGMII_LINK_MAC_PHY;
+				eth_priv_cfg[j].sgmii_link_type =
+					SGMII_LINK_MAC_PHY;
 			else
-				eth_priv_cfg[j].sgmii_link_type = SGMII_LINK_MAC_PHY_FORCED;
+				eth_priv_cfg[j].sgmii_link_type =
+					SGMII_LINK_MAC_PHY_FORCED;
 		} else {
 			eth_priv_cfg[j].sgmii_link_type = res;
 		}
@@ -184,8 +186,8 @@ int board_eth_init(bd_t *bis)
 		keystone2_emac_initialize(&eth_priv_cfg[j]);
 	}
 
-#ifdef CONFIG_SOC_TCI6638
-	tci6638_eth_open_close(eth_priv_cfg[0].dev);
+#ifdef CONFIG_SOC_K2HK
+	k2hk_eth_open_close(eth_priv_cfg[0].dev);
 #endif
 
 	return 0;
@@ -217,8 +219,8 @@ int turn_off_all_dsps(void)
 	int j;
 	int ret = 0;
 
-	for (j=0; j<8; j++) {
-		if (psc_disable_module(j + TCI6638_LPSC_GEM_0))
+	for (j = 0; j < 8; j++) {
+		if (psc_disable_module(j + K2HK_LPSC_GEM_0))
 			ret = 1;
 		if (psc_disable_domain(j + 8))
 			ret = 1;
@@ -232,7 +234,7 @@ int turn_off_myself(void)
 	printf("Turning off ourselves\r\n");
 	mon_power_off(0);
 
-	psc_disable_module(TCI6638_LPSC_TETRIS);
+	psc_disable_module(K2HK_LPSC_TETRIS);
 	psc_disable_domain(31);
 
 	asm volatile (
@@ -259,7 +261,7 @@ U_BOOT_CMD(
 int board_init(void)
 {
 
-	gd->bd->bi_arch_number = -1; /* MACH_TYPE_TCI6638_EVM; */
+	gd->bd->bi_arch_number = -1; /* MACH_TYPE_K2HK_EVM; */
 	gd->bd->bi_boot_params = LINUX_BOOT_PARAM_ADDR;
 
 	return 0;
@@ -275,7 +277,7 @@ int __weak misc_init_r(void)
 	if (env)
 		debug_options = simple_strtol(env, NULL, 0);
 
-	if((debug_options & DBG_LEAVE_DSPS_ON) == 0)
+	if ((debug_options & DBG_LEAVE_DSPS_ON) == 0)
 		turn_off_all_dsps();
 
 	return 0;
@@ -342,8 +344,10 @@ void ft_board_setup(void *blob, bd_t *bd)
 		int err;
 		nodeoffset = fdt_path_offset(blob, "/chosen");
 		if (nodeoffset >= 0) {
-			prop1 = fdt_getprop(blob, nodeoffset, "linux,initrd-start", NULL);
-			prop2 = fdt_getprop(blob, nodeoffset, "linux,initrd-end", NULL);
+			prop1 = fdt_getprop(blob, nodeoffset,
+					    "linux,initrd-start", NULL);
+			prop2 = fdt_getprop(blob, nodeoffset,
+					    "linux,initrd-end", NULL);
 			if (prop1 && prop2) {
 				initrd_start = __be32_to_cpu(*prop1);
 				initrd_start -= K2_DDR3_START_ADDR;
@@ -354,28 +358,35 @@ void ft_board_setup(void *blob, bd_t *bd)
 				initrd_end += CONFIG_SYS_LPAE_SDRAM_BASE;
 				initrd_end = __cpu_to_be64(initrd_end);
 
-				err = fdt_delprop(blob, nodeoffset, "linux,initrd-start");
+				err = fdt_delprop(blob, nodeoffset,
+						  "linux,initrd-start");
 				if (err < 0)
-					printf("error deleting linux,initrd-start\n");
+					printf("error deleting initrd-start\n");
 
-				err = fdt_delprop(blob, nodeoffset, "linux,initrd-end");
+				err = fdt_delprop(blob, nodeoffset,
+						  "linux,initrd-end");
 				if (err < 0)
-					printf("error deleting linux,initrd-end\n");
+					printf("error deleting initrd-end\n");
 
-				err = fdt_setprop(blob, nodeoffset, "linux,initrd-start",
-						&initrd_start, sizeof(initrd_start));
+				err = fdt_setprop(blob, nodeoffset,
+						  "linux,initrd-start",
+						  &initrd_start,
+						  sizeof(initrd_start));
 				if (err < 0)
-					printf("error adding linux,initrd-start\n");
+					printf("error adding initrd-start\n");
 
-				err = fdt_setprop(blob, nodeoffset, "linux,initrd-end",
-						&initrd_end, sizeof(initrd_end));
+				err = fdt_setprop(blob, nodeoffset,
+						  "linux,initrd-end",
+						  &initrd_end,
+						  sizeof(initrd_end));
 				if (err < 0)
-					printf("error adding linux,initrd-end\n");
+					printf("error adding initrd-end\n");
 			}
 
 			/*
-			 * the initrd and other reserved memory areas are embedded in
-			 * in the DTB itslef. fix up these addresses to 36 bit format
+			 * the initrd and other reserved memory areas are
+			 * embedded in in the DTB itslef. fix up these addresses
+			 * to 36 bit format
 			 */
 			reserve_start = (char *)blob + fdt_off_mem_rsvmap(blob);
 			while (1) {
@@ -383,15 +394,17 @@ void ft_board_setup(void *blob, bd_t *bd)
 				size = __cpu_to_be64(*(reserve_start + 1));
 				if (size) {
 					*reserve_start -= K2_DDR3_START_ADDR;
-					*reserve_start += CONFIG_SYS_LPAE_SDRAM_BASE;
-					*reserve_start = __cpu_to_be64(*reserve_start);
+					*reserve_start +=
+						CONFIG_SYS_LPAE_SDRAM_BASE;
+					*reserve_start =
+						__cpu_to_be64(*reserve_start);
 				} else
 					break;
 				reserve_start += 2;
 			}
 		}
 	}
-	check_ddr3_ecc_int(TCI6638_DDR3A_EMIF_CTRL_BASE);
+	check_ddr3_ecc_int(K2HK_DDR3A_EMIF_CTRL_BASE);
 }
 #endif
 

@@ -1107,8 +1107,8 @@ extern unsigned int __machine_arch_type;
 #define MACH_TYPE_OMAP5_SEVM           3777
 #define MACH_TYPE_ARMADILLO_800EVA     3863
 #define MACH_TYPE_KZM9G                4140
-#define MACH_TYPE_TCI6638_SIM          4010
-#define MACH_TYPE_TCI6638_EVM          4011
+#define MACH_TYPE_K2HK_SIM          4010
+#define MACH_TYPE_K2HK_EVM          4011
 
 #ifdef CONFIG_ARCH_EBSA110
 # ifdef machine_arch_type
@@ -14250,28 +14250,28 @@ extern unsigned int __machine_arch_type;
 # define machine_is_kzm9g()	(0)
 #endif
 
-#ifdef CONFIG_MACH_TCI6638_SIM
+#ifdef CONFIG_MACH_K2HK_SIM
 # ifdef machine_arch_type
 #  undef machine_arch_type
 #  define machine_arch_type	__machine_arch_type
 # else
-#  define machine_arch_type	MACH_TYPE_TCI6638_SIM
+#  define machine_arch_type	MACH_TYPE_K2HK_SIM
 # endif
-# define machine_is_tci6638_sim()	(machine_arch_type == MACH_TYPE_TCI6638_SIM)
+# define machine_is_k2hk_sim()	(machine_arch_type == MACH_TYPE_K2HK_SIM)
 #else
-# define machine_is_tci6638_sim()	(0)
+# define machine_is_k2hk_sim()	(0)
 #endif
 
-#ifdef CONFIG_MACH_TCI6638_EVM
+#ifdef CONFIG_MACH_K2HK_EVM
 # ifdef machine_arch_type
 #  undef machine_arch_type
 #  define machine_arch_type     __machine_arch_type
 # else
-#  define machine_arch_type	MACH_TYPE_TCI6638_EVM
+#  define machine_arch_type	MACH_TYPE_K2HK_EVM
 # endif
-# define machine_is_tci6638_evm()	(machine_arch_type == MACH_TYPE_TCI6638_EVM)
+# define machine_is_k2hk_evm()	(machine_arch_type == MACH_TYPE_K2HK_EVM)
 #else
-# define machine_is_tci6638_evm()	(0)
+# define machine_is_k2hk_evm()	(0)
 #endif
 
 /*
