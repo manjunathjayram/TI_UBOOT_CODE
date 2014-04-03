@@ -38,63 +38,63 @@ void init_ddrphy(u32 base, struct ddr3_phy_config *phy_cfg)
 {
 	unsigned int tmp;
 
-	while ((__raw_readl(base + K2HK_DDRPHY_PGSR0_OFFSET)
+	while ((__raw_readl(base + KS2_DDRPHY_PGSR0_OFFSET)
 		 & 0x00000001) != 0x00000001)
 		;
 
-	__raw_writel(phy_cfg->pllcr, base + K2HK_DDRPHY_PLLCR_OFFSET);
+	__raw_writel(phy_cfg->pllcr, base + KS2_DDRPHY_PLLCR_OFFSET);
 
-	tmp = __raw_readl(base + K2HK_DDRPHY_PGCR1_OFFSET);
+	tmp = __raw_readl(base + KS2_DDRPHY_PGCR1_OFFSET);
 	tmp &= ~(phy_cfg->pgcr1_mask);
 	tmp |= phy_cfg->pgcr1_val;
-	__raw_writel(tmp, base + K2HK_DDRPHY_PGCR1_OFFSET);
+	__raw_writel(tmp, base + KS2_DDRPHY_PGCR1_OFFSET);
 
-	__raw_writel(phy_cfg->ptr0,   base + K2HK_DDRPHY_PTR0_OFFSET);
-	__raw_writel(phy_cfg->ptr1,   base + K2HK_DDRPHY_PTR1_OFFSET);
-	__raw_writel(phy_cfg->ptr3,  base + K2HK_DDRPHY_PTR3_OFFSET);
-	__raw_writel(phy_cfg->ptr4,  base + K2HK_DDRPHY_PTR4_OFFSET);
+	__raw_writel(phy_cfg->ptr0,   base + KS2_DDRPHY_PTR0_OFFSET);
+	__raw_writel(phy_cfg->ptr1,   base + KS2_DDRPHY_PTR1_OFFSET);
+	__raw_writel(phy_cfg->ptr3,  base + KS2_DDRPHY_PTR3_OFFSET);
+	__raw_writel(phy_cfg->ptr4,  base + KS2_DDRPHY_PTR4_OFFSET);
 
-	tmp =  __raw_readl(base + K2HK_DDRPHY_DCR_OFFSET);
+	tmp =  __raw_readl(base + KS2_DDRPHY_DCR_OFFSET);
 	tmp &= ~(phy_cfg->dcr_mask);
 	tmp |= phy_cfg->dcr_val;
-	__raw_writel(tmp, base + K2HK_DDRPHY_DCR_OFFSET);
+	__raw_writel(tmp, base + KS2_DDRPHY_DCR_OFFSET);
 
-	__raw_writel(phy_cfg->dtpr0, base + K2HK_DDRPHY_DTPR0_OFFSET);
-	__raw_writel(phy_cfg->dtpr1, base + K2HK_DDRPHY_DTPR1_OFFSET);
-	__raw_writel(phy_cfg->dtpr2, base + K2HK_DDRPHY_DTPR2_OFFSET);
-	__raw_writel(phy_cfg->mr0,   base + K2HK_DDRPHY_MR0_OFFSET);
-	__raw_writel(phy_cfg->mr1,   base + K2HK_DDRPHY_MR1_OFFSET);
-	__raw_writel(phy_cfg->mr2,   base + K2HK_DDRPHY_MR2_OFFSET);
-	__raw_writel(phy_cfg->dtcr,  base + K2HK_DDRPHY_DTCR_OFFSET);
-	__raw_writel(phy_cfg->pgcr2, base + K2HK_DDRPHY_PGCR2_OFFSET);
+	__raw_writel(phy_cfg->dtpr0, base + KS2_DDRPHY_DTPR0_OFFSET);
+	__raw_writel(phy_cfg->dtpr1, base + KS2_DDRPHY_DTPR1_OFFSET);
+	__raw_writel(phy_cfg->dtpr2, base + KS2_DDRPHY_DTPR2_OFFSET);
+	__raw_writel(phy_cfg->mr0,   base + KS2_DDRPHY_MR0_OFFSET);
+	__raw_writel(phy_cfg->mr1,   base + KS2_DDRPHY_MR1_OFFSET);
+	__raw_writel(phy_cfg->mr2,   base + KS2_DDRPHY_MR2_OFFSET);
+	__raw_writel(phy_cfg->dtcr,  base + KS2_DDRPHY_DTCR_OFFSET);
+	__raw_writel(phy_cfg->pgcr2, base + KS2_DDRPHY_PGCR2_OFFSET);
 
-	__raw_writel(phy_cfg->zq0cr1, base + K2HK_DDRPHY_ZQ0CR1_OFFSET);
-	__raw_writel(phy_cfg->zq1cr1, base + K2HK_DDRPHY_ZQ1CR1_OFFSET);
-	__raw_writel(phy_cfg->zq2cr1, base + K2HK_DDRPHY_ZQ2CR1_OFFSET);
+	__raw_writel(phy_cfg->zq0cr1, base + KS2_DDRPHY_ZQ0CR1_OFFSET);
+	__raw_writel(phy_cfg->zq1cr1, base + KS2_DDRPHY_ZQ1CR1_OFFSET);
+	__raw_writel(phy_cfg->zq2cr1, base + KS2_DDRPHY_ZQ2CR1_OFFSET);
 
-	__raw_writel(phy_cfg->pir_v1, base + K2HK_DDRPHY_PIR_OFFSET);
-	while ((__raw_readl(base + K2HK_DDRPHY_PGSR0_OFFSET) & 0x1) != 0x1)
+	__raw_writel(phy_cfg->pir_v1, base + KS2_DDRPHY_PIR_OFFSET);
+	while ((__raw_readl(base + KS2_DDRPHY_PGSR0_OFFSET) & 0x1) != 0x1)
 		;
 
-	__raw_writel(phy_cfg->pir_v2, base + K2HK_DDRPHY_PIR_OFFSET);
-	while ((__raw_readl(base + K2HK_DDRPHY_PGSR0_OFFSET) & 0x1) != 0x1)
+	__raw_writel(phy_cfg->pir_v2, base + KS2_DDRPHY_PIR_OFFSET);
+	while ((__raw_readl(base + KS2_DDRPHY_PGSR0_OFFSET) & 0x1) != 0x1)
 		;
 }
 
 void init_ddremif(u32 base, struct ddr3_emif_config *emif_cfg)
 {
-	__raw_writel(emif_cfg->sdcfg,  base + K2HK_DDR3_SDCFG_OFFSET);
-	__raw_writel(emif_cfg->sdtim1, base + K2HK_DDR3_SDTIM1_OFFSET);
-	__raw_writel(emif_cfg->sdtim2, base + K2HK_DDR3_SDTIM2_OFFSET);
-	__raw_writel(emif_cfg->sdtim3, base + K2HK_DDR3_SDTIM3_OFFSET);
-	__raw_writel(emif_cfg->sdtim4, base + K2HK_DDR3_SDTIM4_OFFSET);
-	__raw_writel(emif_cfg->zqcfg,  base + K2HK_DDR3_ZQCFG_OFFSET);
-	__raw_writel(emif_cfg->sdrfc,  base + K2HK_DDR3_SDRFC_OFFSET);
+	__raw_writel(emif_cfg->sdcfg,  base + KS2_DDR3_SDCFG_OFFSET);
+	__raw_writel(emif_cfg->sdtim1, base + KS2_DDR3_SDTIM1_OFFSET);
+	__raw_writel(emif_cfg->sdtim2, base + KS2_DDR3_SDTIM2_OFFSET);
+	__raw_writel(emif_cfg->sdtim3, base + KS2_DDR3_SDTIM3_OFFSET);
+	__raw_writel(emif_cfg->sdtim4, base + KS2_DDR3_SDTIM4_OFFSET);
+	__raw_writel(emif_cfg->zqcfg,  base + KS2_DDR3_ZQCFG_OFFSET);
+	__raw_writel(emif_cfg->sdrfc,  base + KS2_DDR3_SDRFC_OFFSET);
 }
 
 static int ddr_ecc_support_rmw(u32 base)
 {
-	u32 value = __raw_readl(base + K2HK_DDR3_MIDR_OFFSET);
+	u32 value = __raw_readl(base + KS2_DDR3_MIDR_OFFSET);
 
 	/* Check the DDR3 controller ID reg if the controllers
 	   supports ECC RMW or not */
@@ -108,23 +108,23 @@ void config_ddr3_ecc(u32 base, u32 value)
 {
 	u32 data;
 
-	__raw_writel(value,  base + K2HK_DDR3_ECC_CTRL_OFFSET);
+	__raw_writel(value,  base + KS2_DDR3_ECC_CTRL_OFFSET);
 	udelay(100000); /* delay required to synchronize across clock domains */
 
 	if (value & DDR3_ECC_EN) {
 		/* Clear the 1-bit error count */
-		data = __raw_readl(base + K2HK_DDR3_ONE_BIT_ECC_ERR_CNT_OFFSET);
-		__raw_writel(data, base + K2HK_DDR3_ONE_BIT_ECC_ERR_CNT_OFFSET);
+		data = __raw_readl(base + KS2_DDR3_ONE_BIT_ECC_ERR_CNT_OFFSET);
+		__raw_writel(data, base + KS2_DDR3_ONE_BIT_ECC_ERR_CNT_OFFSET);
 
 		/* enable the ECC interrupt */
 		__raw_writel(DDR3_1B_ECC_ERR_SYS | DDR3_2B_ECC_ERR_SYS | \
 			DDR3_WR_ECC_ERR_SYS,
-			base + K2HK_DDR3_ECC_INT_ENABLE_SET_SYS_OFFSET);
+			base + KS2_DDR3_ECC_INT_ENABLE_SET_SYS_OFFSET);
 
 		/* Clear the ECC error interrupt status */
 		__raw_writel(DDR3_1B_ECC_ERR_SYS | DDR3_2B_ECC_ERR_SYS | \
 				DDR3_WR_ECC_ERR_SYS,
-				base + K2HK_DDR3_ECC_INT_STATUS_OFFSET);
+				base + KS2_DDR3_ECC_INT_STATUS_OFFSET);
 	}
 }
 
@@ -177,7 +177,7 @@ static void reset_ddr_data(u32 base, u32 seg_num)
 {
 	u32 edma_src[EDMA_BLK_SIZE/4] __aligned(16) = {0, };
 	u32 seg, blks, dst, edma_blks;
-	u32 edma_base = K2HK_EDMA0_BASE;
+	u32 edma_base = KS2_EDMA0_BASE;
 	u32 mpax[2];
 
 	/* Setup an edma to copy the 1k block to the entire DDR */
@@ -219,7 +219,7 @@ static void reset_ddr_data(u32 base, u32 seg_num)
 
 void check_ddr3_ecc_int(u32 base)
 {
-	u32 value = __raw_readl(base + K2HK_DDR3_ECC_INT_STATUS_OFFSET);
+	u32 value = __raw_readl(base + KS2_DDR3_ECC_INT_STATUS_OFFSET);
 	char *env;
 	int ecc_test = 0;
 
@@ -238,11 +238,11 @@ void check_ddr3_ecc_int(u32 base)
 		}
 	}
 
-	value = __raw_readl(base + K2HK_DDR3_ONE_BIT_ECC_ERR_CNT_OFFSET);
+	value = __raw_readl(base + KS2_DDR3_ONE_BIT_ECC_ERR_CNT_OFFSET);
 	if (value) {
 		printf("1-bit ECC err count: 0x%x\n", value);
 		value = __raw_readl(base + \
-				K2HK_DDR3_ONE_BIT_ECC_ERR_ADDR_LOG_OFFSET);
+				KS2_DDR3_ONE_BIT_ECC_ERR_ADDR_LOG_OFFSET);
 		printf("1-bit ECC err address log: 0x%x\n", value);
 	}
 }
@@ -288,7 +288,7 @@ static void ddr3_init_ecc(u32 base)
 
 	if (rmw)
 		ecc_val |= DDR3_ECC_RMW_EN;
-	__raw_writel(0, base + K2HK_DDR3_ECC_ADDR_RANGE1_OFFSET);
+	__raw_writel(0, base + KS2_DDR3_ECC_ADDR_RANGE1_OFFSET);
 
 	config_ddr3_ecc(base, ecc_val);
 }
@@ -329,7 +329,7 @@ int init_ddr3_ecc(u32 base)
 	reset_ddr_data(CONFIG_SYS_SDRAM_BASE, seg_num);
 
 	/* mapping DDR3 ECC system interrupt from CIC2 to GIC */
-	keystone_map_ddr3_ecc_cic2_irq(K2HK_CIC2_BASE);
+	keystone_map_ddr3_ecc_cic2_irq(KS2_CIC2_BASE);
 
 	if (ddr_ecc_support_rmw(base))
 		ddr3_enable_ecc(base, 0);
@@ -349,9 +349,9 @@ void ddr_reset_workaround(void)
 	 * RDERR, WDERR, REERR, WEERR error to see if they are set or not
 	 */
 	tmp_a = __raw_readl(K2HK_DDR3A_DDRPHYC +
-				K2HK_DDRPHY_PGSR0_OFFSET);
+				KS2_DDRPHY_PGSR0_OFFSET);
 	tmp_b = __raw_readl(K2HK_DDR3B_DDRPHYC +
-				K2HK_DDRPHY_PGSR0_OFFSET);
+				KS2_DDRPHY_PGSR0_OFFSET);
 
 	if (((tmp_a & 0x0FE00000) != 0) || ((tmp_b & 0x0FE00000) != 0)) {
 

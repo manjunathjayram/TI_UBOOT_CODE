@@ -65,7 +65,7 @@ struct msms_regs {
 
 void share_all_segments(int priv_id)
 {
-	struct msms_regs *msmc = (struct msms_regs *) K2HK_MSMC_CTRL_BASE;
+	struct msms_regs *msmc = (struct msms_regs *) KS2_MSMC_CTRL_BASE;
 	int j;
 
 	for (j=0; j<8; j++) {
@@ -77,7 +77,7 @@ void share_all_segments(int priv_id)
 void map_ses_segment(int priv_id, int ses_pair,
 		     u32 src_pfn, u32 dst_pfn, mpax_seg_size size)
 {
-	struct msms_regs *msmc = (struct msms_regs *) K2HK_MSMC_CTRL_BASE;
+	struct msms_regs *msmc = (struct msms_regs *) KS2_MSMC_CTRL_BASE;
 
 	msmc->ses[priv_id][ses_pair].mpaxh = src_pfn << 12 |
 		(size & 0x1f) | 0x80;
@@ -86,7 +86,7 @@ void map_ses_segment(int priv_id, int ses_pair,
 
 void get_ses_mpax(int priv_id, int ses_pair, u32 *mpax)
 {
-	struct msms_regs *msmc = (struct msms_regs *) K2HK_MSMC_CTRL_BASE;
+	struct msms_regs *msmc = (struct msms_regs *) KS2_MSMC_CTRL_BASE;
 
 	*mpax++ = msmc->ses[priv_id][ses_pair].mpaxl;
 	*mpax = msmc->ses[priv_id][ses_pair].mpaxh;
@@ -94,7 +94,7 @@ void get_ses_mpax(int priv_id, int ses_pair, u32 *mpax)
 
 void set_ses_mpax(int priv_id, int ses_pair, u32 *mpax)
 {
-	struct msms_regs *msmc = (struct msms_regs *) K2HK_MSMC_CTRL_BASE;
+	struct msms_regs *msmc = (struct msms_regs *) KS2_MSMC_CTRL_BASE;
 
 	msmc->ses[priv_id][ses_pair].mpaxl = *mpax++;
 	msmc->ses[priv_id][ses_pair].mpaxh = *mpax;
