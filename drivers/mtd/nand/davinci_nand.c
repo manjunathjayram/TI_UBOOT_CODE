@@ -327,6 +327,38 @@ static struct nand_ecclayout nand_davinci_rbl_4bit_layout_oobfirst = {
 		{.offset = 48, .length = 6, },
 	},
 };
+#elif defined(CONFIG_SYS_NAND_PAGE_4K)
+static struct nand_ecclayout nand_davinci_rbl_4bit_layout_oobfirst = {
+	.eccbytes = 80,
+	.eccpos = {
+		6, 7,
+		8, 9, 10, 11, 12, 13, 14, 15,
+		22, 23,
+		24, 25, 26, 27, 28, 29, 30, 31,
+		38, 39,
+		40, 41, 42, 43, 44, 45, 46, 47,
+		54, 55,
+		56, 57, 58, 59, 60, 61, 62, 63,
+		70, 71,
+		72, 73, 74, 75, 76, 77, 78, 79,
+		86, 87,
+		88, 89, 90, 91, 92, 93, 94, 95,
+		102, 103,
+		104, 105, 106, 107, 108, 109, 110, 111,
+		118, 119,
+		120, 121, 122, 123, 124, 125, 126, 127,
+		},
+	.oobfree = {
+		{.offset = 2, .length = 4, },
+		{.offset = 16, .length = 6, },
+		{.offset = 32, .length = 6, },
+		{.offset = 48, .length = 6, },
+		{.offset = 64, .length = 6, },
+		{.offset = 80, .length = 6, },
+		{.offset = 96, .length = 6, },
+		{.offset = 112, .length = 6, },
+	},
+};
 #endif
 
 #define NAND_ECCLAYOUT_NUM 2
