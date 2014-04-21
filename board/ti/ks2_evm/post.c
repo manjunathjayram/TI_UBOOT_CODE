@@ -1,7 +1,7 @@
 /*
- * K2HK-EVM: Power On Self Test
+ * KS2-EVM: Power On Self Test
  *
- * Copyright (C) 2012 Texas Instruments
+ * Copyright (C) 2012 - 2014 Texas Instruments
  *
  * See file CREDITS for list of people who contributed to this
  * project.
@@ -38,7 +38,6 @@
 #include "post.h"
 
 #define WAIT_OR_RETURN for (;;)
-/* #define WAIT_OR_RETURN return (1) */
 
 /******************************************************************************
  * Function:    post_test_external_memory
@@ -94,7 +93,7 @@ int post_test_nand(void)
 	return 0;
 }
 
-void post_hex_to_string (u32 hex, u32 nibbles, char *msg)
+void post_hex_to_string(u32 hex, u32 nibbles, char *msg)
 {
 	s32     i;
 	u32 nbl;
@@ -129,7 +128,7 @@ void post_dump_register_val(u32 reg_addr, char *desc_string)
 	char	msg[10];
 	u32	reg_val;
 
-	reg_val = *(volatile u32 *)reg_addr;
+	reg_val = readl(reg_addr);
 	puts(desc_string);
 	post_hex_to_string(reg_val, 8, msg);
 	msg[8] = ' ';
@@ -166,9 +165,11 @@ int init_mac(u32 port, u8 *macAddress, u32 mtu)
 	writel(0x400a1, DEVICE_EMACSL_BASE(port) + CPGMACSL_REG_CTL);
 
 	/* Configure the MAC address for this port */
-	writel((macAddress[0]<<8)+macAddress[1], DEVICE_CPSW_BASE + 0x70 + 0x30*port);
-	writel((macAddress[2]<<24)+(macAddress[3]<<16)+(macAddress[4]<<8)+macAddress[5],
-		DEVICE_CPSW_BASE + 0x74 + 0x30*port);
+	writel((macAddress[0] << 8) + macAddress[1],
+		DEVICE_CPSW_BASE + 0x70 + 0x30 * port);
+	writel((macAddress[2] << 24) + (macAddress[3] << 16) + \
+		(macAddress[4] << 8) + macAddress[5],
+		DEVICE_CPSW_BASE + 0x74 + 0x30 * port);
 
 	writel(mtu, DEVICE_EMACSL_BASE(port) + CPGMACSL_REG_MAXLEN);
 
@@ -202,10 +203,9 @@ s32 init_sgmii(u32 port)
 	return 0;
 }
 
-#define PKT_PL_SIZE 256
-#define PKT_SIZE (PKT_PL_SIZE + 14)
-u8 pkt_buf[PKT_SIZE] __attribute__((aligned(16)));
-
+#define PKT_PL_SIZE	256
+#define PKT_SIZE	(PKT_PL_SIZE + 14)
+u8 pkt_buf[PKT_SIZE] __aligned(16);
 int post_eth_loopback_test(struct eth_device *dev)
 {
 	int ret = 0;
@@ -240,7 +240,8 @@ int post_eth_loopback_test(struct eth_device *dev)
 
 	DEVICE_REG32_W(DEVICE_CPSW_BASE + CPSW_REG_ALE_CONTROL, 0x80000010);
 	for (j = 0; j <= get_num_eth_ports(); j++)
-		DEVICE_REG32_W(DEVICE_CPSW_BASE + CPSW_REG_ALE_PORTCTL(j), 0x13);
+		DEVICE_REG32_W(DEVICE_CPSW_BASE + CPSW_REG_ALE_PORTCTL(j),
+				0x13);
 
 	memset(pkt_buf, 0, PKT_SIZE);
 	memset(pkt_buf, 0xff, 6);
@@ -323,8 +324,9 @@ void k2hk_post(void)
 	char	*s;
 	u32	no_post;
 
-	if ((s = getenv ("no_post")) != NULL) {
-		no_post = simple_strtoul (s, NULL, 16);
+	s = getenv("no_post");
+	if (s != NULL) {
+		no_post = simple_strtoul(s, NULL, 16);
 		if (no_post == 1)
 			return;
 	}
