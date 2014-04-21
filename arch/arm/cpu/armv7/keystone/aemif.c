@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Texas Instruments.
+ * Copyright (C) 2012-2013 Texas Instruments.
  *
  * Keystone: Asynchronous EMIF Configuration
  *
@@ -25,14 +25,11 @@
 #include <asm/io.h>
 #include <asm/arch/clock.h>
 
-#ifdef CONFIG_SOC_K2HK
-#define ASYNC_EMIF_BASE			K2HK_ASYNC_EMIF_CNTRL_BASE
-#endif
-
-#define ASYNC_EMIF_CONFIG(cs)		(ASYNC_EMIF_BASE+0x10+(cs)*4)
-#define ASYNC_EMIF_ONENAND_CONTROL	(ASYNC_EMIF_BASE+0x5c)
-#define ASYNC_EMIF_NAND_CONTROL		(ASYNC_EMIF_BASE+0x60)
-#define ASYNC_EMIF_WAITCYCLE_CONFIG	(ASYNC_EMIF_BASE+0x4)
+#define ASYNC_EMIF_CONFIG(cs)		(KS2_ASYNC_EMIF_CNTRL_BASE + 0x10 \
+					 + (cs * 4))
+#define ASYNC_EMIF_ONENAND_CONTROL	(KS2_ASYNC_EMIF_CNTRL_BASE + 0x5c)
+#define ASYNC_EMIF_NAND_CONTROL		(KS2_ASYNC_EMIF_CNTRL_BASE + 0x60)
+#define ASYNC_EMIF_WAITCYCLE_CONFIG	(KS2_ASYNC_EMIF_CNTRL_BASE + 0x4)
 
 #define CONFIG_SELECT_STROBE(v)		((v) ? 1 << 31 : 0)
 #define CONFIG_EXTEND_WAIT(v)		((v) ? 1 << 30 : 0)
@@ -90,9 +87,9 @@ void init_async_emif(int num_cs, struct async_emif_config *config)
 
 #ifdef K2_AEMIF_PERF_DEGRADE_ERRATA_FIX
 	u32 tmp;
-	tmp = __raw_readl(ASYNC_EMIF_BASE + 8);
+	tmp = __raw_readl(KS2_ASYNC_EMIF_CNTRL_BASE + 8);
 	tmp |= 0x80000000;
-	__raw_writel(tmp, ASYNC_EMIF_BASE + 8);
+	__raw_writel(tmp, KS2_ASYNC_EMIF_CNTRL_BASE + 8);
 #endif
 	for (cs = 0; cs < num_cs; cs++)
 		configure_async_emif(cs, config + cs);

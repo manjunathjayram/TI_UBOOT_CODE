@@ -44,6 +44,9 @@ typedef volatile unsigned int *	dv_reg_p;
 #define ASYNC_EMIF_MODE_ONENAND		2
 #define ASYNC_EMIF_PRESERVE		-1
 
+#define KS2_ASYNC_EMIF_CNTRL_BASE	0x21000a00
+#define DAVINCI_ASYNC_EMIF_CNTRL_BASE	KS2_ASYNC_EMIF_CNTRL_BASE
+
 struct async_emif_config {
 	unsigned mode;
 	unsigned select_strobe;
