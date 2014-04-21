@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012 Texas Instruments
+# Copyright (C) 2012-2013 Texas Instruments
 #
 # See file CREDITS for list of people who contributed to this
 # project.
@@ -23,9 +23,16 @@ include $(TOPDIR)/config.mk
 
 LIB	= $(obj)lib$(SOC).o
 
-COBJS	+= aemif.o init.o psc.o clock.o cmd_clock.o keystone_nav.o
+COBJS	+= aemif.o init.o psc.o clock.o cmd_clock.o
 COBJS	+= ddr3.o cmd_ddr3.o
 ifdef CONFIG_SOC_K2HK
+COBJS	+= cmd_mon.o
+COBJS	+= cmd_fmtimg.o
+COBJS	+= msmc.o
+COBJS	+= highmem.o
+COBJS	+= keystone_nav.o
+endif
+ifdef CONFIG_SOC_K2E
 COBJS	+= cmd_mon.o
 COBJS	+= cmd_fmtimg.o
 COBJS	+= msmc.o

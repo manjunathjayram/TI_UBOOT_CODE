@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Texas Instruments Inc.
+ * Copyright (C) 2013 - 2014 Texas Instruments Inc.
  *
  * Keystone2: DDR3 initialization
  *
@@ -337,98 +337,4 @@ int init_ddr3_ecc(u32 base)
 		ddr3_disable_ecc(base);
 }
 
-/*********** Begin DDR Reset Workaround ***********/
-void ddr_reset_workaround(void)
-{
-
-	unsigned int tmp, tmp_a, tmp_b;
-
-	/*
-	 * Check for PGSR0 error bits of DDR3 PHY.
-	 * Check for WLERR, QSGERR, WLAERR,
-	 * RDERR, WDERR, REERR, WEERR error to see if they are set or not
-	 */
-	tmp_a = __raw_readl(K2HK_DDR3A_DDRPHYC +
-				KS2_DDRPHY_PGSR0_OFFSET);
-	tmp_b = __raw_readl(K2HK_DDR3B_DDRPHYC +
-				KS2_DDRPHY_PGSR0_OFFSET);
-
-	if (((tmp_a & 0x0FE00000) != 0) || ((tmp_b & 0x0FE00000) != 0)) {
-
-		printf("DDR Leveling Error Detected!\n");
-		printf("DDR3A PGSR0 = 0x%x\n", tmp_a);
-		printf("DDR3B PGSR0 = 0x%x\n", tmp_b);
-
-		/*
-		 * Write Keys to KICK registers to enable writes to registers
-		 * in boot config space
-		 */
-		__raw_writel(KEYSTONE_KICK0_MAGIC, KEYSTONE_KICK0);
-		__raw_writel(KEYSTONE_KICK1_MAGIC, KEYSTONE_KICK1);
-
-		/*
-		 * Move DDR3A Module out of reset isolation by setting
-		 * MDCTL23[12] = 0
-		 */
-		tmp_a = __raw_readl(KS2_PSC_BASE + 0xA5C);
-		tmp_a &= ~(0x1000);
-		__raw_writel(tmp_a, KS2_PSC_BASE + 0xA5C);
-
-		/*
-		 * Move DDR3B Module out of reset isolation by setting
-		 * MDCTL24[12] = 0
-		 */
-		 tmp_b = __raw_readl(KS2_PSC_BASE + 0xA60);
-		 tmp_b &= ~(0x1000);
-		__raw_writel(tmp_b, KS2_PSC_BASE + 0xA60);
-
-		/*
-		 * Write 0x5A69 Key to RSTCTRL[15:0] to unlock writes
-		 * to RSTCTRL and RSTCFG
-		 */
-		tmp = __raw_readl(K2HK_PLL_CNTRL_BASE +
-					MAIN_PLL_CTRL_RSTCTRL);
-		tmp &= ~(0xFFFF);
-		tmp |= 0x5A69;
-		__raw_writel(tmp, K2HK_PLL_CNTRL_BASE +
-					MAIN_PLL_CTRL_RSTCTRL);
-
-		/*
-		 * Set PLL Controller to drive hard reset on SW trigger by
-		 * setting RSTCFG[13] = 0
-		 */
-		tmp = __raw_readl(K2HK_PLL_CNTRL_BASE +
-					MAIN_PLL_CTRL_RSTCFG);
-		tmp &= ~(0x2000);
-		tmp |= 0x0000;
-		__raw_writel(tmp, K2HK_PLL_CNTRL_BASE +
-					MAIN_PLL_CTRL_RSTCFG);
-
-		/*
-		 * Write 0x5A69 Key to RSTCTRL[15:0] to unlock writes to
-		 * RSTCTRL and RSTCFG
-		 */
-		tmp = __raw_readl(K2HK_PLL_CNTRL_BASE +
-					MAIN_PLL_CTRL_RSTCTRL);
-		tmp &= ~(0xFFFF);
-		tmp |= 0x5A69;
-		__raw_writel(tmp, K2HK_PLL_CNTRL_BASE +
-					MAIN_PLL_CTRL_RSTCTRL);
-
-		/*
-		 * Write RSTCTRL[16] = 0 to initiate software reset via PLL
-		 * controller
-		 */
-		tmp = __raw_readl(K2HK_PLL_CNTRL_BASE +
-					MAIN_PLL_CTRL_RSTCTRL);
-		tmp &= ~(0x10000);
-		tmp = 0x00000;
-		__raw_writel(tmp, K2HK_PLL_CNTRL_BASE +
-					MAIN_PLL_CTRL_RSTCTRL);
-
-		/* Wait for Reset */
-		for (;;)
-			;
-	}
-}
 
