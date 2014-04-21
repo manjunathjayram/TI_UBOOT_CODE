@@ -370,17 +370,17 @@ void ddr_reset_workaround(void)
 		 * Move DDR3A Module out of reset isolation by setting
 		 * MDCTL23[12] = 0
 		 */
-		tmp_a = __raw_readl(K2HK_PSC_BASE + 0xA5C);
+		tmp_a = __raw_readl(KS2_PSC_BASE + 0xA5C);
 		tmp_a &= ~(0x1000);
-		__raw_writel(tmp_a, K2HK_PSC_BASE + 0xA5C);
+		__raw_writel(tmp_a, KS2_PSC_BASE + 0xA5C);
 
 		/*
 		 * Move DDR3B Module out of reset isolation by setting
 		 * MDCTL24[12] = 0
 		 */
-		 tmp_b = __raw_readl(K2HK_PSC_BASE + 0xA60);
+		 tmp_b = __raw_readl(KS2_PSC_BASE + 0xA60);
 		 tmp_b &= ~(0x1000);
-		__raw_writel(tmp_b, K2HK_PSC_BASE + 0xA60);
+		__raw_writel(tmp_b, KS2_PSC_BASE + 0xA60);
 
 		/*
 		 * Write 0x5A69 Key to RSTCTRL[15:0] to unlock writes

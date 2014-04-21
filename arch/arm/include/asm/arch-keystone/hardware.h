@@ -244,6 +244,9 @@ struct ddr3_emif_config {
 #define MSMC_DST_SEG_BASE	(CONFIG_SYS_LPAE_SDRAM_BASE >> \
 				 MSMC_SEG_SIZE_SHIFT)
 
+/* PSC */
+#define KS2_PSC_BASE		0x02350000
+
 #ifdef CONFIG_SOC_K2HK
 #include <asm/arch/hardware-k2hk.h>
 #endif
