@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012 Texas Instruments Inc.
+# Copyright (C) 2012 - 2014 Texas Instruments Inc.
 #
 # See file CREDITS for list of people who contributed to this
 # project.
@@ -23,7 +23,7 @@ include $(TOPDIR)/config.mk
 
 LIB	= $(obj)lib$(BOARD).o
 
-COBJS		+= board.o post.o cmd_test.o ddr3.o
+COBJS		+= board.o post.o ddr3.o
 
 SRCS	:= $(SOBJS:.o=.S) $(COBJS:.o=.c)
 OBJS	:= $(addprefix $(obj),$(COBJS))
