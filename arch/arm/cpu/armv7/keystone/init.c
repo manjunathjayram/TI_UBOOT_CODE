@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2013 Texas Instruments
+ * Copyright (C) 2012-2014 Texas Instruments
  *
  * Keystone: Architecture initialization
  *
@@ -47,6 +47,8 @@ int arch_cpu_init(void)
 	share_all_segments(11); /* PCIE 0 */
 	if (cpu_is_k2e())
 		share_all_segments(13); /* PCIE 1 */
+	if (cpu_is_k2l())
+		share_all_segments(14); /* PCIE 1 */
 
 	/*
 	 * just initialise the COM2 port so that TI specific
