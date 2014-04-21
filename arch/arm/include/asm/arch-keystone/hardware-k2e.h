@@ -107,6 +107,6 @@
 #define DEVICE_PA_CDMA_TX_NUM_CHANNELS	9
 
 /* MSMC control */
-#define K2E_MSMC_CTRL_BASE		0x0bc00000
+#define KS2_MSMC_CTRL_BASE		0x0bc00000
 
 #endif /* __ASM_ARCH_HARDWARE_H */

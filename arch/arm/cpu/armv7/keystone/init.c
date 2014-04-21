@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Texas Instruments
+ * Copyright (C) 2012-2013 Texas Instruments
  *
  * Keystone: Architecture initialization
  *
@@ -36,19 +36,17 @@ void chip_configuration_unlock(void)
 	__raw_writel(KEYSTONE_KICK1_MAGIC, KEYSTONE_KICK1);
 }
 
-void share_all_segments(int priv_id);
-
 int arch_cpu_init(void)
 {
 	chip_configuration_unlock();
 	icache_enable();
 
-#ifdef CONFIG_SOC_K2HK
-	share_all_segments(8);
-	share_all_segments(9);
+	share_all_segments(8);  /* Tetris */
+	share_all_segments(9);  /* Netcp */
 	share_all_segments(10); /* QM PDSP */
-	share_all_segments(11); /* PCIE */
-#endif	
+	share_all_segments(11); /* PCIE 0 */
+	if (cpu_is_k2e())
+		share_all_segments(13); /* PCIE 1 */
 
 	/*
 	 * just initialise the COM2 port so that TI specific

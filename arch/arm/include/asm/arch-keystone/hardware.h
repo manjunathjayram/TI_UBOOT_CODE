@@ -322,6 +322,7 @@ void init_ddr3(void);
 void init_ddrphy(u32 base, struct ddr3_phy_config *phy_cfg);
 void init_ddremif(u32 base, struct ddr3_emif_config *emif_cfg);
 void ddr_reset_workaround(void);
+void share_all_segments(int priv_id);
 
 extern u32 debug_options;
 #endif
