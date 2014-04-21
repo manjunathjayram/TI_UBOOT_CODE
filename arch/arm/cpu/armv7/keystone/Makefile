@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012-2013 Texas Instruments
+# Copyright (C) 2012-2014 Texas Instruments
 #
 # See file CREDITS for list of people who contributed to this
 # project.
@@ -33,6 +33,12 @@ COBJS	+= highmem.o
 COBJS	+= keystone_nav.o
 endif
 ifdef CONFIG_SOC_K2E
+COBJS	+= cmd_mon.o
+COBJS	+= cmd_fmtimg.o
+COBJS	+= msmc.o
+COBJS	+= highmem.o
+endif
+ifdef CONFIG_SOC_K2L
 COBJS	+= cmd_mon.o
 COBJS	+= cmd_fmtimg.o
 COBJS	+= msmc.o
