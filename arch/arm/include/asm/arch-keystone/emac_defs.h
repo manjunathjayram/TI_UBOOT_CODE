@@ -174,22 +174,6 @@ typedef struct  {
 	dv_reg		USERPHYSEL1;
 } mdio_regs;
 
-
-/* Ethernet MAC Registers Structure */
-typedef struct  {
-    dv_reg		IDVER;
-    dv_reg		MACCONTROL;
-    dv_reg		MACSTATUS;
-    dv_reg		SOFT_RESET;
-    dv_reg		RX_MAXLEN;
-    u_int8_t	RSVD0[4];
-    dv_reg		RX_PAUSE;
-    dv_reg		TX_PAUSE;
-    dv_reg		EMCONTROL;
-    dv_reg		PRI_MAP;
-    u32			rsvd1[6];
-} emac_regs;
-
 typedef struct
 {
 	char	name[64];

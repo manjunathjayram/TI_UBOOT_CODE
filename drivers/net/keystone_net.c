@@ -70,7 +70,6 @@ void sgmii_serdes_setup_156p25mhz(void);
 void sgmii_serdes_shutdown(void);
 
 /* EMAC Addresses */
-static volatile emac_regs	*adap_emac = (emac_regs *)EMAC_EMACSL_BASE_ADDR;
 static volatile mdio_regs	*adap_mdio = (mdio_regs *)EMAC_MDIO_BASE_ADDR;
 
 phy_t phy;
@@ -309,9 +308,11 @@ static void  __attribute__((unused))
 	 * Check if link detected is giga-bit
 	 * If Gigabit mode detected, enable gigbit in MAC
 	 */
-	writel(readl(&(adap_emac[eth_priv->slave_port - 1].MACCONTROL)) |
-	        EMAC_MACCONTROL_GIGFORCE | EMAC_MACCONTROL_GIGABIT_ENABLE, 
-		&(adap_emac[eth_priv->slave_port - 1].MACCONTROL));
+	writel(readl(DEVICE_EMACSL_BASE(eth_priv->slave_port - 1) + \
+			CPGMACSL_REG_CTL) | EMAC_MACCONTROL_GIGFORCE | \
+			EMAC_MACCONTROL_GIGABIT_ENABLE,
+		readl(DEVICE_EMACSL_BASE(eth_priv->slave_port - 1) + \
+			CPGMACSL_REG_CTL));
 }
 
 int keystone_sgmii_link_status(int port)
