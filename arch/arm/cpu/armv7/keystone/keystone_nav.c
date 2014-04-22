@@ -297,11 +297,8 @@ static int _netcp_init(struct pktdma_cfg *netcp_cfg, struct rx_buff_desc *rx_buf
 	/* Disable loopback in the tx direction */
 	writel(0, &netcp->global->emulation_control);
 
-/* TODO: make it dependend on a soc type variable */
-#ifdef CONFIG_SOC_K2HK
 	/* Set QM base address, only for K2x devices */
-	writel(0x23a80000, &netcp->global->qm_base_addr[0]);
-#endif
+	writel(KS2_QM_BASE_ADDRESS, &netcp->global->qm_base_addr[0]);
 
 	/* Enable all channels. The current state isn't important */
 	for (j = 0; j < netcp->tx_ch_num; j++)  {

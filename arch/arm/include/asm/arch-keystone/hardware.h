@@ -285,6 +285,9 @@ struct ddr3_emif_config {
 /* Chip Interrupt Controller */
 #define KS2_CIC2_BASE			0x02608000
 
+/* Queue Manager */
+#define KS2_QM_BASE_ADDRESS		0x23a80000
+
 #ifdef CONFIG_SOC_K2HK
 #include <asm/arch/hardware-k2hk.h>
 #endif

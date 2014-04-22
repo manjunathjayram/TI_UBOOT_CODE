@@ -141,4 +141,5 @@
 						   channel 29 */
 /* Number of DSP cores in the SoC */
 #define KS2_NUM_DSPS			8
+
 #endif /* __ASM_ARCH_HARDWARE_H */
