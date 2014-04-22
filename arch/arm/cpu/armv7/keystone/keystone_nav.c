@@ -1,7 +1,7 @@
 /*
  * MCNAV driver for TI Keystone 2 devices.
  *
- * Copyright (C) 2013 Texas Instruments Incorporated
+ * Copyright (C) 2013 - 2014 Texas Instruments Incorporated
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,10 +23,7 @@
 
 extern int cpu_to_bus(u32 *ptr, u32 length);
 
-static int soc_type = 
-	k2hk;
-
-struct qm_config k2hk_qm_memmap = {
+struct qm_config ks2_qm_memmap = {
 	.stat_cfg	= 0x02a40000,
 	.queue		= (struct qm_reg_queue *)0x02a80000,
 	.mngr_vbusm	= 0x23a80000,
@@ -94,12 +91,7 @@ static int _qm_init(struct qm_config * cfg)
 
 int qm_init(void)
 {
-	switch (soc_type) {
-	case k2hk:
-		return _qm_init(&k2hk_qm_memmap);
-	}
-
-	return QM_ERR;
+	return _qm_init(&ks2_qm_memmap);
 }
 
 void qm_close(void)
@@ -190,7 +182,7 @@ struct pktdma_cfg k2hk_netcp_pktdma = {
 
 	.rx_free_q	= 4001,
 	.rx_rcv_q	= 4002,
-	.tx_snd_q	= 648,
+	.tx_snd_q       = 648,
 };
 
 struct pktdma_cfg *netcp;
@@ -322,12 +314,11 @@ static int _netcp_init(struct pktdma_cfg *netcp_cfg, struct rx_buff_desc *rx_buf
 
 int netcp_init(struct rx_buff_desc *rx_buffers)
 {
-	switch (soc_type) {
-	case k2hk:
+	if (cpu_is_k2hk()) {
 		_netcp_init(&k2hk_netcp_pktdma, rx_buffers);
 		return QM_OK;
-	}
-	return QM_ERR;
+	} else
+		return QM_ERR;
 }
 
 int netcp_close(void)
