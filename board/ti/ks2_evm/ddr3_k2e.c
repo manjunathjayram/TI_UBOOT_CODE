@@ -119,6 +119,7 @@ struct pll_init_data ddr3_400 = DDR3_PLL_400;
 void init_ddr3(void)
 {
 	char dimm_name[32];
+	u32 tmp;
 
 	if (~(readl(K2E_PLL_CNTRL_BASE + MAIN_PLL_CTRL_RSTYPE) & 0x1))
 		init_pll(&ddr3_400);
@@ -126,6 +127,9 @@ void init_ddr3(void)
 	get_dimm_params(dimm_name);
 
 	printf("Detected SO-DIMM [%s]\n", dimm_name);
+
+	/* Reset DDR3 PHY after PLL enabled */
+	reset_ddrphy(KS2_DEVICE_STATE_CTRL_BASE);
 
 	init_ddrphy(K2E_DDR3_DDRPHYC, &ddr3phy_1600_64);
 	init_ddremif(K2E_DDR3_EMIF_CTRL_BASE, &ddr3_1600_64);
