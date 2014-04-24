@@ -55,6 +55,10 @@ struct pll_regs {
 #include "clock-k2hk.c"
 #endif
 
+#ifdef CONFIG_SOC_K2E
+#include "clock-k2e.c"
+#endif
+
 void init_pll(const struct pll_init_data *data)
 {
 	u32 tmp, tmp_ctl, pllm, plld, pllod, bwadj;
@@ -133,8 +137,8 @@ void init_pll(const struct pll_init_data *data)
 
 		/* Set the PLLEN */
 		tmp = pllctl_reg_setbits(data->pll, ctl, PLLCTL_PLLEN);
-
 	}
+#ifndef CONFIG_SOC_K2E
 	else if (data->pll == TETRIS_PLL) {
 		bwadj = pllm >> 1;
 //1.5 Set PLLCTL0[BYPASS] =1 (enable bypass),
@@ -166,6 +170,7 @@ void init_pll(const struct pll_init_data *data)
 //9 Set CHIPMISCCTL1[13] = 1 (disable glitchfree bypass) only applicable for Kepler
 		reg_setbits( 0x02620c7c, (1<<13));
 	}
+#endif
 	else {
 
 		reg_setbits(pll_regs[data->pll].reg1, 0x00000040); /* Set ENSAT bit = 1 */
