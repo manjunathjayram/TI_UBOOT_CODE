@@ -248,6 +248,10 @@ struct ddr3_emif_config {
 #include <asm/arch/hardware-k2hk.h>
 #endif
 
+#ifdef CONFIG_SOC_K2E
+#include <asm/arch/hardware-k2e.h>
+#endif
+
 #ifndef __ASSEMBLY__
 static inline int cpu_is_k2hk(void)
 {
@@ -255,6 +259,14 @@ static inline int cpu_is_k2hk(void)
 	unsigned int part_no	= (jtag_id >> 12) & 0xffff;
 
 	return ((part_no == 0xb981) ? 1 : 0);
+}
+
+static inline int cpu_is_k2e(void)
+{
+	unsigned int jtag_id	= __raw_readl(JTAG_ID_REG);
+	unsigned int part_no	= (jtag_id >> 12) & 0xffff;
+
+	return ((part_no == 0xb9a6) ? 1 : 0);
 }
 
 static inline int cpu_revision(void)
