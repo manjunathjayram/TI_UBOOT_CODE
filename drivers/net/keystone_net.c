@@ -99,6 +99,12 @@ int keystone2_eth_read_mac_addr(struct eth_device *dev)
 	if (eth_priv->slave_port == 1) {
 		maca = __raw_readl(MAC_ID_BASE_ADDR);
 		macb = __raw_readl(MAC_ID_BASE_ADDR + 4);
+
+		/* tmp: workaround for MAC ID regs swapping issue */
+		if (!(maca & 0x00ff0000)) {
+			maca = macb;
+			macb = __raw_readl(MAC_ID_BASE_ADDR);
+		}
 	}
 
 	dev->enetaddr[0] = (macb >>  8) & 0xff;
