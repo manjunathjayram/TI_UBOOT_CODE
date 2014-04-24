@@ -200,6 +200,86 @@ static struct ddr3_phy_config ddr3phy_1333_64 = {
 };
 /************************* *****************************/
 
+/* DDR PHY Configs Updated for PG 2.0
+ * zq0,1,2cr1 are updated for PG 2.0 specific configs *_pg2 */
+static struct ddr3_phy_config ddr3phy_1600_64A_pg2 = {
+	.pllcr		= 0x0001C000ul,
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK),
+	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
+	.ptr0		= 0x42C21590ul,
+	.ptr1		= 0xD05612C0ul,
+	.ptr2		= 0, /* not set in gel */
+	.ptr3		= 0x0D861A80ul,
+	.ptr4		= 0x0C827100ul,
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK),
+	.dcr_val	= ((1 << 10)),
+	.dtpr0		= 0xA19DBB66ul,
+	.dtpr1		= 0x32868300ul,
+	.dtpr2		= 0x50035200ul,
+	.mr0		= 0x00001C70ul,
+	.mr1		= 0x00000006ul,
+	.mr2		= 0x00000018ul,
+	.dtcr		= 0x730035C7ul,
+	.pgcr2		= 0x00F07A12ul,
+	.zq0cr1		= 0x0001005Dul,
+	.zq1cr1		= 0x0001005Bul,
+	.zq2cr1		= 0x0001005Bul,
+	.pir_v1		= 0x00000033ul,
+	.pir_v2		= 0x0000FF81ul,
+};
+
+static struct ddr3_phy_config ddr3phy_1333_64A_pg2 = {
+	.pllcr		= 0x0005C000ul,
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK),
+	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
+	.ptr0		= 0x42C21590ul,
+	.ptr1		= 0xD05612C0ul,
+	.ptr2		= 0, /* not set in gel */
+	.ptr3		= 0x0B4515C2ul,
+	.ptr4		= 0x0A6E08B4ul,
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK),
+	.dcr_val	= ((1 << 10)),
+	.dtpr0		= 0x8558AA55ul,
+	.dtpr1		= 0x32857280ul,
+	.dtpr2		= 0x5002C200ul,
+	.mr0		= 0x00001A60ul,
+	.mr1		= 0x00000006ul,
+	.mr2		= 0x00000010ul,
+	.dtcr		= 0x710035C7ul,
+	.pgcr2		= 0x00F065B8ul,
+	.zq0cr1		= 0x0001005Dul,
+	.zq1cr1		= 0x0001005Bul,
+	.zq2cr1		= 0x0001005Bul,
+	.pir_v1		= 0x00000033ul,
+	.pir_v2		= 0x0000FF81ul,
+};
+
+static struct ddr3_phy_config ddr3phy_1333_64_pg2 = {
+	.pllcr		= 0x0005C000ul,
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK),
+	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
+	.ptr0		= 0x42C21590ul,
+	.ptr1		= 0xD05612C0ul,
+	.ptr2		= 0, /* not set in gel */
+	.ptr3		= 0x0B4515C2ul,
+	.ptr4		= 0x0A6E08B4ul,
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK),
+	.dcr_val	= ((1 << 10)),
+	.dtpr0		= 0x8558AA55ul,
+	.dtpr1		= 0x32857280ul,
+	.dtpr2		= 0x5002C200ul,
+	.mr0		= 0x00001A60ul,
+	.mr1		= 0x00000006ul,
+	.mr2		= 0x00000010ul,
+	.dtcr		= 0x710035C7ul,
+	.pgcr2		= 0x00F065B8ul,
+	.zq0cr1		= 0x0001005Dul,
+	.zq1cr1		= 0x0001005Bul,
+	.zq2cr1		= 0x0001005Bul,
+	.pir_v1		= 0x00000033ul,
+	.pir_v2		= 0x0000FF81ul,
+};
+
 int get_dimm_params(char *dimm_name)
 {
 	u8 spd_params[256];
@@ -371,9 +451,20 @@ void init_ddr3(void)
 	if (!strcmp(dimm_name, "18KSF1G72HZ-1G6E2 ")) {
 		/* 8G SO-DIMM */
 		if (cpu_revision() > 0) {
-			init_ddrphy(K2HK_DDR3A_DDRPHYC, &ddr3phy_1600_64A);
-			init_ddremif(K2HK_DDR3A_EMIF_CTRL_BASE, &ddr3_1600_64);
-			printf("DRAM: 8 GiB (includes reported below)\n");
+			if (cpu_revision() > 1) {
+				/* PG 2.0 */
+				/* Reset DDR3A PHY after PLL enabled */
+				reset_ddrphy(KS2_DEVICE_STATE_CTRL_BASE);
+				init_ddrphy(K2HK_DDR3A_DDRPHYC,
+						&ddr3phy_1600_64A_pg2);
+			} else {
+				/* PG 1.1 */
+				init_ddrphy(K2HK_DDR3A_DDRPHYC,
+						&ddr3phy_1600_64A);
+			}
+			init_ddremif(K2HK_DDR3A_EMIF_CTRL_BASE,
+					&ddr3_1600_64);
+			printf("DRAM:  8 GiB (includes reported below)\n");
 		} else {
 			init_ddrphy(K2HK_DDR3A_DDRPHYC, &ddr3phy_1600_32);
 			init_ddremif(K2HK_DDR3A_EMIF_CTRL_BASE, &ddr3_1600_32);
@@ -382,7 +473,17 @@ void init_ddr3(void)
 	} else {
 		/* 2G SO-DIMM */
 		if (cpu_revision() > 0) {
-			init_ddrphy(K2HK_DDR3A_DDRPHYC, &ddr3phy_1333_64A);
+			if (cpu_revision() > 1) {
+				/* PG 2.0 */
+				/* Reset DDR3A PHY after PLL enabled */
+				reset_ddrphy(KS2_DEVICE_STATE_CTRL_BASE);
+				init_ddrphy(K2HK_DDR3A_DDRPHYC,
+						&ddr3phy_1333_64A_pg2);
+			} else {
+				/* PG 1.1 */
+				init_ddrphy(K2HK_DDR3A_DDRPHYC,
+						&ddr3phy_1333_64A);
+			}
 			init_ddremif(K2HK_DDR3A_EMIF_CTRL_BASE, &ddr3_1333_64);
 		} else {
 			init_ddrphy(K2HK_DDR3A_DDRPHYC, &ddr3phy_1333_32);

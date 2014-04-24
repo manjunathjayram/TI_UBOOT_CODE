@@ -254,6 +254,9 @@ struct ddr3_emif_config {
 #define JTAG_ID_REG			(KS2_DEVICE_STATE_CTRL_BASE + 0x18)
 #define KS2_DEVSTAT			(KS2_DEVICE_STATE_CTRL_BASE + 0x20)
 
+#define KS2_DDR3APLLCTL0		0x360
+#define KS2_DDR3APLLCTL1		0x364
+
 /* Chip configuration unlock codes and registers */
 #define KEYSTONE_KICK0			(KS2_DEVICE_STATE_CTRL_BASE + 0x38)
 #define KEYSTONE_KICK1			(KS2_DEVICE_STATE_CTRL_BASE + 0x3c)
@@ -375,6 +378,7 @@ void share_all_segments(int priv_id);
 int psc_disable_module(u32 mod_num);
 int mon_power_off(int core_id);
 void pll_pa_clk_sel(int pa_pll);
+void reset_ddrphy(u32 base);
 
 extern u32 debug_options;
 #endif

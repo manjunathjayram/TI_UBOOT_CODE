@@ -92,6 +92,23 @@ void init_ddremif(u32 base, struct ddr3_emif_config *emif_cfg)
 	__raw_writel(emif_cfg->sdrfc,  base + KS2_DDR3_SDRFC_OFFSET);
 }
 
+void reset_ddrphy(u32 base)
+{
+	u32 tmp;
+
+	/* Assert DDR3A  PHY reset */
+	tmp = readl(base + KS2_DDR3APLLCTL1);
+	tmp |= 0x80000000;
+	writel(tmp, base + KS2_DDR3APLLCTL1);
+
+	udelay(10);
+
+	/* Release DDR3A PHY reset */
+	tmp = readl(base + KS2_DDR3APLLCTL1);
+	tmp &= 0x7FFFFFFF;
+	__raw_writel(tmp, base + KS2_DDR3APLLCTL1);
+}
+
 static int ddr_ecc_support_rmw(u32 base)
 {
 	u32 value = __raw_readl(base + KS2_DDR3_MIDR_OFFSET);
