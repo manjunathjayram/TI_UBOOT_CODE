@@ -59,6 +59,10 @@ struct pll_regs {
 #include "clock-k2e.c"
 #endif
 
+#ifdef CONFIG_SOC_K2L
+#include "clock-k2l.c"
+#endif
+
 void init_pll(const struct pll_init_data *data)
 {
 	u32 tmp, tmp_ctl, pllm, plld, pllod, bwadj;

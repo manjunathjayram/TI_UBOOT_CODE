@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2013 Texas Instruments.
+ * Copyright (C) 2012-2014 Texas Instruments.
  *
  * See file CREDITS for list of people who contributed to this
  * project.
@@ -28,6 +28,10 @@
 
 #ifdef CONFIG_SOC_K2E
 #include <asm/arch/clock-k2e.h>
+#endif
+
+#ifdef CONFIG_SOC_K2L
+#include <asm/arch/clock-k2l.h>
 #endif
 
 #endif

@@ -101,6 +101,13 @@ U_BOOT_CMD(
 	"<pa|ddr3> <mult> <div> <OD>\n"
 );
 #endif
+#ifdef CONFIG_SOC_K2L
+U_BOOT_CMD(
+	pllset,	5,	0,	do_pll_cmd,
+	"set pll multiplier and pre divider",
+	"<pa|arm|ddr3> <mult> <div> <OD>\n"
+);
+#endif
 
 int do_getclk_cmd(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
@@ -129,6 +136,9 @@ U_BOOT_CMD(
 #endif
 #ifdef CONFIG_SOC_K2E
 	"See the 'enum clk_e' in the K2E clock.h for clk indexes\n"
+#endif
+#ifdef CONFIG_SOC_K2L
+	"See the 'enum clk_e' in the K2L clock.h for clk indexes\n"
 #endif
 );
 
