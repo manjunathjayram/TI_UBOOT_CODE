@@ -200,6 +200,21 @@ struct pktdma_cfg k2e_netcp_pktdma = {
 	.tx_snd_q	= 896,
 };
 
+struct pktdma_cfg k2l_netcp_pktdma = {
+	.global		= (struct global_ctl_regs *)0x26186000,
+	.tx_ch		= (struct tx_chan_regs *)0x26187000,
+	.tx_ch_num	= 21,
+	.rx_ch		= (struct rx_chan_regs *)0x26188000,
+	.rx_ch_num	= 91,
+	.tx_sched	= (u32 *)0x26186100,
+	.rx_flows	= (struct rx_flow_regs *)0x26189000,
+	.rx_flow_num	= 96,
+
+	.rx_free_q	= 4001,
+	.rx_rcv_q	= 4002,
+	.tx_snd_q	= 896,
+};
+
 struct pktdma_cfg *netcp;
 
 static int netcp_rx_disable(void)
@@ -331,6 +346,9 @@ int netcp_init(struct rx_buff_desc *rx_buffers)
 		return QM_OK;
 	} else if (cpu_is_k2e()) {
 		_netcp_init(&k2e_netcp_pktdma, rx_buffers);
+		return QM_OK;
+	} else if (cpu_is_k2l()) {
+		_netcp_init(&k2l_netcp_pktdma, rx_buffers);
 		return QM_OK;
 	} else
 		return QM_ERR;

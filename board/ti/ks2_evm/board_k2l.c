@@ -87,6 +87,84 @@ int dram_init(void)
 	return 0;
 }
 
+#ifdef CONFIG_DRIVER_TI_KEYSTONE_NET
+eth_priv_t eth_priv_cfg[] = {
+	{
+		.int_name	= "K2L_EMAC0",
+		.rx_flow	= CPSW_PORT_RX_FLOW(0),
+		.phy_addr	= 0,
+		.slave_port	= 1,
+		.sgmii_link_type = SGMII_LINK_MAC_PHY,
+	},
+	{
+		.int_name	= "K2L_EMAC1",
+		.rx_flow	= CPSW_PORT_RX_FLOW(1),
+		.phy_addr	= 1,
+		.slave_port	= 2,
+		.sgmii_link_type = SGMII_LINK_MAC_PHY,
+	},
+	{
+		.int_name	= "K2L_EMAC2",
+		.rx_flow	= CPSW_PORT_RX_FLOW(2),
+		.phy_addr	= 2,
+		.slave_port	= 3,
+		.sgmii_link_type = SGMII_LINK_MAC_MAC_FORCED,
+	},
+	{
+		.int_name	= "K2L_EMAC3",
+		.rx_flow	= CPSW_PORT_RX_FLOW(3),
+		.phy_addr	= 3,
+		.slave_port	= 4,
+		.sgmii_link_type = SGMII_LINK_MAC_MAC_FORCED,
+	},
+};
+
+inline int get_num_eth_ports(void)
+{
+	return sizeof(eth_priv_cfg) / sizeof(eth_priv_t);
+}
+
+eth_priv_t *get_eth_priv_ptr(int port_num)
+{
+	if (port_num < 0 || port_num >= get_num_eth_ports())
+		return NULL;
+
+	return &eth_priv_cfg[port_num];
+}
+
+int get_eth_env_param(char *env_name)
+{
+	char *env;
+	int  res = -1;
+
+	env = getenv(env_name);
+	if (env)
+		res = simple_strtol(env, NULL, 0);
+
+	return res;
+}
+
+int board_eth_init(bd_t *bis)
+{
+	int	j;
+	int	res;
+	int	link_type_name[32];
+
+	for (j = 0; j < get_num_eth_ports(); j++) {
+		sprintf(link_type_name, "sgmii%d_link_type", j);
+		res = get_eth_env_param(link_type_name);
+		if (res >= 0)
+			eth_priv_cfg[j].sgmii_link_type = res;
+
+		keystone2_emac_initialize(&eth_priv_cfg[j]);
+	}
+
+	keystone2_eth_open_close(eth_priv_cfg[0].dev);
+
+	return 0;
+}
+#endif
+
 #if defined(CONFIG_BOARD_EARLY_INIT_F)
 int board_early_init_f(void)
 {

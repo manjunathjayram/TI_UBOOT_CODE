@@ -39,6 +39,9 @@
 #ifdef CONFIG_SOC_K2E
 #define DEVICE_CPSW_NUM_PORTS		9	/* 9 switch ports */
 #endif
+#ifdef CONFIG_SOC_K2L
+#define DEVICE_CPSW_NUM_PORTS		5	/* 5 switch ports */
+#endif
 #define DEVICE_N_GMACSL_PORTS		(DEVICE_CPSW_NUM_PORTS - 1)
 
 #define DEVICE_CPSW_BASE		(KS2_PASS_BASE + 0x00220000)
@@ -68,6 +71,12 @@
 					EMAC_SGMII_BASE_ADDR + 0x600, \
 					EMAC_SGMII_BASE_ADDR + 0x700, \
 					EMAC_SGMII_BASE_ADDR + 0x800}
+#endif
+#ifdef CONFIG_SOC_K2L
+#define TARGET_SGMII_BASE_ADDRESSES    {EMAC_SGMII_BASE_ADDR + 0x100, \
+					EMAC_SGMII_BASE_ADDR + 0x200, \
+					EMAC_SGMII_BASE_ADDR + 0x300, \
+					EMAC_SGMII_BASE_ADDR + 0x400}
 #endif
 
 /*

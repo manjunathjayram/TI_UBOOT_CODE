@@ -35,8 +35,6 @@
 
 #include <configs/ks2_evm.h>
 
-#undef CONFIG_DRIVER_TI_KEYSTONE_NET
-
 /* SPL SPI Loader Configuration */
 #define CONFIG_SPL_TEXT_BASE		0x0c100000
 
