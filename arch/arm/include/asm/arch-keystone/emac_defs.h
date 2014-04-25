@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Texas Instruments Incorporated
+ * Copyright (C) 2012 - 2014 Texas Instruments Incorporated
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,22 +28,14 @@ typedef enum { FALSE = 0, TRUE = 1 } bool;
 #define DEVICE_REG32_R(a)			readl(a)
 #define DEVICE_REG32_W(a,v)			writel(v,a)
 
-/*#define chipLmbd(x,y) _lmbd(x,y) */
-
-#define EMAC_EMACSL_BASE_ADDR		(KS2_PASS_BASE + 0x00090900)
-#define EMAC_MDIO_BASE_ADDR		(KS2_PASS_BASE + 0x00090300)
-#define EMAC_SGMII_BASE_ADDR		(KS2_PASS_BASE + 0x00090100)
-
 #define KS2_EMAC_GIG_ENABLE
 
 #define MAC_ID_BASE_ADDR		(KS2_DEVICE_STATE_CTRL_BASE + 0x110)
 
-#ifdef CONFIG_SOC_K2HK
 /* MDIO module input frequency */
 #define EMAC_MDIO_BUS_FREQ		(clk_get_rate(pass_pll_clk))
 /* MDIO clock output frequency */
 #define EMAC_MDIO_CLOCK_FREQ		1000000		/* 1.0 MHz */
-#endif
 
 /* MII Status Register */
 #define MII_STATUS_REG			1
@@ -106,20 +98,6 @@ struct mac_sl_cfg {
 #define GMACSL_RET_WARN_MAXLEN_TOO_BIG      -3
 #define GMACSL_RET_CONFIG_FAIL_RESET_ACTIVE -4
 
-
-/* Register offsets */
-#define CPGMACSL_REG_ID         0x00
-#define CPGMACSL_REG_CTL        0x04
-#define CPGMACSL_REG_STATUS     0x08
-#define CPGMACSL_REG_RESET      0x0c
-#define CPGMACSL_REG_MAXLEN     0x10
-#define CPGMACSL_REG_BOFF       0x14
-#define CPGMACSL_REG_RX_PAUSE   0x18
-#define CPGMACSL_REG_TX_PAURSE  0x1c
-#define CPGMACSL_REG_EM_CTL     0x20
-#define CPGMACSL_REG_PRI        0x24
-
-
 /* Soft reset register values */
 #define CPGMAC_REG_RESET_VAL_RESET_MASK      (1 << 0)
 #define CPGMAC_REG_RESET_VAL_RESET           (1 << 0)
@@ -140,69 +118,14 @@ struct mac_sl_cfg {
 #define CPSW_CTL_P0_PASS_PRI_TAGGED     (1 << 3)
 #define CPSW_CTL_P0_ENABLE              (1 << 2)
 #define CPSW_CTL_VLAN_AWARE             (1 << 1)
-#define CPSW_CTL_FIFO_LOOPBACK          (1 << 0)
 
-#define DEVICE_CPSW_NUM_PORTS       5                    /* 5 switch ports */
-#define DEVICE_CPSW_BASE            (0x02090800)
 #define targetGetSwitchCtl()        CPSW_CTL_P0_ENABLE   /* Enable port 0 */
 #define targetGetSwitchMaxPktSize() 9000
 
-/* Register offsets */
-#define CPSW_REG_CTL                0x004
-#define CPSW_REG_STAT_PORT_EN       0x00c
-#define CPSW_REG_MAXLEN             0x040
-#define CPSW_REG_ALE_CONTROL        0x608
-#define CPSW_REG_ALE_PORTCTL(x)     (0x640 + (x)*4)
-
-
 /* Register values */
-#define CPSW_REG_VAL_STAT_ENABLE_ALL             0xf
 #define CPSW_REG_VAL_ALE_CTL_RESET_AND_ENABLE	((u_int32_t)0xc0000000)
 #define CPSW_REG_VAL_ALE_CTL_BYPASS		((u_int32_t)0x00000010)
 #define CPSW_REG_VAL_PORTCTL_FORWARD_MODE        0x3
-
-#define PA_MAGIC_ID  0x0CEC11E0
-
-#define PA_REG_MAILBOX_SLOT(pdsp, slot)		(0x00 + ((pdsp)*0x10) + ((slot)*0x04))
-#define PA_REG_PDSP_CTL(pdsp)               (0x1000 + ((pdsp)*0x100))
-#define PA_MEM_PDSP_IRAM(pdsp)				(0x10000 + ((pdsp)*0x8000))
-
-
-/* The pdsp control register */
-#define PA_REG_VAL_PDSP_CTL_ENABLE_PDSP(pcVal)   (((pcVal) << 16) | 0x3)
-#define PA_REG_VAL_PDSP_CTL_DISABLE_PDSP         0
-
-/* Number of mailbox slots for each PDPS */
-#define PA_NUM_MAILBOX_SLOTS                4
-
-struct pa_config {
-	u_int32_t  mac0ms;      /* 32 most significant bits of the mac address */
-	u_int32_t  mac0ls;      /* 32 least significant bits of the mac address, in the 16msbs of this word */
-	u_int32_t  mac1ms;      /* 32 most significant bits of the mac address */
-	u_int32_t  mac1ls;      /* 32 least significant bits of the mac address, in the 16 msbs of this word */
-	u_int32_t  rx_qnum;     /* Receive packet queue number */
-	u_int8_t   *cmd_buf;    /* Buffer used to create PA command */
-};
-
-#define DEVICE_PA_BASE                  KS2_PASS_BASE
-#define DEVICE_PA_NUM_PDSPS             6
-#define DEVICE_PA_RUN_CHECK_COUNT       100         /* Number of loops to verify PA firmware is running */
-#define chipLower8(x)                   ((x) & 0x00ff)
-
-#define SERDES_RX_ENABLE		BIT(0)
-#define SERDES_RX_RATE			(CONFIG_SYS_SGMII_RATESCALE << 4)
-#define SERDES_RX_TERM			(4 << 7)
-#define SERDES_RX_ALIGN			BIT(10)
-#define SERDES_RX_ENOC			BIT(22)
-#define SERDES_RX_EQ			(12 << 18)
-
-#define SERDES_TX_ENABLE		BIT(0)
-#define SERDES_TX_RATE			(CONFIG_SYS_SGMII_RATESCALE << 4)
-#define	SERDES_TX_CM			BIT(7)
-#define SERDES_TX_SWING			(8 << 8)
-#define SERDES_TX_MSYNC			BIT(16)
-
-#define SERDES_ENABLE_PLL		BIT(0)
 
 #define SGMII_REG_STATUS_LOCK		BIT(4)
 #define	SGMII_REG_STATUS_LINK		BIT(0)
@@ -222,99 +145,14 @@ struct pa_config {
 
 #define TARGET_SGMII_EXTERNAL_SERDES
 #define TARGET_SGMII_TYPE_2             /* Use second sgmii setup sequence */
-#define TARGET_SGMII_BASE		KS2_PASS_BASE + 0x00090100
-#define TARGET_SGMII_BASE_ADDRESSES    {KS2_PASS_BASE+0x00090100, \
-					KS2_PASS_BASE+0x00090200, \
-					KS2_PASS_BASE+0x00090400, \
-					KS2_PASS_BASE+0x00090500  }
+
 #define TARGET_SGMII_SERDES_BASE        (KS2_DEVICE_STATE_CTRL_BASE + 0x340)
 #define TARGET_SGMII_SERDES_STATUS_BASE (KS2_DEVICE_STATE_CTRL_BASE + 0x158)
 #define TARGET_SGMII_SOFT_RESET         0x04
 #define TARGET_SGMII_CONTROL            0x10
 #define TARGET_SGMII_MR_ADV_ABILITY     0x18
-//#define chipKickOpenSerdes(x)           *((u_int32_t *)0x2620038) = 0x83e70b13; *((u_int32_t *)0x262003c) = 0x95a4f1e0
 
-#define SGMII_OFFSET(x)	((x <= 1)? (x * 0x100): ((x * 0x100) + 0x100))
-
-/*
- * SGMII registers
- */
-#define SGMII_IDVER_REG(x)    (TARGET_SGMII_BASE + SGMII_OFFSET(x) + 0x000)
-#define SGMII_SRESET_REG(x)   (TARGET_SGMII_BASE + SGMII_OFFSET(x) + 0x004)
-#define SGMII_CTL_REG(x)      (TARGET_SGMII_BASE + SGMII_OFFSET(x) + 0x010)
-#define SGMII_STATUS_REG(x)   (TARGET_SGMII_BASE + SGMII_OFFSET(x) + 0x014)
-#define SGMII_MRADV_REG(x)    (TARGET_SGMII_BASE + SGMII_OFFSET(x) + 0x018)
-#define SGMII_LPADV_REG(x)    (TARGET_SGMII_BASE + SGMII_OFFSET(x) + 0x020)
-#define SGMII_TXCFG_REG(x)    (TARGET_SGMII_BASE + SGMII_OFFSET(x) + 0x030)
-#define SGMII_RXCFG_REG(x)    (TARGET_SGMII_BASE + SGMII_OFFSET(x) + 0x034)
-#define SGMII_AUXCFG_REG(x)   (TARGET_SGMII_BASE + SGMII_OFFSET(x) + 0x038)
-
-#define chipKickClosedSerdes(x)         ;       /* never lock the registers */
-#define TARGET_SERDES_LOCK_DELAY        (1600*1000)
-
-#define DEVICE_EMACSL_BASE(x)           (KS2_PASS_BASE + 0x00090900 + (x)*0x040)
-#define DEVICE_N_GMACSL_PORTS           4
 #define DEVICE_EMACSL_RESET_POLL_COUNT  100
-
-#define DEVICE_PSTREAM_CFG_REG_ADDR                 (KS2_PASS_BASE + 0x604)
-#define DEVICE_PSTREAM_CFG_REG_VAL_ROUTE_PDSP0      0
-
-#ifdef CONFIG_SOC_K2HK
-#define DEVICE_PSTREAM_CFG_REG_VAL_ROUTE_CPPI      0x06060606
-#endif
-
-#define hwConfigStreamingSwitch()                   DEVICE_REG32_W(DEVICE_PSTREAM_CFG_REG_ADDR, DEVICE_PSTREAM_CFG_REG_VAL_ROUTE_CPPI);
-
-#define SERDES_MAX_LANES    4
-
-struct serdes_config {
-	u_int32_t cfg;
-	u_int32_t n_lanes;
-	u_int32_t rx_cfg[SERDES_MAX_LANES];
-	u_int32_t tx_cfg[SERDES_MAX_LANES];
-};
-
-/* Offsets */
-#define SERDES_REG_CFG      0
-#define SERDES_REG_RX(x)    (4 + 8*(x))
-#define SERDES_REG_TX(x)    (8 + 8*(x))
-
-
-/* Cfg register */
-#define SERDES_SET_CFG_SLEEP(x,v)  BOOT_SET_BITFIELD((x),(v),10,10)
-#define SERDES_GET_ENABLE(x)       BOOT_READ_BITFIELD((x),0,0)
-#define SERDES_SET_ENABLE(x,v)     BOOT_SET_BITFIELD((x),(v),0,0)
-#define SERDES_SET_MULT(x,v)       BOOT_SET_BITFIELD((x),(v),7,1)
-#define SERDES_SET_VRANGE(x,v)     BOOT_SET_BITFIELD((x),(v),9,9)
-
-
-/* Rx Cfg register */
-#define SERDES_RX_CFG_SET_ENABLE(x,v)   BOOT_SET_BITFIELD((x),(v),0,0)
-#define SERDES_RX_CFG_SET_RATE(x,v)     BOOT_SET_BITFIELD((x),(v),5,4)
-
-/* Tx Cfg register */
-#define SERDES_TX_CFG_SET_ENABLE(x,v)   BOOT_SET_BITFIELD((x),(v),0,0)
-#define SERDES_TX_CFG_SET_RATE(x,v)     BOOT_SET_BITFIELD((x),(v),5,4)
-
-
-/**
- *  @brief
- *      This structure is used to control the operation of the ibl sgmii ports
- *
- *  @details
- *      The physical register configuration is provided
- */
-typedef struct iblSgmii_s
-{
-    bool    configure;          /**< Set to false to disable configuration */
-    u_int32_t  adviseAbility;      /**< The advise ability register           */
-    u_int32_t  control;            /**< The control register                  */
-    u_int32_t  txConfig;           /**< Serdes Tx config                      */
-    u_int32_t  rxConfig;           /**< Serdes Rx config                      */
-    u_int32_t  auxConfig;          /**< Serdes Aux config                     */
-
-} iblSgmii_t;
-
 
 /* EMAC MDIO Registers Structure */
 typedef struct  {
@@ -372,5 +210,11 @@ typedef struct
 	int	sgmii_link_type;
 	struct	eth_device *dev;
 } eth_priv_t;
+
+void keystone2_eth_open_close(struct eth_device *dev);
+
+#ifdef CONFIG_SOC_K2HK
+#include <asm/arch/emac_defs_netcp.h>
+#endif
 
 #endif  /* _EMAC_DEFS_H_ */
