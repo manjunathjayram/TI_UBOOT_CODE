@@ -83,6 +83,10 @@ typedef	struct	global_data {
 	unsigned long	post_log_res; /* success of POST test */
 	unsigned long	post_init_f_time; /* When post_init_f started */
 #endif
+#if defined(CONFIG_SOC_K2HK) || defined(CONFIG_SOC_K2E) || \
+	defined(CONFIG_SOC_K2L)
+	u32		ddr3_size;	/* Physical DDR3 size in giga byte */
+#endif
 } gd_t;
 
 #include <asm-generic/global_data_flags.h>

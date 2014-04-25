@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Texas Instruments Inc.
+ * Copyright (C) 2013 - 2014 Texas Instruments Inc.
  *
  * Keystone2: DDR3 initialization
  *
@@ -21,10 +21,14 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <common.h>
+
 #include <asm/arch/hardware.h>
 #include <asm/io.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/clock_defs.h>
+
+DECLARE_GLOBAL_DATA_PTR;
 
 /************************* *****************************/
 static struct ddr3_phy_config ddr3phy_1600_64A = {
@@ -464,10 +468,12 @@ void init_ddr3(void)
 			}
 			init_ddremif(K2HK_DDR3A_EMIF_CTRL_BASE,
 					&ddr3_1600_64);
+			gd->ddr3_size = 8;
 			printf("DRAM:  8 GiB (includes reported below)\n");
 		} else {
 			init_ddrphy(K2HK_DDR3A_DDRPHYC, &ddr3phy_1600_32);
 			init_ddremif(K2HK_DDR3A_EMIF_CTRL_BASE, &ddr3_1600_32);
+			gd->ddr3_size = 4;
 			printf("DRAM: 4 GiB (includes reported below)\n");
 		}
 	} else {
@@ -485,9 +491,13 @@ void init_ddr3(void)
 						&ddr3phy_1333_64A);
 			}
 			init_ddremif(K2HK_DDR3A_EMIF_CTRL_BASE, &ddr3_1333_64);
+			gd->ddr3_size = 2;
+			printf("DRAM: 2 GiB\n");
 		} else {
 			init_ddrphy(K2HK_DDR3A_DDRPHYC, &ddr3phy_1333_32);
 			init_ddremif(K2HK_DDR3A_EMIF_CTRL_BASE, &ddr3_1333_32);
+			gd->ddr3_size = 1;
+			printf("DRAM: 2 GiB\n");
 		}
 	}
 
@@ -501,7 +511,7 @@ void init_ddr3(void)
 
 u32 get_ddr_seg_num(void)
 {
-	/* tmp: DDR3 size in segments (4KB seg size), hardcoded to 8GB size */
-	return 8 << (30 - MSMC_SEG_SIZE_SHIFT);
+	/* DDR3 size in segments (4KB seg size) */
+	return gd->ddr3_size << (30 - MSMC_SEG_SIZE_SHIFT);
 }
 
