@@ -71,6 +71,7 @@ enum clk_e {
 };
 
 #define K2HK_CLK1_6	sys_clk0_6_clk
+#define KS2_CLK1_6	K2HK_CLK1_6
 
 /* PLL identifiers */
 enum pll_type_e {

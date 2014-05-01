@@ -31,12 +31,6 @@
 #define JTAG_ID_REG			(KS2_DEVICE_STATE_CTRL_BASE + 0x18)
 #define K2E_DEVSTAT			(KS2_DEVICE_STATE_CTRL_BASE + 0x20)
 
-#define K2E_SPI0_BASE			0x21000400
-#define K2E_SPI1_BASE			0x21000600
-#define K2E_SPI2_BASE			0x21000800
-#define K2E_SPI_BASE			K2E_SPI0_BASE
-#define KS2_SPI_BASE			K2E_SPI_BASE
-
 /* Chip configuration unlock codes and registers */
 #define KEYSTONE_KICK0			(KS2_DEVICE_STATE_CTRL_BASE + 0x38)
 #define KEYSTONE_KICK1			(KS2_DEVICE_STATE_CTRL_BASE + 0x3c)
@@ -79,10 +73,6 @@
 #define K2E_LPSC_PCIE_1			27
 #define K2E_LPSC_XGE			50
 #define K2E_LPSC_TETRIS			52
-
-
-#define K2E_UART0_BASE			0x02530c00
-#define KS2_UART0_BASE			K2E_UART0_BASE
 
 /* DDR3 definitions */
 #define K2E_DDR3_EMIF_CTRL_BASE		0x21010000

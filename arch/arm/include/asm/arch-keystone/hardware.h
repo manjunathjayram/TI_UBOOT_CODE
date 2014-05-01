@@ -162,6 +162,8 @@ struct ddr3_emif_config {
 #define KS2_DDR3_PMCTL_OFFSET	0x38
 #define KS2_DDR3_ZQCFG_OFFSET	0xC8
 
+#define KS2_DDR3_EMIF_CTRL_BASE	0x21010000
+
 /* DDR3 ECC */
 #define KS2_DDR3_ECC_INT_RAW_STATUS_OFFSET		0x0A4
 #define KS2_DDR3_ECC_INT_STATUS_OFFSET		0x0AC
@@ -252,11 +254,27 @@ struct ddr3_emif_config {
 #define JTAG_ID_REG			(KS2_DEVICE_STATE_CTRL_BASE + 0x18)
 #define KS2_DEVSTAT			(KS2_DEVICE_STATE_CTRL_BASE + 0x20)
 
+/* Chip configuration unlock codes and registers */
+#define KEYSTONE_KICK0			(KS2_DEVICE_STATE_CTRL_BASE + 0x38)
+#define KEYSTONE_KICK1			(KS2_DEVICE_STATE_CTRL_BASE + 0x3c)
+#define KEYSTONE_KICK0_MAGIC		0x83e70b13
+#define KEYSTONE_KICK1_MAGIC		0x95a4f1e0
+
 /* PSC */
 #define KS2_PSC_BASE			0x02350000
 #define KS2_LPSC_GEM_0			15
 #define KS2_LPSC_TETRIS			52
 #define KS2_TETRIS_PWR_DOMAIN		31
+
+/* SPI */
+#define KS2_SPI0_BASE			0x21000400
+#define KS2_SPI1_BASE			0x21000600
+#define KS2_SPI2_BASE			0x21000800
+#define KS2_SPI_BASE			KS2_SPI0_BASE
+
+/* UART */
+#define KS2_UART0_BASE			0x02530c00
+#define KS2_UART1_BASE			0x02531000
 
 #ifdef CONFIG_SOC_K2HK
 #include <asm/arch/hardware-k2hk.h>
