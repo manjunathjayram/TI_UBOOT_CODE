@@ -192,10 +192,6 @@ void init_pll(const struct pll_init_data *data)
 		tmp &= ~(0xf);
 		tmp |= ((bwadj>>8) & 0xf);
 
-		/* set PLL Select (bit 13) for PASS PLL */
-		if (data->pll == PASS_PLL)
-			tmp |= 0x00002000;
-
 		__raw_writel(tmp, pll_regs[data->pll].reg1);
 
 
@@ -223,4 +219,19 @@ void init_plls(int num_pll, struct pll_init_data *config)
 	for (i = 0; i < num_pll; i++)
 		init_pll(&config[i]);
 }
+
+void pll_pa_clk_sel(int pa_pll)
+{
+	u32 reg = readl(pll_regs[PASS_PLL].reg1);
+
+	if (pa_pll)
+		reg |= 0x00002000; /* set PLL Select (bit 13) for PASS PLL */
+	else
+		reg &= ~(0x00002000); /* clear PLL Select for MAIN PLL */
+
+	writel(reg, pll_regs[PASS_PLL].reg1);
+
+	pll_delay(1000);
+}
+
 

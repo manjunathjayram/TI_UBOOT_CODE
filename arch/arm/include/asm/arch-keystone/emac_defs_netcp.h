@@ -35,6 +35,7 @@
 #define CPGMACSL_REG_TX_PAURSE		0x1c
 #define CPGMACSL_REG_EM_CTL		0x20
 #define CPGMACSL_REG_PRI		0x24
+#define CPGMACSL_REG_RX_PRI_MAP		-1	/* not available */
 
 /*
  *	Ethernet switch definitions
@@ -58,6 +59,7 @@
 
 /* CPSW Net RX flow */
 #define CPSW_NET_RX_FLOW		22
+#define CPSW_PORT_RX_FLOW(x)		(CPSW_NET_RX_FLOW + x)
 
 /* SGMII definitions */
 #define TARGET_SGMII_BASE		KS2_PASS_BASE + 0x00090100

@@ -201,4 +201,8 @@ void keystone2_eth_open_close(struct eth_device *dev);
 #include <asm/arch/emac_defs_netcp.h>
 #endif
 
+#if defined(CONFIG_SOC_K2E)
+#include <asm/arch/emac_defs_netcp2.h>
+#endif
+
 #endif  /* _EMAC_DEFS_H_ */

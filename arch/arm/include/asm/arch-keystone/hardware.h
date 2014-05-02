@@ -374,6 +374,7 @@ void init_ddremif(u32 base, struct ddr3_emif_config *emif_cfg);
 void share_all_segments(int priv_id);
 int psc_disable_module(u32 mod_num);
 int mon_power_off(int core_id);
+void pll_pa_clk_sel(int pa_pll);
 
 extern u32 debug_options;
 #endif

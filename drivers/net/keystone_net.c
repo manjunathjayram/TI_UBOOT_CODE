@@ -44,13 +44,19 @@ static unsigned int sys_has_mdio = 1;
 #define RX_BUFF_LEN	1520
 #define MAX_SIZE_STREAM_BUFFER RX_BUFF_LEN
 
+#define PHY_CALC_MASK(fieldOffset, fieldLen, mask)		\
+	if ((fieldLen + fieldOffset) >= 16)			\
+		mask = (0 - (1 << fieldOffset));		\
+	else							\
+		mask = (((1 << (fieldLen + fieldOffset))) - (1 << fieldOffset))
+
 static u8 rx_buffs[RX_BUFF_NUMS * RX_BUFF_LEN] __attribute__((aligned(16)));
 
 struct rx_buff_desc net_rx_buffs = {
 	.buff_ptr	= rx_buffs,
 	.num_buffs	= RX_BUFF_NUMS,
 	.buff_len	= RX_BUFF_LEN,
-	.rx_flow	= 22,
+	.rx_flow	= CPSW_NET_RX_FLOW,
 };
 
 extern int cpu_to_bus(u32 *ptr, u32 length);
@@ -169,6 +175,41 @@ int keystone2_eth_phy_write(u_int8_t phy_addr, u_int8_t reg_num, u_int16_t data)
 	return(0);
 }
 
+/* Read bits from a register */
+int keystone2_eth_phy_readbits(u8 phy_addr, u8 reg_num, u16 offset,
+				u16 len, u16 *data)
+{
+	u16 reg, mask;
+
+	PHY_CALC_MASK(offset, len, mask);
+
+	if (keystone2_eth_phy_read(phy_addr, reg_num, &reg) != 0)
+		return -1;
+
+	*data = (reg & mask) >> offset;
+
+	return 0;
+}
+
+/* Write bits to a register */
+int keystone2_eth_phy_writebits(u8 phy_addr, u8 reg_num, u16 offset, u16 len,
+				u16 data)
+{
+	u16 reg, mask;
+
+	PHY_CALC_MASK(offset, len, mask);
+
+	if (keystone2_eth_phy_read(phy_addr, reg_num, &reg) != 0)
+		return -1;
+
+	reg &= ~mask;
+	reg |= data << offset;
+
+	if (keystone2_eth_phy_write(phy_addr, reg_num, reg) != 0)
+		return -1;
+	return 0;
+}
+
 /* PHY functions for a generic PHY */
 static int __attribute__((unused)) gen_init_phy(int phy_addr)
 {
@@ -221,6 +262,32 @@ static int __attribute__((unused)) gen_auto_negotiate(int phy_addr)
 		return(0);
 
 	return(gen_get_link_speed(phy_addr));
+}
+
+int marvell_88e1512_init_phy(int phy_addr)
+{
+	/* As per Marvell Release Notes - Alaska 88E1510/88E1518/88E1512/88E1514
+	   Rev A0, Errata Section 3.1 */
+	keystone2_eth_phy_write(phy_addr, 22, 0x00ff);	/* reg page 0xff */
+	keystone2_eth_phy_write(phy_addr, 17, 0x214B);
+	keystone2_eth_phy_write(phy_addr, 16, 0x2144);
+	keystone2_eth_phy_write(phy_addr, 17, 0x0C28);
+	keystone2_eth_phy_write(phy_addr, 16, 0x2146);
+	keystone2_eth_phy_write(phy_addr, 17, 0xB233);
+	keystone2_eth_phy_write(phy_addr, 16, 0x214D);
+	keystone2_eth_phy_write(phy_addr, 17, 0xCC0C);
+	keystone2_eth_phy_write(phy_addr, 16, 0x2159);
+	keystone2_eth_phy_write(phy_addr, 22, 0x0000);	/* reg page 0 */
+
+	keystone2_eth_phy_write(phy_addr, 22, 18);	/* reg page 18 */
+	/* Write HWCFG_MODE = SGMII to Copper */
+	keystone2_eth_phy_writebits(phy_addr, 20, 0, 3, 1);
+	/* Phy reset */
+	keystone2_eth_phy_writebits(phy_addr, 20, 15, 1, 1);
+	keystone2_eth_phy_write(phy_addr, 22, 0);	/* reg page 18 */
+	udelay(100);
+
+	return 0;
 }
 
 /* PHY functions for Marvell 88E1111 PHY */
@@ -311,8 +378,7 @@ static void  __attribute__((unused))
 	writel(readl(DEVICE_EMACSL_BASE(eth_priv->slave_port - 1) + \
 			CPGMACSL_REG_CTL) | EMAC_MACCONTROL_GIGFORCE | \
 			EMAC_MACCONTROL_GIGABIT_ENABLE,
-		readl(DEVICE_EMACSL_BASE(eth_priv->slave_port - 1) + \
-			CPGMACSL_REG_CTL));
+	       DEVICE_EMACSL_BASE(eth_priv->slave_port - 1) + CPGMACSL_REG_CTL);
 }
 
 int keystone_sgmii_link_status(int port)
@@ -474,6 +540,11 @@ int mac_sl_config(u_int16_t port, struct mac_sl_cfg *cfg)
 	DEVICE_REG32_W(DEVICE_EMACSL_BASE(port) + CPGMACSL_REG_CTL,
 			cfg->ctl);
 
+	if (!cpu_is_k2hk())
+		/* Map RX packet flow priority to 0 */
+		DEVICE_REG32_W(DEVICE_EMACSL_BASE(port) + \
+				CPGMACSL_REG_RX_PRI_MAP, 0);
+
 	return (ret);
 }
 
@@ -542,7 +613,6 @@ int32_t cpmac_drv_send(u32* buffer, int num_bytes, int slave_port_num)
 /* Eth device open */
 static int keystone2_eth_open(struct eth_device *dev, bd_t *bis)
 {
-	u_int32_t clkdiv;
 	int link;
 
 	eth_priv_t *eth_priv = (eth_priv_t*)dev->priv;
@@ -553,9 +623,6 @@ static int keystone2_eth_open(struct eth_device *dev, bd_t *bis)
 
 	sys_has_mdio =
 		(eth_priv->sgmii_link_type == SGMII_LINK_MAC_PHY) ? 1 : 0;
-
-	psc_enable_module(KS2_LPSC_PA);
-	psc_enable_module(KS2_LPSC_CPGMAC);
 
 	sgmii_serdes_setup_156p25mhz();
 
@@ -589,12 +656,8 @@ static int keystone2_eth_open(struct eth_device *dev, bd_t *bis)
 	hwConfigStreamingSwitch();
 	if (sys_has_mdio) {
 		/* Init MDIO & get link state */
-		clkdiv = (EMAC_MDIO_BUS_FREQ / EMAC_MDIO_CLOCK_FREQ) - 1;
-		writel((clkdiv & 0xff) | MDIO_CONTROL_ENABLE | MDIO_CONTROL_FAULT,
-		&adap_mdio->CONTROL);
+		keystone2_eth_mdio_enable();
 
-		/* We need to wait for MDIO to start */
-		udelay(1000);
 		if (!loopback_test) {
 			link = keystone_get_link_status(dev);
 			if (link == 0) {
@@ -631,18 +694,12 @@ void keystone2_eth_close(struct eth_device *dev)
 	netcp_close();
 	qm_close();
 
-#if 0
- 	sgmii_serdes_shutdown();
-	psc_disable_module(KS2_LPSC_CPGMAC);
-	psc_disable_module(KS2_LPSC_PA);
-	psc_disable_domain(2);
-#endif
 	emac_open = 0;
 
 	debug_emac("- emac_close\n");
 }
 
-void k2hk_eth_open_close(struct eth_device *dev)
+void keystone2_eth_open_close(struct eth_device *dev)
 {
 	keystone2_eth_open(dev, NULL);
 	keystone2_eth_close(dev);
@@ -715,6 +772,7 @@ int keystone2_emac_initialize(eth_priv_t *eth_priv)
 {
 	struct eth_device *dev;
 	static int phy_registered = 0;
+	static int emac_poweron = 1;
 
 	dev = malloc(sizeof *dev);
 	if (dev == NULL)
@@ -735,6 +793,18 @@ int keystone2_emac_initialize(eth_priv_t *eth_priv)
 	eth_priv->dev		= dev;
 	eth_register(dev);
 
+	if (emac_poweron) {
+		emac_poweron = 0;
+		/* By default, select PA PLL clock as PA clock source */
+		if (psc_enable_module(KS2_LPSC_PA))
+			return -1;
+		if (psc_enable_module(KS2_LPSC_CPGMAC))
+			return -1;
+		if (psc_enable_module(KS2_LPSC_CRYPTO))
+			return -1;
+		pll_pa_clk_sel(1);
+	}
+
 	if ((eth_priv->sgmii_link_type == SGMII_LINK_MAC_PHY) &&
 	    !phy_registered) {
 		phy_registered = 1;
@@ -753,6 +823,12 @@ int keystone2_emac_initialize(eth_priv_t *eth_priv)
 #endif
 		miiphy_register(phy.name, keystone2_mii_phy_read,
 				keystone2_mii_phy_write);
+	}
+
+	if (!cpu_is_k2hk() &&
+	    (eth_priv->sgmii_link_type == SGMII_LINK_MAC_PHY)) {
+		keystone2_eth_mdio_enable();
+		marvell_88e1512_init_phy(eth_priv->phy_addr);
 	}
 
 	return(0);

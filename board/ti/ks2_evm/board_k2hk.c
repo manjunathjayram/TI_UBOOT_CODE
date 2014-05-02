@@ -96,28 +96,28 @@ int dram_init(void)
 eth_priv_t eth_priv_cfg[] = {
 	{
 		.int_name	= "K2HK_EMAC",
-		.rx_flow	= 22,
+		.rx_flow	= CPSW_PORT_RX_FLOW(0),
 		.phy_addr	= 0,
 		.slave_port	= 1,
 		.sgmii_link_type = SGMII_LINK_MAC_PHY,
 	},
 	{
 		.int_name	= "K2HK_EMAC1",
-		.rx_flow	= 23,
+		.rx_flow	= CPSW_PORT_RX_FLOW(1),
 		.phy_addr	= 1,
 		.slave_port	= 2,
 		.sgmii_link_type = SGMII_LINK_MAC_PHY,
 	},
 	{
 		.int_name	= "K2HK_EMAC2",
-		.rx_flow	= 24,
+		.rx_flow	= CPSW_PORT_RX_FLOW(2),
 		.phy_addr	= 2,
 		.slave_port	= 3,
 		.sgmii_link_type = SGMII_LINK_MAC_MAC_FORCED,
 	},
 	{
 		.int_name	= "K2HK_EMAC3",
-		.rx_flow	= 25,
+		.rx_flow	= CPSW_PORT_RX_FLOW(3),
 		.phy_addr	= 3,
 		.slave_port	= 4,
 		.sgmii_link_type = SGMII_LINK_MAC_MAC_FORCED,
@@ -164,7 +164,7 @@ int board_eth_init(bd_t *bis)
 		keystone2_emac_initialize(&eth_priv_cfg[j]);
 	}
 
-	k2hk_eth_open_close(eth_priv_cfg[0].dev);
+	keystone2_eth_open_close(eth_priv_cfg[0].dev);
 
 	return 0;
 }
