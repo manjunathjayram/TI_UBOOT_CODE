@@ -30,6 +30,9 @@ endif
 ifdef CONFIG_K2E_EVM
 COBJS	+= board_k2e.o ddr3_k2e.o
 endif
+ifdef CONFIG_K2L_EVM
+COBJS	+= board_k2l.o ddr3_k2l.o
+endif
 
 SRCS	:= $(SOBJS:.o=.S) $(COBJS:.o=.c)
 OBJS	:= $(addprefix $(obj),$(COBJS))

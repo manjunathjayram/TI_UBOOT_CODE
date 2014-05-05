@@ -675,7 +675,8 @@ void board_init_r(gd_t *id, ulong dest_addr)
 	post_run(NULL, POST_RAM | post_bootmode_get(0));
 #endif
 
-#if defined(CONFIG_K2HK_EVM) || defined(CONFIG_K2E_EVM)
+#if defined(CONFIG_K2HK_EVM) || defined(CONFIG_K2E_EVM) || \
+	defined(CONFIG_K2L_EVM)
 	ks2_post();
 #endif
 

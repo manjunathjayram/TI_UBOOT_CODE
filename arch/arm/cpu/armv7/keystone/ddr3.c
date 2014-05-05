@@ -274,7 +274,7 @@ static void keystone_map_cic_to_gic(u32 base, u32 chan_num, u32 irq_num)
 
 static void keystone_map_ddr3_ecc_cic2_irq(u32 base)
 {
-	if (cpu_is_k2hk()) {
+	if (cpu_is_k2hk() || cpu_is_k2l()) {
 		keystone_init_cic(base);
 		keystone_map_cic_to_gic(base, DDR3_ECC_CIC2_CHAN_NUM,
 					 DDR3_ECC_CIC2_IRQ_NUM);
