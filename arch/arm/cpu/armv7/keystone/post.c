@@ -312,7 +312,7 @@ int post_emac_test(void)
 /******************************************************************************
  * Function:    main function for POST
  ******************************************************************************/
-void k2hk_post(void)
+void ks2_post(void)
 {
 	u32	reset_type;
 	int	i;
