@@ -27,15 +27,6 @@
 
 #define K2E_PLL_CNTRL_BASE		0x02310000
 #define CLOCK_BASE			K2E_PLL_CNTRL_BASE
-#define KS2_DEVICE_STATE_CTRL_BASE	0x02620000
-#define JTAG_ID_REG			(KS2_DEVICE_STATE_CTRL_BASE + 0x18)
-#define K2E_DEVSTAT			(KS2_DEVICE_STATE_CTRL_BASE + 0x20)
-
-/* Chip configuration unlock codes and registers */
-#define KEYSTONE_KICK0			(KS2_DEVICE_STATE_CTRL_BASE + 0x38)
-#define KEYSTONE_KICK1			(KS2_DEVICE_STATE_CTRL_BASE + 0x3c)
-#define KEYSTONE_KICK0_MAGIC		0x83e70b13
-#define KEYSTONE_KICK1_MAGIC		0x95a4f1e0
 
 /* PA SS Registers */
 #define KS2_PASS_BASE			0x24000000
@@ -68,14 +59,14 @@
 #define K2E_LPSC_VUSR0			12
 #define K2E_LPSC_CHIP_SRSS		13
 #define K2E_LPSC_MSMC			14
-#define K2E_LPSC_GEM_0			15
+#define K2E_LPSC_GEM_0			KS2_LPSC_GEM_0
 #define K2E_LPSC_EMIF4F_DDR3		23
 #define K2E_LPSC_PCIE_1			27
 #define K2E_LPSC_XGE			50
-#define K2E_LPSC_TETRIS			52
+#define K2E_LPSC_TETRIS			KS2_LPSC_TETRIS
 
 /* DDR3 definitions */
-#define K2E_DDR3_EMIF_CTRL_BASE		0x21010000
+#define K2E_DDR3_EMIF_CTRL_BASE		KS2_DDR3_EMIF_CTRL_BASE
 #define K2E_DDR3_EMIF_DATA_BASE		0x80000000
 #define K2E_DDR3_DDRPHYC		0x02329000
 
@@ -97,7 +88,10 @@
 #define DEVICE_PA_CDMA_RX_NUM_FLOWS	32
 #define DEVICE_PA_CDMA_TX_NUM_CHANNELS	9
 
-/* MSMC control */
-#define KS2_MSMC_CTRL_BASE		0x0bc00000
+/* Chip Interrupt Controller */
+#define DDR3_ECC_CIC2_IRQ_NUM		-1	/* not defined in K2E */
+#define DDR3_ECC_CIC2_CHAN_NUM		-1	/* not defined in K2E */
 
+/* Number of DSP cores */
+#define KS2_NUM_DSPS			1
 #endif /* __ASM_ARCH_HARDWARE_H */

@@ -135,15 +135,7 @@
 #define DEVICE_PA_CDMA_RX_NUM_FLOWS      32
 #define DEVICE_PA_CDMA_TX_NUM_CHANNELS   9
 
-/* MSMC control */
-#define KS2_MSMC_CTRL_BASE		0x0bc00000
-
-/* EDMA */
-#define KS2_EDMA0_BASE			0x02700000
-
 /* Chip Interrupt Controller */
-#define KS2_CIC2_BASE			0x02608000
-
 #define DDR3_ECC_CIC2_IRQ_NUM		0x0D3   /* DDR3 ECC system irq # */
 #define DDR3_ECC_CIC2_CHAN_NUM		0x01D   /* DDR3 ECC int mapped to CIC2
 						   channel 29 */

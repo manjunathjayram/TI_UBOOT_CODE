@@ -276,6 +276,15 @@ struct ddr3_emif_config {
 #define KS2_UART0_BASE			0x02530c00
 #define KS2_UART1_BASE			0x02531000
 
+/* MSMC control */
+#define KS2_MSMC_CTRL_BASE		0x0bc00000
+
+/* EDMA */
+#define KS2_EDMA0_BASE			0x02700000
+
+/* Chip Interrupt Controller */
+#define KS2_CIC2_BASE			0x02608000
+
 #ifdef CONFIG_SOC_K2HK
 #include <asm/arch/hardware-k2hk.h>
 #endif
