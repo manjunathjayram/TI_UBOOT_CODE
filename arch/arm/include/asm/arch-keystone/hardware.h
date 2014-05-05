@@ -247,8 +247,16 @@ struct ddr3_emif_config {
 #define MSMC_DST_SEG_BASE	(CONFIG_SYS_LPAE_SDRAM_BASE >> \
 				 MSMC_SEG_SIZE_SHIFT)
 
+/* Boot Config */
+#define KS2_DEVICE_STATE_CTRL_BASE	0x02620000
+#define JTAG_ID_REG			(KS2_DEVICE_STATE_CTRL_BASE + 0x18)
+#define KS2_DEVSTAT			(KS2_DEVICE_STATE_CTRL_BASE + 0x20)
+
 /* PSC */
-#define KS2_PSC_BASE		0x02350000
+#define KS2_PSC_BASE			0x02350000
+#define KS2_LPSC_GEM_0			15
+#define KS2_LPSC_TETRIS			52
+#define KS2_TETRIS_PWR_DOMAIN		31
 
 #ifdef CONFIG_SOC_K2HK
 #include <asm/arch/hardware-k2hk.h>
@@ -322,6 +330,8 @@ void init_ddr3(void);
 void init_ddrphy(u32 base, struct ddr3_phy_config *phy_cfg);
 void init_ddremif(u32 base, struct ddr3_emif_config *emif_cfg);
 void share_all_segments(int priv_id);
+int psc_disable_module(u32 mod_num);
+int mon_power_off(int core_id);
 
 extern u32 debug_options;
 #endif

@@ -32,9 +32,6 @@
 
 #define K2HK_PLL_CNTRL_BASE		(0x02310000)
 #define CLOCK_BASE			K2HK_PLL_CNTRL_BASE
-#define KS2_DEVICE_STATE_CTRL_BASE	(0x02620000)
-#define JTAG_ID_REG			(KS2_DEVICE_STATE_CTRL_BASE + 0x18)
-#define K2HK_DEVSTAT			(KS2_DEVICE_STATE_CTRL_BASE + 0x20)
 
 #define K2HK_SPI0_BASE		(0x21000400)
 #define K2HK_SPI1_BASE		(0x21000600)
@@ -82,7 +79,7 @@
 #define K2HK_LPSC_VUSR0		12
 #define K2HK_LPSC_CHIP_SRSS		13
 #define K2HK_LPSC_MSMC		14
-#define K2HK_LPSC_GEM_0		15
+#define K2HK_LPSC_GEM_0		KS2_LPSC_GEM_0
 #define K2HK_LPSC_GEM_1		16
 #define K2HK_LPSC_GEM_2		17
 #define K2HK_LPSC_GEM_3		18
@@ -119,7 +116,7 @@
 #define K2HK_LPSC_VUSR1		49
 #define K2HK_LPSC_XGE		50
 #define K2HK_LPSC_ARM_SREFLEX	51
-#define K2HK_LPSC_TETRIS		52
+#define K2HK_LPSC_TETRIS		KS2_LPSC_TETRIS
 
 
 #define K2HK_UART0_BASE			(0x02530c00)
@@ -166,5 +163,6 @@
 #define DDR3_ECC_CIC2_IRQ_NUM		0x0D3   /* DDR3 ECC system irq # */
 #define DDR3_ECC_CIC2_CHAN_NUM		0x01D   /* DDR3 ECC int mapped to CIC2
 						   channel 29 */
-
+/* Number of DSP cores in the SoC */
+#define KS2_NUM_DSPS			8
 #endif /* __ASM_ARCH_HARDWARE_H */
