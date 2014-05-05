@@ -20,11 +20,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+#include <common.h>
 
 #include <asm/arch/hardware.h>
 #include <asm/io.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/clock_defs.h>
+
+DECLARE_GLOBAL_DATA_PTR;
 
 /************************* *****************************/
 static struct ddr3_phy_config ddr3phy_1600_64 = {
@@ -127,6 +130,16 @@ void init_ddr3(void)
 	get_dimm_params(dimm_name);
 
 	printf("Detected SO-DIMM [%s]\n", dimm_name);
+
+	if (!strcmp(dimm_name, "18KSF51272HZ-1G6K2")) {
+		/* 4G SO-DIMM */
+		gd->ddr3_size = 4;
+		printf("DRAM: 4 GiB\n");
+	} else {
+		/* by default, 2GB */
+		gd->ddr3_size = 2;
+		printf("DRAM: 2 GiB\n");
+	}
 
 	/* Reset DDR3 PHY after PLL enabled */
 	reset_ddrphy(KS2_DEVICE_STATE_CTRL_BASE);
