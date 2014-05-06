@@ -31,6 +31,12 @@
 #define UART_REG_VAL_PWREMU_MGMT_UART_ENABLE    ((1 << 14) | (1 << 13) | (1 << 0))
 #define serial_out(x,y) writel(x,y)
 #define serial_in(y) 	readl(y)
+#undef UART_MCRVAL
+#ifdef CONFIG_HWFLOW
+#define UART_MCRVAL             (UART_MCR_RTS | UART_MCR_AFE)
+#else
+#define UART_MCRVAL             (UART_MCR_RTS)
+#endif
 #else
 #define serial_out(x,y) writeb(x,y)
 #define serial_in(y) 	readb(y)
