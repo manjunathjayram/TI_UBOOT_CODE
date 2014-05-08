@@ -140,6 +140,10 @@
 #define DDR3_ECC_CIC2_IRQ_NUM		0x0D3   /* DDR3 ECC system irq # */
 #define DDR3_ECC_CIC2_CHAN_NUM		0x01D   /* DDR3 ECC int mapped to CIC2
 						   channel 29 */
+/* SGMII SerDes */
+#define KS2_SGMII_SERDES2_BASE		-1	/* Not defined */
+#define KS2_LANES_PER_SGMII_SERDES	4
+
 /* Number of DSP cores in the SoC */
 #define KS2_NUM_DSPS			8
 

@@ -112,6 +112,10 @@
 #define DDR3_ECC_CIC2_CHAN_NUM		0x01D   /* DDR3 ECC int mapped to CIC2
 						   channel 29 */
 
+/* SGMII SerDes */
+#define KS2_SGMII_SERDES2_BASE		0x02320000
+#define KS2_LANES_PER_SGMII_SERDES	2
+
 /* Number of DSP cores */
 #define KS2_NUM_DSPS			4
 

@@ -93,6 +93,10 @@
 #define DDR3_ECC_CIC2_IRQ_NUM		-1	/* not defined in K2E */
 #define DDR3_ECC_CIC2_CHAN_NUM		-1	/* not defined in K2E */
 
+/* SGMII SerDes */
+#define KS2_SGMII_SERDES2_BASE		0x02324000
+#define KS2_LANES_PER_SGMII_SERDES	4
+
 /* Number of DSP cores */
 #define KS2_NUM_DSPS			1
 #endif /* __ASM_ARCH_HARDWARE_H */

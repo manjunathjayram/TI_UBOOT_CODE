@@ -291,6 +291,9 @@ struct ddr3_emif_config {
 /* Queue Manager */
 #define KS2_QM_BASE_ADDRESS		0x23a80000
 
+/* SGMII SerDes */
+#define KS2_SGMII_SERDES_BASE		0x0232a000
+
 #ifdef CONFIG_SOC_K2HK
 #include <asm/arch/hardware-k2hk.h>
 #endif
@@ -379,6 +382,7 @@ int psc_disable_module(u32 mod_num);
 int mon_power_off(int core_id);
 void pll_pa_clk_sel(int pa_pll);
 void reset_ddrphy(u32 base);
+void sgmii_serdes_setup_156p25mhz();
 
 extern u32 debug_options;
 #endif
