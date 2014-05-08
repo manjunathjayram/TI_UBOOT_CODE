@@ -276,4 +276,8 @@
    which is NOT applicable for DDR ECC test */
 #define CONFIG_MAX_UBOOT_MEM_SIZE	(4 << 20)	/* 4 MiB */
 
+/* SGMII SerDes */
+#define CONFIG_KSSERDES_SGMII_BASE	KS2_SGMII_SERDES_BASE
+#define CONFIG_KSSERDES_LANES_PER_SGMII	KS2_LANES_PER_SGMII_SERDES
+
 #endif /* __CONFIG_KS2_EVM_H */

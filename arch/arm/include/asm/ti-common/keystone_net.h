@@ -246,7 +246,5 @@ struct eth_priv_t {
 };
 
 int keystone2_emac_initialize(struct eth_priv_t *eth_priv);
-void sgmii_serdes_setup_156p25mhz(void);
-void sgmii_serdes_shutdown(void);
 
 #endif  /* _KEYSTONE_NET_H_ */
