@@ -1,3 +1,5 @@
 #
-# Makefile for the u-boot SOC specific device drivers.
+# Makefile for the U-boot SOC specific device drivers.
 #
+
+obj-$(CONFIG_ARCH_KEYSTONE)	+= keystone/
