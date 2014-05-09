@@ -223,7 +223,7 @@
 	"name_kern=uImage-keystone-evm.bin\0"				\
 	NAME_MON							\
 	NAME_UBOOT							\
-	"name_ubi=keystone-evm-ubifs.ubi\0"				\
+	NAME_UBI							\
 	"run_mon=mon_install ${addr_mon}\0"				\
 	"run_kern=bootm ${addr_kern} ${addr_uinitrd} ${addr_fdt}\0"	\
 	"init_net=run set_fs_none args_all args_net\0"			\

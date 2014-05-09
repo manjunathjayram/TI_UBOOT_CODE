@@ -28,7 +28,8 @@
 #define ADDR_MON	"addr_mon=0x0c140000\0"
 #define NAME_FDT	"name_fdt=uImage-k2l-evm.dtb\0"
 #define NAME_MON	"name_mon=skern-k2l.bin\0"
-#define NAME_UBOOT	"name_uboot=u-boot-k2l-spi-keystone-evm.gph\0"
+#define NAME_UBOOT	"name_uboot=u-boot-spi-k2l-evm.gph\0"
+#define NAME_UBI	"name_ubi=keystone-evm-ubifs_4KB.ubi\0"
 #define HAS_MDIO	"has_mdio=1\0"
 #define ARGS_UBI	"args_ubi=setenv bootargs ${bootargs} rootfstype=ubifs"\
 			" root=ubi0:rootfs rootflags=sync rw ubi.mtd=2,4096\0"
