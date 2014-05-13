@@ -260,10 +260,10 @@
 	"init_ramfs=run set_fs_none args_all args_ramfs get_fs_ramfs\0"	\
 	"init_uinitrd=run set_fs_uinitrd args_all args_uinitrd "	\
 			"get_fs_uinitrd\0"				\
-	"args_ramfs=setenv bootargs ${bootargs} earlyprintk "		\
+	"args_ramfs=setenv bootargs ${bootargs} "			\
 		"rdinit=/sbin/init rw root=/dev/ram0 "			\
 		"initrd=0x802000000,9M\0"				\
-	"args_uinitrd=setenv bootargs ${bootargs} earlyprintk "		\
+	"args_uinitrd=setenv bootargs ${bootargs} "			\
 		"rdinit=/sbin/init rw root=/dev/ram0\0"			\
 	"no_post=1\0"							\
 	"mtdparts=mtdparts=davinci_nand.0:"				\
