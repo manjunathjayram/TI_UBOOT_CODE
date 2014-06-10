@@ -363,6 +363,9 @@ typedef enum {
 	MPAX_SEG_4G
 } mpax_seg_size;
 
+int get_max_dev_speed(void);
+int get_max_arm_speed(void);
+
 void map_ses_segment(int priv_id, int ses_pair,
 		     u32 src_pfn, u32 dst_pfn, mpax_seg_size size);
 void share_all_segments(int priv_id);
@@ -382,7 +385,7 @@ int psc_disable_module(u32 mod_num);
 int mon_power_off(int core_id);
 void pll_pa_clk_sel(int pa_pll);
 void reset_ddrphy(u32 base);
-void sgmii_serdes_setup_156p25mhz();
+void sgmii_serdes_setup_156p25mhz(void);
 
 extern u32 debug_options;
 #endif

@@ -99,4 +99,17 @@
 
 /* Number of DSP cores */
 #define KS2_NUM_DSPS			1
+
+#ifndef __ASSEMBLY__
+enum {
+	SPD800,
+	SPD850,
+	SPD1000,
+	SPD1250,
+	SPD1350,
+	SPD1400,
+	SPD1500,
+	SPD_RSV
+};
+#endif
 #endif /* __ASM_ARCH_HARDWARE_H */

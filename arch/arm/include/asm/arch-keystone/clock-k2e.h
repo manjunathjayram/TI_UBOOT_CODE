@@ -84,10 +84,6 @@ struct pll_init_data {
 	int pll_od;		/* PLL output divider    */
 };
 
-#define CORE_PLL_800	{ CORE_PLL, 16,	1, 2 }
-#define CORE_PLL_1000	{ CORE_PLL, 20,	1, 2 }
-#define CORE_PLL_1200	{ CORE_PLL, 24,	1, 2 }
-#define PASS_PLL_1000	{ PASS_PLL, 20, 1, 2 }
 #define DDR3_PLL_200	{ DDR3_PLL, 4,	1, 2 }
 #define DDR3_PLL_400	{ DDR3_PLL, 16,	1, 4 }
 #define DDR3_PLL_800	{ DDR3_PLL, 16,	1, 2 }
@@ -98,7 +94,6 @@ void init_pll(const struct pll_init_data *data);
 unsigned long clk_get_rate(unsigned int clk);
 unsigned long clk_round_rate(unsigned int clk, unsigned long hz);
 int clk_set_rate(unsigned int clk, unsigned long hz);
-
 
 #endif
 

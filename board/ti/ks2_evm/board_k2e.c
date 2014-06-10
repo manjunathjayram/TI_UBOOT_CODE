@@ -59,14 +59,22 @@ static struct async_emif_config async_emif_config[ASYNC_EMIF_NUM_CS] = {
 
 };
 
-static struct pll_init_data pll_config[] = {
-	CORE_PLL_1200,
-	PASS_PLL_1000,
+static struct pll_init_data core_pll_config[] = {
+	{ CORE_PLL,	16,	1,	2 }, /* 800 */
+	{ CORE_PLL,	17,	1,	2 }, /* 850 */
+	{ CORE_PLL,	20,	2,	2 }, /* 1000 */
+	{ CORE_PLL,	25,	1,	2 }, /* 1250 */
+	{ CORE_PLL,	27,	1,	2 }, /* 1350 */
+	{ CORE_PLL,	28,	2,	2 }, /* 1400 */
+	{ CORE_PLL,	30,	1,	2 }, /* 1500 */
 };
+
+static struct pll_init_data pa_pll_config =
+	{ PASS_PLL,	20,	1,	2 }; /* 1000 */
 
 #ifdef CONFIG_SPL_BOARD_INIT
 static struct pll_init_data spl_pll_config[] = {
-	CORE_PLL_800,
+	{ CORE_PLL,	16,	1,	2 },
 };
 
 void spl_init_keystone_plls(void)
@@ -195,7 +203,17 @@ int board_eth_init(bd_t *bis)
 #if defined(CONFIG_BOARD_EARLY_INIT_F)
 int board_early_init_f(void)
 {
-	init_plls(ARRAY_SIZE(pll_config), pll_config);
+	int speed;
+
+	speed = get_max_dev_speed();
+
+	if (speed != SPD800 && speed != SPD_RSV)
+		init_pll(&core_pll_config[speed]);
+	else
+		init_pll(&core_pll_config[SPD800]);
+
+	init_pll(&pa_pll_config);
+
 	return 0;
 }
 #endif

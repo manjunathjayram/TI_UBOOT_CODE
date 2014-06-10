@@ -85,20 +85,6 @@ struct pll_init_data {
 	int pll_od;		/* PLL output divider    */
 };
 
-#define CORE_PLL_799	{ CORE_PLL,	13,	1,	2 }
-#define CORE_PLL_983	{ CORE_PLL,	16,	1,	2 }
-#define CORE_PLL_1167	{ CORE_PLL,	19,	1,	2 }
-#define CORE_PLL_1198	{ CORE_PLL,	39,	2,	2 }
-#define CORE_PLL_1228	{ CORE_PLL,	20,	1,	2 }
-#define PASS_PLL_1228	{ PASS_PLL,	20,	1,	2 }
-#define PASS_PLL_983	{ PASS_PLL,	16,	1,	2 }
-#define PASS_PLL_1050	{ PASS_PLL,    205,    12,	2 }
-#define TETRIS_PLL_491  { TETRIS_PLL,	8,	1,	2 }
-#define TETRIS_PLL_737  { TETRIS_PLL,	12,	1,	2 }
-#define TETRIS_PLL_799  { TETRIS_PLL,	13,	1,	2 }
-#define TETRIS_PLL_983  { TETRIS_PLL,	16,	1,	2 }
-#define TETRIS_PLL_1167 { TETRIS_PLL,	19,	1,	2 }
-#define TETRIS_PLL_1228 { TETRIS_PLL,	20,	1,	2 }
 #define DDR3_PLL_200	{ DDR3_PLL,	4,	1,	2 }
 #define DDR3_PLL_400	{ DDR3_PLL,	16,	1,	4 }
 #define DDR3_PLL_800	{ DDR3_PLL,	16,	1,	2 }
@@ -109,7 +95,6 @@ void init_pll(const struct pll_init_data *data);
 unsigned long clk_get_rate(unsigned int clk);
 unsigned long clk_round_rate(unsigned int clk, unsigned long hz);
 int clk_set_rate(unsigned int clk, unsigned long hz);
-
 
 #endif
 

@@ -63,16 +63,28 @@ static struct async_emif_config async_emif_config[ASYNC_EMIF_NUM_CS] = {
 
 };
 
-static struct pll_init_data pll_config[] = {
-	CORE_PLL_1198,
-	PASS_PLL_983,
-	TETRIS_PLL_1200,
+static struct pll_init_data core_pll_config[] = {
+	{ CORE_PLL,	13,	1,	2 }, /* 799 */
+	{ CORE_PLL,	122,	15,	1 }, /* 999 */
+	{ CORE_PLL,	625,	32,	2 }, /* 1200 */
 };
+
+static struct pll_init_data tetris_pll_config[] = {
+	{ TETRIS_PLL,	32,	5,	1 }, /* 800 */
+	{ TETRIS_PLL,	40,	5,	1 }, /* 1000 */
+	{ TETRIS_PLL,	48,	5,	1 }, /* 1200 */
+	{ TETRIS_PLL,	54,	5,	1 }, /* 1350 */
+	{ TETRIS_PLL,	56,	5,	1 }, /* 1400 */
+};
+
+static struct pll_init_data pa_pll_config =
+	{ PASS_PLL,	16,	1,	2 }; /* 983 */
+
 
 #ifdef CONFIG_SPL_BOARD_INIT
 static struct pll_init_data spl_pll_config[] = {
-	CORE_PLL_799,
-	TETRIS_PLL_500,
+	{ CORE_PLL,	13,	1,	2 }, /* 799 */
+	{ TETRIS_PLL,	8,	1,	2 }, /* 500 */
 };
 
 void spl_init_keystone_plls(void)
@@ -173,7 +185,24 @@ int board_eth_init(bd_t *bis)
 #if defined(CONFIG_BOARD_EARLY_INIT_F)
 int board_early_init_f(void)
 {
-	init_plls(ARRAY_SIZE(pll_config), pll_config);
+	int speed;
+
+	speed = get_max_dev_speed();
+
+	if (speed != SPD800 && speed != SPD_RSV)
+		init_pll(&core_pll_config[speed]);
+	else
+		init_pll(&core_pll_config[SPD800]);
+
+	init_pll(&pa_pll_config);
+
+	speed = get_max_arm_speed();
+
+	if (speed != SPD800 && speed != SPD_RSV)
+		init_pll(&tetris_pll_config[speed]);
+	else
+		init_pll(&tetris_pll_config[SPD800]);
+
 	return 0;
 }
 #endif

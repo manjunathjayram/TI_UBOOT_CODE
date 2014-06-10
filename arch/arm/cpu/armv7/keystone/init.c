@@ -28,6 +28,12 @@
 #include <asm/arch/clock.h>
 #include <asm/arch/hardware.h>
 
+/* this register is used for K2HK revision 1.x */
+#define K2HK_REV1_DEVSPEED	(KS2_DEVICE_STATE_CTRL_BASE + 0xc98)
+/* all revisiona above and not K2HK SoCs use EFUSE_BOOTROM */
+#define KS2_EFUSE_BOOTROM	(KS2_DEVICE_STATE_CTRL_BASE + 0xc90)
+
+
 u32 debug_options;
 
 void chip_configuration_unlock(void)
@@ -73,3 +79,89 @@ void reset_cpu(ulong addr)
 	for (;;);
 }
 
+#ifdef CONFIG_SOC_K2E
+#define MAX_SPEEDS 13
+static int dev_speeds[MAX_SPEEDS] = {
+	SPD800,
+	SPD850,
+	SPD1000,
+	SPD1250,
+	SPD1350,
+	SPD1400,
+	SPD1500,
+	SPD1400,
+	SPD1350,
+	SPD1250,
+	SPD1000,
+	SPD850,
+	SPD800
+};
+
+#else
+#define MAX_SPEEDS 11
+static int dev_speeds[MAX_SPEEDS] = {
+	SPD800,
+	SPD1000,
+	SPD1200,
+	SPD_RSV,
+	SPD_RSV,
+	SPD_RSV,
+	SPD_RSV,
+	SPD_RSV,
+	SPD1200,
+	SPD1350,
+	SPD1400
+};
+
+static int arm_speeds[MAX_SPEEDS] = {
+	SPD800,
+	SPD1000,
+	SPD1200,
+	SPD1350,
+	SPD1400,
+	SPD_RSV,
+	SPD1400,
+	SPD1350,
+	SPD1200,
+	SPD1000,
+	SPD800
+};
+#endif
+
+int get_max_speed(u32 val, int *speeds)
+{
+	int	j;
+
+	if (!val)
+		return speeds[0];
+
+	for (j = 1; j < MAX_SPEEDS; j++) {
+		if (val == 0x0001)
+			return speeds[j];
+		val >>= 1;
+	}
+
+	return SPD_RSV;
+}
+
+#ifdef CONFIG_SOC_K2HK
+unsigned int read_efuse_bootrom(void)
+{
+	return (cpu_revision() > 1) ?  __raw_readl(KS2_EFUSE_BOOTROM) :
+		 __raw_readl(K2HK_REV1_DEVSPEED);
+}
+#else
+#define read_efuse_bootrom() __raw_readl(KS2_EFUSE_BOOTROM)
+#endif
+
+int inline get_max_dev_speed(void)
+{
+	return get_max_speed(read_efuse_bootrom() & 0xffff, dev_speeds);
+}
+
+#ifndef CONFIG_SOC_K2E
+int inline get_max_arm_speed(void)
+{
+	return get_max_speed((read_efuse_bootrom() >> 16) & 0xffff, arm_speeds);
+}
+#endif
