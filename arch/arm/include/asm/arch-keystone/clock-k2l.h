@@ -88,6 +88,7 @@ struct pll_init_data {
 #define CORE_PLL_799	{ CORE_PLL,	13,	1,	2 }
 #define CORE_PLL_983	{ CORE_PLL,	16,	1,	2 }
 #define CORE_PLL_1167	{ CORE_PLL,	19,	1,	2 }
+#define CORE_PLL_1198	{ CORE_PLL,	39,	2,	2 }
 #define CORE_PLL_1228	{ CORE_PLL,	20,	1,	2 }
 #define PASS_PLL_1228	{ PASS_PLL,	20,	1,	2 }
 #define PASS_PLL_983	{ PASS_PLL,	16,	1,	2 }
