@@ -27,7 +27,7 @@
 /* Defualt environment variables */
 #define ADDR_MON	"addr_mon=0x0c140000\0"
 #define NAME_FDT	"name_fdt=uImage-k2e-evm.dtb\0"
-#define NAME_MON	"name_mon=skern-k2e.bin\0"
+#define NAME_MON	"name_mon=skern-k2e-evm.bin\0"
 #define NAME_UBOOT	"name_uboot=u-boot-spi-k2e-evm.gph\0"
 #define NAME_UBI	"name_ubi=keystone-evm-ubifs.ubi\0"
 #define HAS_MDIO	"has_mdio=1\0"
