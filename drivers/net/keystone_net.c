@@ -411,8 +411,10 @@ int keystone_get_link_status(struct eth_device *dev)
 			link_state = 1;
 
 			if (eth_priv->sgmii_link_type == SGMII_LINK_MAC_PHY)
-				if (phy.get_link_speed (eth_priv->phy_addr))
+				if (phy.get_link_speed (eth_priv->phy_addr)) {
 					link_state = 0;
+					udelay(1000);
+				}
 		}
 #if CONFIG_GET_LINK_STATUS_ATTEMPTS > 1
 	}
@@ -481,7 +483,8 @@ int keystone_sgmii_config(int port, int interface)
 	if (control & SGMII_REG_CONTROL_AUTONEG)
 		mask |= SGMII_REG_STATUS_AUTONEG;
 
-	for (i = 0; i < 1000; i++)  {
+	for (i = 0; i < 2000; i++) {
+		udelay(2000);
 		status = __raw_readl(SGMII_STATUS_REG(port));
 		if ((status & mask) == mask)
 			break;
