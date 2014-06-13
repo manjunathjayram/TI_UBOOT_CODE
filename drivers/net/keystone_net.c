@@ -710,8 +710,6 @@ void keystone2_eth_open_close(struct eth_device *dev)
 	keystone2_eth_close(dev);
 }
 
-static int tx_send_loop = 0;
-
 /*
  * This function sends a single packet on the network and returns
  * positive number (number of bytes transmitted) or negative for error
@@ -722,24 +720,13 @@ static int keystone2_eth_send_packet(struct eth_device *dev,
 	int ret_status = -1;
 	eth_priv_t *eth_priv = (eth_priv_t*)dev->priv;
 
-	tx_send_loop = 0;
-
 	if (!loopback_test) {
 		if (keystone_get_link_status(dev) == 0)
 			return -1;
-
-		emac_gigabit_enable(dev);
 	}
 
 	if (cpmac_drv_send ((u32*) packet, length, eth_priv->slave_port) != 0)
 		return ret_status;
-
-	if (!loopback_test) {
-		if (keystone_get_link_status(dev) == 0)
-			return -1;
-
-		emac_gigabit_enable(dev);
-	}
 
 	return (length);
 }
