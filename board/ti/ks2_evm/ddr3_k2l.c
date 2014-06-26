@@ -25,43 +25,9 @@
 #include <asm/io.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/clock_defs.h>
+#include "ddr3_cfg.h"
 
-/************************* *****************************/
-static struct ddr3_phy_config ddr3phy_1600_64 = {
-	.pllcr		= 0x0001C000ul,
-	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK),
-	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
-	.ptr0		= 0x42C21590ul,
-	.ptr1		= 0xD05612C0ul,
-	.ptr2		= 0, /* not set in gel */
-	.ptr3		= 0x0D861A80ul,
-	.ptr4		= 0x0C827100ul,
-	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK),
-	.dcr_val	= ((1 << 10)),
-	.dtpr0		= 0x9D5CBB66ul,
-	.dtpr1		= 0x12868300ul,
-	.dtpr2		= 0x5002D200ul,
-	.mr0		= 0x00001C70ul,
-	.mr1		= 0x00000006ul,
-	.mr2		= 0x00000018ul,
-	.dtcr		= 0x710035C7ul,
-	.pgcr2		= 0x00F07A12ul,
-	.zq0cr1		= 0x0001005Dul,
-	.zq1cr1		= 0x0001005Bul,
-	.zq2cr1		= 0x0001005Bul,
-	.pir_v1		= 0x00000033ul,
-	.pir_v2		= 0x0000FF81ul,
-};
-
-static struct ddr3_emif_config ddr3_1600_64 = {
-	.sdcfg		= 0x6200CE62ul,
-	.sdtim1		= 0x166C9855ul,
-	.sdtim2		= 0x00001D4Aul,
-	.sdtim3		= 0x435DFF53ul,
-	.sdtim4		= 0x543F0CFFul,
-	.zqcfg		= 0x70073200ul,
-	.sdrfc		= 0x00001869ul,
-};
+DECLARE_GLOBAL_DATA_PTR;
 
 struct pll_init_data ddr3_400 = DDR3_PLL_400;
 
@@ -79,8 +45,8 @@ void init_ddr3(void)
 	/* Reset DDR3 PHY after PLL enabled */
 	reset_ddrphy(KS2_DEVICE_STATE_CTRL_BASE);
 
-	init_ddrphy(K2L_DDR3_DDRPHYC, &ddr3phy_1600_64);
-	init_ddremif(K2L_DDR3_EMIF_CTRL_BASE, &ddr3_1600_64);
+	init_ddrphy(K2L_DDR3_DDRPHYC, &ddr3phy_1600_2g);
+	init_ddremif(K2L_DDR3_EMIF_CTRL_BASE, &ddr3_1600_2g);
 }
 
 /* Get the total segment number of the DDR memory, each segment is 4KB size */
