@@ -26,96 +26,9 @@
 #include <asm/io.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/clock_defs.h>
+#include "ddr3_cfg.h"
 
 DECLARE_GLOBAL_DATA_PTR;
-
-/************************* *****************************/
-static struct ddr3_phy_config ddr3phy_1600_64 = {
-	.pllcr		= 0x0001C000ul,
-	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK),
-	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
-	.ptr0		= 0x42C21590ul,
-	.ptr1		= 0xD05612C0ul,
-	.ptr2		= 0, /* not set in gel */
-	.ptr3		= 0x08861A80ul,
-	.ptr4		= 0x0C827100ul,
-	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK),
-	.dcr_val	= ((1 << 10)),
-	.dtpr0		= 0x9D9CBB66ul,
-	.dtpr1		= 0x12840300ul,
-	.dtpr2		= 0x5002D200ul,
-	.mr0		= 0x00001C70ul,
-	.mr1		= 0x00000006ul,
-	.mr2		= 0x00000018ul,
-	.dtcr		= 0x710035C7ul,
-	.pgcr2		= 0x00F07A12ul,
-	.zq0cr1		= 0x0001005Dul,
-	.zq1cr1		= 0x0001005Bul,
-	.zq2cr1		= 0x0001005Bul,
-	.pir_v1		= 0x00000033ul,
-	.pir_v2		= 0x0000FF81ul,
-};
-
-static struct ddr3_emif_config ddr3_1600_64 = {
-	.sdcfg		= 0x6200CE62ul,
-	.sdtim1		= 0x166C9855ul,
-	.sdtim2		= 0x00001D4Aul,
-	.sdtim3		= 0x421DFF53ul,
-	.sdtim4		= 0x543F07FFul,
-	.zqcfg		= 0x70073200ul,
-	.sdrfc		= 0x00001869ul,
-};
-
-int get_dimm_params(char *dimm_name)
-{
-	u8 spd_params[256];
-	int ret, y, x;
-	int old_bus;
-
-	i2c_init(CONFIG_SYS_I2C_SPEED, CONFIG_SYS_I2C_SLAVE);
-
-	old_bus = i2c_get_bus_num();
-	i2c_set_bus_num(1);
-
-	ret = i2c_read(0x53, 0, 1, spd_params, 256);
-
-	i2c_set_bus_num(old_bus);
-
-	dimm_name[0] = '\0';
-
-	if (ret) {
-		puts("Cannot read DIMM params\n");
-		return 1;
-	}
-
-#ifdef DEBUG
-	for (y = 0; y < 16; y++) {
-		for (x = 0; x < 16; x++)
-			printf("%02x ", spd_params[y * 16 + x]);
-		printf("   ");
-
-		for (x = 0; x < 16; x++)
-			if ((spd_params[y * 16 + x] >= 0x20) &&
-			    (spd_params[y * 16 + x] <= 0x7e))
-				printf("%c", spd_params[y * 16 + x]);
-			else
-				printf(".");
-		printf("\n");
-	}
-#endif
-	/*
-	 * We need to convert spd data to dimm parameters
-	 * and to DDR3 EMIF and PHY regirsters values.
-	 * For now we just return DIMM type string value.
-	 * Caller may use this value to choose appropriate
-	 * a pre-set DDR3 configuration
-	 */
-
-	strncpy(dimm_name, &spd_params[0x80], 18);
-	dimm_name[18] = '\0';
-
-	return 0;
-}
 
 struct pll_init_data ddr3_400 = DDR3_PLL_400;
 
@@ -131,21 +44,25 @@ void init_ddr3(void)
 
 	printf("Detected SO-DIMM [%s]\n", dimm_name);
 
-	if (!strcmp(dimm_name, "18KSF51272HZ-1G6K2")) {
-		/* 4G SO-DIMM */
-		gd->ddr3_size = 4;
-		printf("DRAM: 4 GiB\n");
-	} else {
-		/* by default, 2GB */
-		gd->ddr3_size = 2;
-		printf("DRAM: 2 GiB\n");
-	}
-
 	/* Reset DDR3 PHY after PLL enabled */
 	reset_ddrphy(KS2_DEVICE_STATE_CTRL_BASE);
 
-	init_ddrphy(K2E_DDR3_DDRPHYC, &ddr3phy_1600_64);
-	init_ddremif(K2E_DDR3_EMIF_CTRL_BASE, &ddr3_1600_64);
+	if (!strcmp(dimm_name, "18KSF1G72HZ-1G6E2 ")) {
+		/* 8G SO-DIMM */
+		gd->ddr3_size = 8;
+		printf("DRAM: 8 GiB\n");
+		ddr3phy_1600_8g.zq0cr1 |= 0x10000;
+		ddr3phy_1600_8g.zq1cr1 |= 0x10000;
+		ddr3phy_1600_8g.zq2cr1 |= 0x10000;
+		init_ddrphy(K2E_DDR3_DDRPHYC, &ddr3phy_1600_8g);
+		init_ddremif(K2E_DDR3_EMIF_CTRL_BASE, &ddr3_1600_8g);
+	} else if (!strcmp(dimm_name, "18KSF51272HZ-1G6K2")) {
+		/* 4G SO-DIMM */
+		gd->ddr3_size = 4;
+		printf("DRAM: 4 GiB\n");
+		init_ddrphy(K2E_DDR3_DDRPHYC, &ddr3phy_1600_4g);
+		init_ddremif(K2E_DDR3_EMIF_CTRL_BASE, &ddr3_1600_4g);
+	}
 }
 
 /* Get the total segment number of the DDR memory, each segment is 4KB size */

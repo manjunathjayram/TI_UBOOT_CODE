@@ -28,4 +28,9 @@ extern struct ddr3_phy_config ddr3phy_1333_2g;
 extern struct ddr3_emif_config ddr3_1333_2g;
 #endif
 
+#ifdef CONFIG_SOC_K2E
+extern struct ddr3_phy_config ddr3phy_1600_4g;
+extern struct ddr3_emif_config ddr3_1600_4g;
+#endif
+
 #endif /* __DDR3_CFG_H */
