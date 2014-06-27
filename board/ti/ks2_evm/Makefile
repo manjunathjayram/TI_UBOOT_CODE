@@ -23,7 +23,7 @@ include $(TOPDIR)/config.mk
 
 LIB	= $(obj)lib$(BOARD).o
 
-COBJS	+= board.o
+COBJS	+= board.o ddr3_cfg.o
 ifdef CONFIG_K2HK_EVM
 COBJS	+= board_k2hk.o ddr3_k2hk.o
 endif
