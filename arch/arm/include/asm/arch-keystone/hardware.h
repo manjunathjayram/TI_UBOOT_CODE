@@ -163,6 +163,7 @@ typedef volatile unsigned int   *dv_reg_p;
 
 /* MSMC control */
 #define KS2_MSMC_CTRL_BASE		0x0bc00000
+#define KS2_MSMC_DATA_BASE		0x0c000000
 
 /* USB */
 #define KS2_USB_SS_BASE			0x02680000
