@@ -116,6 +116,32 @@
 #define KS2_SGMII_SERDES2_BASE		0x02320000
 #define KS2_LANES_PER_SGMII_SERDES	2
 
+/* OSR */
+#define KS2_OSR_DATA_BASE		0x70000000	/* OSR data memory
+							   base */
+#define KS2_OSR_CFG_BASE		0x02348c00	/* OSR config reg
+							   base */
+#define KS2_OSR_ECC_VEC			0x08		/* ECC Vector reg */
+#define KS2_OSR_ECC_CTRL		0x14		/* ECC control reg */
+
+/* OSR ECC Vector register */
+#define OSR_ECC_VEC_TRIG_RD		BIT(15)		/* trigger a read op */
+#define OSR_ECC_VEC_RD_DONE		BIT(24)		/* read complete */
+
+#define OSR_ECC_VEC_RAM_ID_SH		0		/* RAM ID shift */
+#define OSR_ECC_VEC_RD_ADDR_SH		16		/* read address shift */
+
+/* OSR ECC control register */
+#define OSR_ECC_CTRL_EN			BIT(0)		/* ECC enable bit */
+#define OSR_ECC_CTRL_CHK		BIT(1)		/* ECC check bit */
+#define OSR_ECC_CTRL_RMW		BIT(2)		/* ECC check bit */
+
+/* Number of OSR RAM banks */
+#define OSR_NUM_RAM_BANKS		4
+
+/* OSR memory size */
+#define OSR_SIZE			0x100000
+
 /* Number of DSP cores */
 #define KS2_NUM_DSPS			4
 

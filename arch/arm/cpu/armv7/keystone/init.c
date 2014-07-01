@@ -27,6 +27,7 @@
 #include <asm/io.h>
 #include <asm/arch/clock.h>
 #include <asm/arch/hardware.h>
+#include <asm/arch/psc_defs.h>
 
 /* this register is used for K2HK revision 1.x */
 #define K2HK_REV1_DEVSPEED	(KS2_DEVICE_STATE_CTRL_BASE + 0xc98)
@@ -42,6 +43,36 @@ void chip_configuration_unlock(void)
 	__raw_writel(KEYSTONE_KICK1_MAGIC, KEYSTONE_KICK1);
 }
 
+#ifdef CONFIG_SOC_K2L
+int osr_init(u32 base, u32 num_ram_banks)
+{
+	u32 i, ecc_ctrl[OSR_NUM_RAM_BANKS];
+
+	/* Enable the OSR clock domain */
+	psc_enable_module(K2L_LPSC_OSR);
+
+	/* Disable OSR ECC check for all the ram banks */
+	for (i = 0; i < num_ram_banks; i++) {
+		writel(i | OSR_ECC_VEC_TRIG_RD | \
+			(KS2_OSR_ECC_CTRL << OSR_ECC_VEC_RD_ADDR_SH),
+			base + KS2_OSR_ECC_VEC);
+		while (!(readl(base + KS2_OSR_ECC_VEC) & OSR_ECC_VEC_RD_DONE))
+			;
+		ecc_ctrl[i] = readl(base + KS2_OSR_ECC_CTRL) ^ OSR_ECC_CTRL_CHK;
+		writel(ecc_ctrl[i], 0xc000000 + i * 4);
+		writel(ecc_ctrl[i], base + KS2_OSR_ECC_CTRL);
+	}
+
+	/* Reset OSR memory to all zeros */
+	for (i = 0; i < OSR_SIZE; i += 4)
+		writel(0, KS2_OSR_DATA_BASE + i);
+
+	/* Enable OSR ECC check for all the ram banks */
+	for (i = 0; i < num_ram_banks; i++)
+		writel(ecc_ctrl[i] | OSR_ECC_CTRL_CHK, base + KS2_OSR_ECC_CTRL);
+}
+#endif
+
 int arch_cpu_init(void)
 {
 	chip_configuration_unlock();
@@ -53,9 +84,12 @@ int arch_cpu_init(void)
 	share_all_segments(11); /* PCIE 0 */
 	if (cpu_is_k2e())
 		share_all_segments(13); /* PCIE 1 */
-	if (cpu_is_k2l())
+	if (cpu_is_k2l()) {
 		share_all_segments(14); /* PCIE 1 */
-
+#ifdef CONFIG_SOC_K2L
+		osr_init(KS2_OSR_CFG_BASE, OSR_NUM_RAM_BANKS);
+#endif
+	}
 	/*
 	 * just initialise the COM2 port so that TI specific
 	 * UART register PWREMU_MGMT is initialized. Linux UART
