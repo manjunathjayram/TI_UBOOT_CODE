@@ -157,6 +157,8 @@ typedef volatile unsigned int   *dv_reg_p;
 /* MSMC control */
 #define KS2_MSMC_CTRL_BASE		0x0bc00000
 
+#define KS2_MAC_ID_BASE_ADDR		(KS2_DEVICE_STATE_CTRL_BASE + 0x110)
+
 #ifdef CONFIG_SOC_K2HK
 #include <asm/arch/hardware-k2hk.h>
 #endif

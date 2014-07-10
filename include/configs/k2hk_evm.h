@@ -36,6 +36,7 @@
 
 /* Network */
 #define CONFIG_DRIVER_TI_KEYSTONE_NET
+#define CONFIG_KSNET_NETCP_V1_0
 #define CONFIG_KSNET_CPSW_NUM_PORTS	5
 
 #endif /* __CONFIG_K2HK_EVM_H */
