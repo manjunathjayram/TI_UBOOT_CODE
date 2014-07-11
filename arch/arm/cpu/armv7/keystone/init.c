@@ -25,9 +25,7 @@ int arch_cpu_init(void)
 	chip_configuration_unlock();
 	icache_enable();
 
-#ifdef CONFIG_SOC_K2HK
 	msmc_share_all_segments(8);  /* TETRIS */
-#endif
 	msmc_share_all_segments(9);  /* NETCP */
 	msmc_share_all_segments(10); /* QM PDSP */
 	msmc_share_all_segments(11); /* PCIE 0 */

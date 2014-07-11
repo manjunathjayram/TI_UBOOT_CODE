@@ -24,7 +24,6 @@ unsigned int external_clk[ext_clk_count] = {
 	[sgmii_clk]     =       156250000,
 	[xgmii_clk]     =       156250000,
 	[usb_clk]       =       100000000,
-	[rp1_clk]       =       123456789
 };
 
 static struct pll_init_data pll_config[] = {

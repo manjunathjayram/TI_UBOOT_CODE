@@ -20,7 +20,6 @@ enum ext_clk_e {
 	sgmii_clk,
 	xgmii_clk,
 	usb_clk,
-	rp1_clk,
 	ext_clk_count /* number of external clocks */
 };
 

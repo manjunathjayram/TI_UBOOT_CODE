@@ -43,6 +43,7 @@ int dram_init(void)
 
 int board_init(void)
 {
+	gd->bd->bi_arch_number = -1; /* MACH_TYPE_K2E_EVM; */
 	gd->bd->bi_boot_params = CONFIG_LINUX_BOOT_PARAM_ADDR;
 
 	return 0;
