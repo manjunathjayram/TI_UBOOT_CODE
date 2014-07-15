@@ -41,7 +41,4 @@
 #define CONFIG_KSNET_NETCP_V1_5
 #define CONFIG_KSNET_CPSW_NUM_PORTS	9
 
-/* SerDes */
-#define CONFIG_TI_KEYSTONE_SERDES
-
 #endif /* __CONFIG_K2E_EVM_H */
