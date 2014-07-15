@@ -34,4 +34,9 @@
 /* NAND Configuration */
 #define CONFIG_SYS_NAND_PAGE_2K
 
+/* Network */
+#define CONFIG_DRIVER_TI_KEYSTONE_NET
+#define CONFIG_KSNET_NETCP_V1_5
+#define CONFIG_KSNET_CPSW_NUM_PORTS	9
+
 #endif /* __CONFIG_K2E_EVM_H */
