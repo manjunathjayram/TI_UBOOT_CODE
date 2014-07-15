@@ -34,4 +34,8 @@
 /* NAND Configuration */
 #define CONFIG_SYS_NAND_PAGE_4K
 
+/* Network */
+#define CONFIG_KSNET_NETCP_V1_5
+#define CONFIG_KSNET_CPSW_NUM_PORTS	5
+
 #endif /* __CONFIG_K2L_EVM_H */
