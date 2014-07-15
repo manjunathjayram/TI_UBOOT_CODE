@@ -219,7 +219,7 @@
 	"initrd_high=0xffffffff\0"					\
 	NAME_FDT							\
 	HAS_MDIO							\
-	"name_fs=arago-console-image.cpio.gz\0"				\
+	NAME_FS								\
 	"name_uinitrd=uinitrd.bin\0"					\
 	"name_kern=uImage-keystone-evm.bin\0"				\
 	NAME_MON							\

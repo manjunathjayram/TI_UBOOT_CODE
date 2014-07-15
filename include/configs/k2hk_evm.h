@@ -27,9 +27,10 @@
 /* Defualt environment variables */
 #define ADDR_MON        "addr_mon=0x0c5f0000\0"
 #define NAME_FDT        "name_fdt=uImage-k2hk-evm.dtb\0"
+#define NAME_FS		"name_fs=arago-console-image-k2hk-evm.cpio.gz\0"
 #define NAME_MON        "name_mon=skern-k2hk-evm.bin\0"
 #define NAME_UBOOT      "name_uboot=u-boot-spi-k2hk-evm.gph\0"
-#define NAME_UBI	"name_ubi=keystone-evm-ubifs.ubi\0"
+#define NAME_UBI	"name_ubi=k2hk-evm-ubifs.ubi\0"
 #define HAS_MDIO	"has_mdio=0\0"
 #define ARGS_UBI	"args_ubi=setenv bootargs ${bootargs} rootfstype=ubifs"\
 			" root=ubi0:rootfs rootflags=sync rw ubi.mtd=2,2048\0"
