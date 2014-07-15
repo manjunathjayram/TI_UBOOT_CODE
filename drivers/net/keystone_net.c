@@ -30,6 +30,13 @@ static unsigned int sys_has_mdio = 1;
 #define RX_BUFF_LEN	1520
 #define MAX_SIZE_STREAM_BUFFER RX_BUFF_LEN
 
+#define PHY_CALC_MASK(fieldoffset, fieldlen, mask)		\
+	if ((fieldlen + fieldoffset) >= 16)			\
+		mask = (0 - (1 << fieldoffset));		\
+	else							\
+		mask = (((1 << (fieldlen + fieldoffset))) - (1 << fieldoffset))
+
+
 static u8 rx_buffs[RX_BUFF_NUMS * RX_BUFF_LEN] __aligned(16);
 
 struct rx_buff_desc net_rx_buffs = {
@@ -138,6 +145,25 @@ int keystone2_eth_phy_write(u_int8_t phy_addr, u_int8_t reg_num, u_int16_t data)
 	return 0;
 }
 
+/* Write bits to a register */
+int keystone2_eth_phy_writebits(u8 phy_addr, u8 reg_num, u16 offset, u16 len,
+		u16 data)
+{
+	u16 reg, mask;
+
+	PHY_CALC_MASK(offset, len, mask);
+
+	if (keystone2_eth_phy_read(phy_addr, reg_num, &reg) != 0)
+		return -1;
+
+	reg &= ~mask;
+	reg |= data << offset;
+
+	if (keystone2_eth_phy_write(phy_addr, reg_num, reg) != 0)
+		return -1;
+	return 0;
+}
+
 /* PHY functions for a generic PHY */
 static int gen_get_link_speed(int phy_addr)
 {
@@ -150,6 +176,36 @@ static int gen_get_link_speed(int phy_addr)
 
 	return -1;
 }
+
+#if defined(CONFIG_K2E_EVM)
+int marvell_88e1512_init_phy(int phy_addr)
+{
+	keystone2_eth_mdio_enable();
+
+	/* As per Marvell Release Notes - Alaska 88E1510/88E1518/88E1512/88E1514
+	   Rev A0, Errata Section 3.1 */
+	keystone2_eth_phy_write(phy_addr, 22, 0x00ff);	/* reg page 0xff */
+	keystone2_eth_phy_write(phy_addr, 17, 0x214B);
+	keystone2_eth_phy_write(phy_addr, 16, 0x2144);
+	keystone2_eth_phy_write(phy_addr, 17, 0x0C28);
+	keystone2_eth_phy_write(phy_addr, 16, 0x2146);
+	keystone2_eth_phy_write(phy_addr, 17, 0xB233);
+	keystone2_eth_phy_write(phy_addr, 16, 0x214D);
+	keystone2_eth_phy_write(phy_addr, 17, 0xCC0C);
+	keystone2_eth_phy_write(phy_addr, 16, 0x2159);
+	keystone2_eth_phy_write(phy_addr, 22, 0x0000);	/* reg page 0 */
+
+	keystone2_eth_phy_write(phy_addr, 22, 18);	/* reg page 18 */
+	/* Write HWCFG_MODE = SGMII to Copper */
+	keystone2_eth_phy_writebits(phy_addr, 20, 0, 3, 1);
+	/* Phy reset */
+	keystone2_eth_phy_writebits(phy_addr, 20, 15, 1, 1);
+	keystone2_eth_phy_write(phy_addr, 22, 0);	/* reg page 18 */
+	udelay(100);
+
+	return 0;
+}
+#endif
 
 static void  __attribute__((unused))
 	keystone2_eth_gigabit_enable(struct eth_device *dev)
@@ -335,6 +391,11 @@ int mac_sl_config(u_int16_t port, struct mac_sl_cfg *cfg)
 
 	DEVICE_REG32_W(DEVICE_EMACSL_BASE(port) + CPGMACSL_REG_CTL,
 		       cfg->ctl);
+
+#ifdef CONFIG_K2E_EVM
+	/* Map RX packet flow priority to 0 */
+	DEVICE_REG32_W(DEVICE_EMACSL_BASE(port) + CPGMACSL_REG_RX_PRI_MAP, 0);
+#endif
 
 	return ret;
 }
@@ -559,6 +620,10 @@ int keystone2_emac_initialize(struct eth_priv_t *eth_priv)
 	dev->recv		= keystone2_eth_rcv_packet;
 
 	eth_register(dev);
+
+#if defined(CONFIG_K2E_EVM)
+	marvell_88e1512_init_phy(eth_priv->phy_addr);
+#endif
 
 	return 0;
 }
