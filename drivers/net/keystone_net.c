@@ -576,6 +576,11 @@ static void keystone2_net_serdes_sgmii_setup(void)
 	serdes_init(CONFIG_KSSERDES_SGMII_BASE,
 		    &serdes_sgmii_156p25mhz, CONFIG_KSSERDES_LANES_PER_SGMII);
 
+#ifdef CONFIG_SOC_K2E
+	serdes_init(CONFIG_KSSERDES_SGMII2_BASE,
+		    &sgmii_serdes_156p25mhz, CONFIG_KSSERDES_LANES_PER_SGMII);
+#endif
+
 	/* wait till setup */
 	udelay(5000);
 }
