@@ -143,8 +143,8 @@ static int dev_speeds[MAX_SPEEDS] = {
 	SPD_RSV,
 	SPD_RSV,
 	SPD1200,
-	SPD1350,
-	SPD1400
+	SPD1000,
+	SPD800
 };
 
 static int arm_speeds[MAX_SPEEDS] = {
