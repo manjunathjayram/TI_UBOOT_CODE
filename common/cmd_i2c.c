@@ -311,6 +311,45 @@ static int do_i2c_write(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[
 	return 0;
 }
 
+static int do_i2c_write_block(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+{
+	u_char	chip;
+	uint	devaddr, alen, length;
+	u_char  *memaddr;
+
+	if (argc != 5)
+		return cmd_usage(cmdtp);
+
+	/*
+	 * memaddr is the address where to store things in memory
+	 */
+	memaddr = (u_char *)simple_strtoul(argv[1], NULL, 16);
+
+	/*
+	 * I2C chip address
+	 */
+	chip = simple_strtoul(argv[2], NULL, 16);
+
+	/*
+	 * I2C data address within the chip.  This can be 1 or
+	 * 2 bytes long.  Some day it might be 3 bytes long :-).
+	 */
+	devaddr = simple_strtoul(argv[3], NULL, 16);
+	alen = get_alen(argv[3]);
+	if (alen > 3)
+		return cmd_usage(cmdtp);
+
+	/*
+	 * Length is the number of objects, not number of bytes.
+	 */
+	length = simple_strtoul(argv[4], NULL, 16);
+	if (i2c_write(chip, devaddr, alen, memaddr, length) != 0) {
+			puts("Error writing to the chip.\n");
+			return 1;
+	}
+	return 0;
+}
+
 /**
  * do_i2c_md() - Handle the "i2c md" command-line command
  * @cmdtp:	Command data struct pointer
@@ -1531,6 +1570,7 @@ static cmd_tbl_t cmd_i2c_sub[] = {
 	U_BOOT_CMD_MKENT(probe, 0, 1, do_i2c_probe, "", ""),
 	U_BOOT_CMD_MKENT(read, 5, 1, do_i2c_read, "", ""),
 	U_BOOT_CMD_MKENT(write, 5, 0, do_i2c_write, "", ""),
+	U_BOOT_CMD_MKENT(write_block, 5, 0, do_i2c_write_block, "", ""),
 	U_BOOT_CMD_MKENT(reset, 0, 1, do_i2c_reset, "", ""),
 #if defined(CONFIG_CMD_SDRAM)
 	U_BOOT_CMD_MKENT(sdram, 1, 1, do_sdram, "", ""),
