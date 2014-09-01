@@ -31,6 +31,13 @@ static struct pll_init_data spl_pll_config[] = {
 };
 #endif
 
+#ifdef CONFIG_K2L_EVM
+static struct pll_init_data spl_pll_config[] = {
+	CORE_PLL_799,
+	TETRIS_PLL_491,
+};
+#endif
+
 void spl_init_keystone_plls(void)
 {
 	init_plls(ARRAY_SIZE(spl_pll_config), spl_pll_config);
