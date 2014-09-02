@@ -27,9 +27,14 @@
 /* Board specific default environment variables */
 #define CONFIG_EXTRA_ENV_KS2_BOARD_SETTINGS				\
 	"addr_mon=0x0c140000\0"						\
+	"args_hdd=setenv bootargs ${bootargs} rw root=/dev/sda1\0"	\
 	"args_ubi=setenv bootargs ${bootargs} rootfstype=ubifs"		\
 	" root=ubi0:rootfs rootflags=sync rw ubi.mtd=2,2048\0"		\
+	"get_fdt_hdd=dhcp ${addr_fdt} ${tftp_root}/${name_fdt}\0"	\
+	"get_kern_hdd=dhcp ${addr_kern} ${tftp_root}/${name_kern}\0"	\
+	"get_mon_hdd=dhcp ${addr_mon} ${tftp_root}/${name_mon}\0"	\
 	"has_mdio=1\0"							\
+	"init_hdd=run set_fs_none args_all args_hdd\0"			\
 	"name_fdt=uImage-k2e-evm.dtb\0"					\
 	"name_fs=arago-console-image-k2e-evm.cpio.gz\0"			\
 	"name_mon=skern-k2e-evm.bin\0"					\
