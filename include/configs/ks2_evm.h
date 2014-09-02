@@ -202,7 +202,9 @@
 
 #define CONFIG_BOOTDELAY		3
 #define CONFIG_BOOTFILE			"uImage"
-#define CONFIG_EXTRA_ENV_SETTINGS					\
+
+/* Common env settings across all KS2 EVMs */
+#define CONFIG_EXTRA_ENV_KS2_SETTINGS					\
 	"boot=ubi\0"							\
 	"tftp_root=/\0"							\
 	"nfs_root=/export\0"						\
@@ -210,21 +212,14 @@
 	"mem_reserve=512M\0"						\
 	"addr_fdt=0x87000000\0"						\
 	"addr_kern=0x88000000\0"					\
-	ADDR_MON							\
 	"addr_uboot=0x87000000\0"					\
 	"addr_fs=0x82000000\0"						\
 	"addr_ubi=0x82000000\0"						\
 	"addr_secdb_key=0xc000000\0"					\
 	"fdt_high=0xffffffff\0"						\
 	"initrd_high=0xffffffff\0"					\
-	NAME_FDT							\
-	HAS_MDIO							\
-	NAME_FS								\
 	"name_uinitrd=uinitrd.bin\0"					\
 	"name_kern=uImage-keystone-evm.bin\0"				\
-	NAME_MON							\
-	NAME_UBOOT							\
-	NAME_UBI							\
 	"run_mon=mon_install ${addr_mon}\0"				\
 	"run_kern=bootm ${addr_kern} ${addr_uinitrd} ${addr_fdt}\0"	\
 	"init_net=run set_fs_none args_all args_net\0"			\
@@ -241,7 +236,6 @@
 	"burn_uboot=sf probe; sf erase 0 0x100000; "			\
 		"sf write ${addr_uboot} 0 ${filesize}\0"		\
 	"args_all=setenv bootargs console=ttyS0,115200n8 rootwait=1\0"	\
-	ARGS_UBI							\
 	"args_net=setenv bootargs ${bootargs} rootfstype=nfs "		\
 		"root=/dev/nfs rw nfsroot=${serverip}:${nfs_root},"	\
 		"${nfs_options} ip=dhcp\0"				\

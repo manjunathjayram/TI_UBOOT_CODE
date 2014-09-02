@@ -24,18 +24,22 @@
 #define CONFIG_SOC_K2HK
 #define CONFIG_K2HK_EVM
 
-/* Defualt environment variables */
-#define ADDR_MON        "addr_mon=0x0c5f0000\0"
-#define NAME_FDT        "name_fdt=uImage-k2hk-evm.dtb\0"
-#define NAME_FS		"name_fs=arago-console-image-k2hk-evm.cpio.gz\0"
-#define NAME_MON        "name_mon=skern-k2hk-evm.bin\0"
-#define NAME_UBOOT      "name_uboot=u-boot-spi-k2hk-evm.gph\0"
-#define NAME_UBI	"name_ubi=k2hk-evm-ubifs.ubi\0"
-#define HAS_MDIO	"has_mdio=0\0"
-#define ARGS_UBI	"args_ubi=setenv bootargs ${bootargs} rootfstype=ubifs"\
-			" root=ubi0:rootfs rootflags=sync rw ubi.mtd=2,2048\0"
+/* Board specific default environment variables */
+#define CONFIG_EXTRA_ENV_KS2_BOARD_SETTINGS				\
+	"addr_mon=0x0c5f0000\0"						\
+	"args_ubi=setenv bootargs ${bootargs} rootfstype=ubifs"		\
+	" root=ubi0:rootfs rootflags=sync rw ubi.mtd=2,2048\0"		\
+	"name_fdt=uImage-k2hk-evm.dtb\0"				\
+	"name_fs=arago-console-image-k2hk-evm.cpio.gz\0"		\
+	"name_mon=skern-k2hk-evm.bin\0"					\
+	"name_uboot=u-boot-spi-k2hk-evm.gph\0"				\
+	"name_ubi=k2hk-evm-ubifs.ubi\0"					\
+	"has_mdio=0\0"
 
 #include <configs/ks2_evm.h>
+
+#define CONFIG_EXTRA_ENV_SETTINGS	CONFIG_EXTRA_ENV_KS2_SETTINGS	\
+					CONFIG_EXTRA_ENV_KS2_BOARD_SETTINGS
 
 /* SPL SPI Loader Configuration */
 #define CONFIG_SPL_TEXT_BASE		0x0c200000
