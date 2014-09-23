@@ -16,3 +16,5 @@ obj-y += watchdog/
 obj-$(CONFIG_QE) += qe/
 obj-y += memory/
 obj-y += pwm/
+# SOC specific infrastructure drivers.
+obj-y += soc/
