@@ -79,6 +79,13 @@ static volatile mdio_regs	*adap_mdio = (mdio_regs *)EMAC_MDIO_BASE_ADDR;
 
 phy_t phy;
 
+#ifdef CONFIG_MCAST_TFTP
+int keystone2_eth_bcast_addr(struct eth_device *dev, u32 ip, u8 set)
+{
+	return 0;
+}
+#endif
+
 static void chip_delay(u32 del)
 {
 	volatile unsigned int i;
@@ -785,6 +792,9 @@ int keystone2_emac_initialize(eth_priv_t *eth_priv)
 	dev->halt		= keystone2_eth_close;
 	dev->send		= keystone2_eth_send_packet;
 	dev->recv		= keystone2_eth_rcv_packet;
+#ifdef CONFIG_MCAST_TFTP
+	dev->mcast		= keystone2_eth_bcast_addr;
+#endif
 	eth_priv->dev		= dev;
 	eth_register(dev);
 
