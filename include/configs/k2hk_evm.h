@@ -50,4 +50,6 @@
 /* U-Boot general configuration */
 #define CONFIG_SYS_PROMPT		"K2HK EVM # "
 
+#define CONFIG_MCAST_TFTP
+
 #endif /* __CONFIG_H */
