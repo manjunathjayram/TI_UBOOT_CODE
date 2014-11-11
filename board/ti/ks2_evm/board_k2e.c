@@ -22,6 +22,7 @@
  */
 
 #include <common.h>
+#include <i2c.h>
 
 #include <asm/arch/hardware.h>
 #include <asm/arch/clock.h>
@@ -87,7 +88,7 @@ int dram_init(void)
 {
 	init_ddr3();
 
-	gd->ram_size = get_ram_size(CONFIG_SYS_SDRAM_BASE,
+	gd->ram_size = get_ram_size((long *)CONFIG_SYS_SDRAM_BASE,
 				    CONFIG_MAX_RAM_BANK_SIZE);
 	init_async_emif(ARRAY_SIZE(async_emif_config), async_emif_config);
 	init_ddr3_ecc(KS2_DDR3_EMIF_CTRL_BASE);
@@ -152,6 +153,18 @@ eth_priv_t eth_priv_cfg[] = {
 		.slave_port	= 8,
 		.sgmii_link_type = SGMII_LINK_MAC_MAC_FORCED,
 	},
+	{
+		.int_name	= "K2E_XMAC0",
+		.rx_flow	= 0,
+		.slave_port	= 1,
+		.sgmii_link_type = XGMII_LINK_MAC_MAC_FORCED,
+	},
+	{
+		.int_name	= "K2E_XMAC1",
+		.rx_flow	= 8,
+		.slave_port	= 2,
+		.sgmii_link_type = XGMII_LINK_MAC_MAC_FORCED,
+	},
 };
 
 inline int get_num_eth_ports(void)
@@ -179,13 +192,36 @@ int get_eth_env_param(char *env_name)
 	return res;
 }
 
+static int board_has_xge(void)
+{
+	int ret;
+
+	ret = i2c_set_bus_num(RTM_BOC_XGE_RETIMER_I2C_BUS);
+	if (ret)
+		return 0;
+
+	ret = i2c_probe(RTM_BOC_XGE_RETIMER1_I2C_ADDR);
+	if (!ret)
+		return 1;
+
+	ret = i2c_probe(RTM_BOC_XGE_RETIMER2_I2C_ADDR);
+	if (!ret)
+		return 1;
+
+	return 0;
+}
+
 int board_eth_init(bd_t *bis)
 {
 	int	j;
 	int	res;
-	int	link_type_name[32];
+	char	link_type_name[32];
+	int	has_xge = board_has_xge();
 
 	for (j = 0; j < get_num_eth_ports(); j++) {
+		if (IS_XGE(&eth_priv_cfg[j]) && !has_xge)
+			continue;
+
 		sprintf(link_type_name, "sgmii%d_link_type", j);
 		res = get_eth_env_param(link_type_name);
 		if (res >= 0)
