@@ -294,6 +294,9 @@ struct ddr3_emif_config {
 /* SGMII SerDes */
 #define KS2_SGMII_SERDES_BASE		0x0232a000
 
+/* Logical Queue Manager's number of queues */
+#define KS2_QUEUES_PER_QUEUE_MGR	4096
+
 #ifdef CONFIG_SOC_K2HK
 #include <asm/arch/hardware-k2hk.h>
 #endif
