@@ -343,7 +343,40 @@ struct pktdma_cfg k2l_netcp_pktdma = {
 	.dest_port_info	= TAG_INFO,
 };
 
+struct pktdma_cfg k2hk_netcpx_pktdma = {
+	.global		= (struct global_ctl_regs *)0x2fa1000,
+	.tx_ch		= (struct tx_chan_regs *)0x2fa1400,
+	.tx_ch_num	= 8,
+	.rx_ch		= (struct rx_chan_regs *)0x02fa1800,
+	.rx_ch_num	= 16,
+	.tx_sched	= (u32 *)0x02fa1c00,
+	.rx_flows	= (struct rx_flow_regs *)0x02fa2000,
+	.rx_flow_num	= 16,
+
+	.rx_free_q	= 9029,
+	.rx_rcv_q	= 9030,
+	.tx_snd_q       = 8752,
+	.dest_port_info	= TAG_INFO,
+};
+
+struct pktdma_cfg k2e_netcpx_pktdma = {
+	.global		= (struct global_ctl_regs *)0x2fa1000,
+	.tx_ch		= (struct tx_chan_regs *)0x2fa1400,
+	.tx_ch_num	= 8,
+	.rx_ch		= (struct rx_chan_regs *)0x02fa1800,
+	.rx_ch_num	= 16,
+	.tx_sched	= (u32 *)0x02fa1c00,
+	.rx_flows	= (struct rx_flow_regs *)0x02fa2000,
+	.rx_flow_num	= 16,
+
+	.rx_free_q	= 4001,
+	.rx_rcv_q	= 4002,
+	.tx_snd_q       = 692,
+	.dest_port_info	= TAG_INFO,
+};
+
 struct pktdma_cfg *netcp;
+struct pktdma_cfg *netcpx;
 
 static int netcp_rx_disable(struct pktdma_cfg *netcp_cfg)
 {
@@ -499,6 +532,29 @@ int netcp_init(struct rx_buff_desc *rx_buffers)
 		return QM_ERR;
 }
 
+int netcpx_init(struct rx_buff_desc *rx_buffers)
+{
+	if (cpu_is_k2hk()) {
+		if (!qm2_cfg)
+			return QM_ERR;
+
+		netcpx = &k2hk_netcpx_pktdma;
+		_netcp_init(netcpx, rx_buffers, qm2_cfg->qpool_num);
+		return QM_OK;
+	}
+
+	if (cpu_is_k2e()) {
+		if (!qm_cfg)
+			return QM_ERR;
+
+		netcpx = &k2e_netcpx_pktdma;
+		_netcp_init(netcpx, rx_buffers, qm_cfg->qpool_num);
+		return QM_OK;
+	}
+
+	return QM_ERR;
+}
+
 static int _netcp_close(struct pktdma_cfg *ncp)
 {
 	if (!ncp)
@@ -517,6 +573,11 @@ static int _netcp_close(struct pktdma_cfg *ncp)
 int netcp_close(void)
 {
 	return _netcp_close(netcp);
+}
+
+int netcpx_close(void)
+{
+	return _netcp_close(netcpx);
 }
 
 static int _netcp_send(struct pktdma_cfg *ncp, u32 *pkt,
@@ -549,6 +610,12 @@ int netcp_send(u32 *pkt, int num_bytes, u32 dest_port)
 	return _netcp_send(netcp, pkt, num_bytes, dest_port, netcp->qpool_num);
 }
 
+int netcpx_send(u32 *pkt, int num_bytes, u32 dest_port)
+{
+	return _netcp_send(netcpx, pkt, num_bytes,
+			dest_port, netcpx->qpool_num);
+}
+
 static void *_netcp_recv(struct pktdma_cfg *ncp, u32 **pkt, int *num_bytes)
 {
 	struct qm_host_desc *hd;
@@ -568,6 +635,11 @@ void *netcp_recv(u32 **pkt, int *num_bytes)
 	return _netcp_recv(netcp, pkt, num_bytes);
 }
 
+void *netcpx_recv(u32 **pkt, int *num_bytes)
+{
+	return _netcp_recv(netcpx, pkt, num_bytes);
+}
+
 static void _netcp_release_rxhd(struct pktdma_cfg *ncp, void *hd)
 {
 	struct qm_host_desc *_hd = (struct qm_host_desc *)hd;
@@ -581,6 +653,11 @@ static void _netcp_release_rxhd(struct pktdma_cfg *ncp, void *hd)
 void netcp_release_rxhd(void *hd)
 {
 	return _netcp_release_rxhd(netcp, hd);
+}
+
+void netcpx_release_rxhd(void *hd)
+{
+	return _netcp_release_rxhd(netcpx, hd);
 }
 /* use the stucture from init.c */
 

@@ -212,4 +212,10 @@ int netcp_send(u32 *pkt, int num_bytes, u32 dest_port);
 void* netcp_recv(u32 **pkt, int* num_bytes);
 void netcp_release_rxhd(void *hd);
 
+int netcpx_close(void);
+int netcpx_init(struct rx_buff_desc *rx_buffers);
+int netcpx_send(u32 *pkt, int num_bytes, u32 dest_port);
+void *netcpx_recv(u32 **pkt, int *num_bytes);
+void netcpx_release_rxhd(void *hd);
+
 #endif  /* _KEYSTONE_NAV_H_ */
