@@ -183,6 +183,7 @@ struct pktdma_cfg k2hk_netcp_pktdma = {
 	.rx_free_q	= 4001,
 	.rx_rcv_q	= 4002,
 	.tx_snd_q       = 648,
+	.dest_port_info	= PKT_INFO,
 };
 
 struct pktdma_cfg k2e_netcp_pktdma = {
@@ -198,6 +199,7 @@ struct pktdma_cfg k2e_netcp_pktdma = {
 	.rx_free_q	= 4001,
 	.rx_rcv_q	= 4002,
 	.tx_snd_q	= 896,
+	.dest_port_info	= TAG_INFO,
 };
 
 struct pktdma_cfg k2l_netcp_pktdma = {
@@ -213,6 +215,7 @@ struct pktdma_cfg k2l_netcp_pktdma = {
 	.rx_free_q	= 4001,
 	.rx_rcv_q	= 4002,
 	.tx_snd_q	= 896,
+	.dest_port_info	= TAG_INFO,
 };
 
 struct pktdma_cfg *netcp;
@@ -369,7 +372,7 @@ int netcp_close(void)
 	return QM_OK;
 }
 
-int netcp_send(u32 *pkt, int num_bytes, u32 swinfo2)
+int netcp_send(u32 *pkt, int num_bytes, u32 dest_port)
 {
 	struct qm_host_desc *hd;
 
@@ -377,9 +380,14 @@ int netcp_send(u32 *pkt, int num_bytes, u32 swinfo2)
 	if (hd == NULL)
 		return QM_ERR;
 
-	hd->desc_info	= num_bytes;
-	hd->swinfo[2]	= swinfo2;
-	hd->packet_info = qm_cfg->qpool_num;
+	dest_port &= 0xf;
+	hd->desc_info = num_bytes;
+	if (netcp->dest_port_info == PKT_INFO)
+		hd->packet_info = qm_cfg->qpool_num | (dest_port << 16);
+	else {
+		hd->packet_info = qm_cfg->qpool_num;
+		hd->tag_info = dest_port;
+	}
 
 	qm_buff_push(hd, netcp->tx_snd_q, pkt, num_bytes);
 

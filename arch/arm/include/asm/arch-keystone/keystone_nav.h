@@ -161,6 +161,11 @@ struct rx_flow_regs {
 	u32	thresh[3];
 };
 
+enum dest_port_info {
+	PKT_INFO,
+	TAG_INFO
+};
+
 struct pktdma_cfg {
 	struct global_ctl_regs*	global;
 	struct tx_chan_regs*	tx_ch;
@@ -178,6 +183,7 @@ struct pktdma_cfg {
 
 	/* */
 	u32			rx_flow; /* flow that is used for RX */
+	enum dest_port_info	dest_port_info;/* HD fiels for dest port bits */
 };
 
 /*
@@ -193,7 +199,7 @@ struct rx_buff_desc {
 
 int netcp_close(void);
 int netcp_init(struct rx_buff_desc *rx_buffers);
-int netcp_send(u32 *pkt, int num_bytes, u32 swinfo2);
+int netcp_send(u32 *pkt, int num_bytes, u32 dest_port);
 void* netcp_recv(u32 **pkt, int* num_bytes);
 void netcp_release_rxhd(void *hd);
 
