@@ -20,6 +20,7 @@
 #include <common.h>
 #include <command.h>
 
+#include <asm/arch/hardware.h>
 #include <net.h>
 #include <miiphy.h>
 #include <malloc.h>
@@ -31,6 +32,7 @@ unsigned int emac_dbg = 0;
 #define debug_emac(fmt, args...) if (emac_dbg) printf(fmt, ##args)
 
 unsigned int emac_open = 0;
+unsigned int xmac_open;
 static unsigned int loopback_test = 0;
 static unsigned int sys_has_mdio = 1;
 
@@ -102,7 +104,7 @@ int keystone2_eth_read_mac_addr(struct eth_device *dev)
 	eth_priv = (eth_priv_t*)dev->priv;
 
 	/* Read the e-fuse mac address */
-	if (eth_priv->slave_port == 1) {
+	if ((eth_priv->slave_port == 1) && IS_1GE(eth_priv)) {
 		maca = __raw_readl(MAC_ID_BASE_ADDR);
 		macb = __raw_readl(MAC_ID_BASE_ADDR + 4);
 
@@ -377,6 +379,9 @@ static void  __attribute__((unused))
 	u_int16_t data;
 	eth_priv_t *eth_priv = (eth_priv_t*)dev->priv;
 
+	if (IS_XGE(eth_priv))
+		return;
+
 	if (sys_has_mdio) {
 		if (keystone2_eth_phy_read(eth_priv->phy_addr, 0, &data) ||
 			!(data & (1 << 6))) /* speed selection MSB */
@@ -633,6 +638,11 @@ static int keystone2_eth_open(struct eth_device *dev, bd_t *bis)
 
 	debug_emac("+ emac_open\n");
 
+	if (xmac_open) {
+		printf("keystone2_eth_open ERR - 10G intf is still open!\n");
+		return -1;
+	}
+
 	net_rx_buffs.rx_flow	= eth_priv->rx_flow;
 
 	sys_has_mdio =
@@ -649,13 +659,14 @@ static int keystone2_eth_open(struct eth_device *dev, bd_t *bis)
 	udelay(10000);
 
 	/* On chip switch configuration */
-	ethss_config (targetGetSwitchCtl(), targetGetSwitchMaxPktSize());
+	ethss_config(target_get_sw_ctl(), target_get_sw_max_pkt_size());
 
 	/* TODO: add error handling code */
 	if (qm_init()) {
 		printf("ERROR: qm_init()\n");
 		return (-1);
 	}
+
 	if (netcp_init(&net_rx_buffs)) {
 		qm_close();
 		printf("ERROR: netcp_init()\n");
@@ -746,23 +757,256 @@ static int keystone2_eth_send_packet(struct eth_device *dev,
 static int keystone2_eth_rcv_packet(struct eth_device *dev)
 {
 	void *hd;
-	u32  pkt_size;
+	int  pkt_size;
 	u32  *pkt;
 
 	hd = netcp_recv(&pkt, &pkt_size);
 	if (hd == NULL)
 		return (0);
 
-	NetReceive ((volatile uchar *)pkt, pkt_size);
+	NetReceive((uchar *)pkt, pkt_size);
 
 	netcp_release_rxhd(hd);
 
-	return (pkt_size);
+	return pkt_size;
 }
 
 inline void keystone2_emac_set_loopback_test(int val)
 {
 	loopback_test = val;
+}
+
+static int xmac_sl_reset(u32 port)
+{
+	u32 i, v;
+
+	if (port >= DEVICE_N_XMACSL_PORTS)
+		return GMACSL_RET_INVALID_PORT;
+
+	/* Set the soft reset bit */
+	DEVICE_REG32_W(DEVICE_XMACSL_BASE(port) +
+		       CPXMACSL_REG_RESET, CPGMAC_REG_RESET_VAL_RESET);
+
+	/* Wait for the bit to clear */
+	for (i = 0; i < DEVICE_EMACSL_RESET_POLL_COUNT; i++) {
+		v = DEVICE_REG32_R(DEVICE_XMACSL_BASE(port) +
+				    CPXMACSL_REG_RESET);
+		if ((v & CPGMAC_REG_RESET_VAL_RESET_MASK) !=
+		    CPGMAC_REG_RESET_VAL_RESET)
+			return GMACSL_RET_OK;
+	}
+
+	/* Timeout on the reset */
+	return GMACSL_RET_WARN_RESET_INCOMPLETE;
+}
+
+static int xmac_sl_config(u_int16_t port, struct mac_sl_cfg *cfg)
+{
+	u32 v, i;
+	int ret = GMACSL_RET_OK;
+
+	if (port >= DEVICE_N_XMACSL_PORTS)
+		return GMACSL_RET_INVALID_PORT;
+
+	if (cfg->max_rx_len > CPGMAC_REG_MAXLEN_LEN) {
+		cfg->max_rx_len = CPGMAC_REG_MAXLEN_LEN;
+		ret = GMACSL_RET_WARN_MAXLEN_TOO_BIG;
+	}
+
+	/* Must wait if the device is undergoing reset */
+	for (i = 0; i < DEVICE_EMACSL_RESET_POLL_COUNT; i++) {
+		v = DEVICE_REG32_R(DEVICE_XMACSL_BASE(port) +
+				   CPXMACSL_REG_RESET);
+		if ((v & CPGMAC_REG_RESET_VAL_RESET_MASK) !=
+		    CPGMAC_REG_RESET_VAL_RESET)
+			break;
+	}
+
+	if (i == DEVICE_EMACSL_RESET_POLL_COUNT)
+		return GMACSL_RET_CONFIG_FAIL_RESET_ACTIVE;
+
+	DEVICE_REG32_W(DEVICE_XMACSL_BASE(port) + CPXMACSL_REG_MAXLEN,
+			cfg->max_rx_len);
+
+	DEVICE_REG32_W(DEVICE_XMACSL_BASE(port) + CPXMACSL_REG_CTL,
+			cfg->ctl);
+
+	/* Map RX packet flow priority to 0 */
+	DEVICE_REG32_W(DEVICE_XMACSL_BASE(port) + CPXMACSL_REG_RX_PRI_MAP, 0);
+
+	return ret;
+}
+
+static int xgess_config(u32 ctl, u32 max_pkt_size)
+{
+	u32 i;
+
+	DEVICE_REG32_W(KS2_XGESS_BASE + XGESS_REG_CTL,
+				XGESS_REG_VAL_XGMII_MODE);
+
+	/* Max length register */
+	DEVICE_REG32_W(DEVICE_CPSWX_BASE + CPSWX_REG_MAXLEN, max_pkt_size);
+
+	/* Control register */
+	DEVICE_REG32_W(DEVICE_CPSWX_BASE + CPSWX_REG_CTL, ctl);
+
+	/* All statistics enabled by default */
+	DEVICE_REG32_W(DEVICE_CPSWX_BASE + CPSWX_REG_STAT_PORT_EN,
+		       CPSWX_REG_VAL_STAT_ENABLE_ALL);
+
+	/* Reset and enable the ALE */
+	DEVICE_REG32_W(DEVICE_CPSWX_BASE + CPSWX_REG_ALE_CONTROL,
+		       CPSW_REG_VAL_ALE_CTL_RESET_AND_ENABLE |
+		       CPSW_REG_VAL_ALE_CTL_BYPASS);
+
+	/* All ports put into forward mode */
+	for (i = 0; i < DEVICE_CPSWX_NUM_PORTS; i++)
+		DEVICE_REG32_W(DEVICE_CPSWX_BASE + CPSWX_REG_ALE_PORTCTL(i),
+			       CPSW_REG_VAL_PORTCTL_FORWARD_MODE);
+
+	return 0;
+}
+
+static int xgess_start(void)
+{
+	int i;
+	struct mac_sl_cfg cfg;
+
+	cfg.max_rx_len	= MAX_SIZE_STREAM_BUFFER;
+
+	cfg.ctl		= (XMACSL_XGMII_ENABLE	|
+			   XMACSL_XGIG_MODE	|
+			   XMACSL_RX_ENABLE_CSF	|
+			   GMACSL_RX_ENABLE_EXT_CTL);
+
+	for (i = 0; i < DEVICE_N_GMACSL_PORTS; i++) {
+		xmac_sl_reset(i);
+		xmac_sl_config(i, &cfg);
+	}
+
+	return 0;
+}
+
+static int xgess_stop(void)
+{
+	int i;
+
+	for (i = 0; i < DEVICE_N_XMACSL_PORTS; i++)
+		xmac_sl_reset(i);
+
+	return 0;
+}
+
+/* XGE device open */
+static int keystone2_xge_open(struct eth_device *dev, bd_t *bis)
+{
+	eth_priv_t *eth_priv = (eth_priv_t *)dev->priv;
+	int ret;
+
+	debug_emac("+ xmac_open\n");
+
+	if (emac_open) {
+		printf("keystone2_xge_open ERR - 1G intf is still open!\n");
+		return -1;
+	}
+
+	net_rx_buffs.rx_flow	= eth_priv->rx_flow;
+	xge_serdes_init();
+	udelay(10000);
+	xgess_config(target_get_sw_ctl(), target_get_sw_max_pkt_size());
+
+	/* TODO: add error handling code */
+	if (cpu_is_k2hk())
+		ret = qm2_init();
+	else if (cpu_is_k2e())
+		ret = qm_init();
+	else
+		return -1;
+
+	if (ret) {
+		printf("ERROR: xge qm(2) init()\n");
+		return -1;
+	}
+
+	if (netcpx_init(&net_rx_buffs)) {
+		if (cpu_is_k2hk())
+			qm2_close();
+		else
+			qm_close();
+		printf("ERROR: netcpx_init()\n");
+		return -1;
+	}
+
+	if (!loopback_test)
+		emac_gigabit_enable(dev);
+
+	xgess_start();
+
+	debug_emac("- xmac_open\n");
+
+	xmac_open = 1;
+
+	return 0;
+}
+
+/* XGE device close */
+static void keystone2_xge_close(struct eth_device *dev)
+{
+	debug_emac("+ xmac_close\n");
+
+	if (!xmac_open)
+		return;
+
+	if (cpu_is_k2l())
+		return;
+
+	xgess_stop();
+
+	netcpx_close();
+
+	if (cpu_is_k2hk())
+		qm2_close();
+	else
+		qm_close();
+
+	xmac_open = 0;
+
+	debug_emac("- xmac_close\n");
+}
+
+static int keystone2_xge_send_packet(struct eth_device *dev,
+			     void *packet, int length)
+{
+	int ret;
+	eth_priv_t *eth_priv = (eth_priv_t *)dev->priv;
+
+	if (length < EMAC_MIN_ETHERNET_PKT_SIZE)
+		length = EMAC_MIN_ETHERNET_PKT_SIZE;
+
+	ret = netcpx_send((u32 *)packet, length, eth_priv->slave_port);
+	if (ret) {
+		printf("netcpx_send error: %d\n", ret);
+		return ret;
+	}
+
+	return length;
+}
+
+static int keystone2_xge_rcv_packet(struct eth_device *dev)
+{
+	void *hd;
+	int  pkt_size;
+	u32  *pkt;
+
+	hd = netcpx_recv(&pkt, &pkt_size);
+	if (hd == NULL)
+		return 0;
+
+	NetReceive((uchar *)pkt, pkt_size);
+
+	netcpx_release_rxhd(hd);
+
+	return pkt_size;
 }
 /*
  * This function initializes the EMAC hardware. It does NOT initialize
@@ -774,6 +1018,7 @@ int keystone2_emac_initialize(eth_priv_t *eth_priv)
 	struct eth_device *dev;
 	static int phy_registered = 0;
 	static int emac_poweron = 1;
+	static int xmac_poweron = 1;
 
 	dev = malloc(sizeof *dev);
 	if (dev == NULL)
@@ -797,7 +1042,7 @@ int keystone2_emac_initialize(eth_priv_t *eth_priv)
 	eth_priv->dev		= dev;
 	eth_register(dev);
 
-	if (emac_poweron) {
+	if (emac_poweron && IS_1GE(eth_priv)) {
 		emac_poweron = 0;
 		/* By default, select PA PLL clock as PA clock source */
 		if (psc_enable_module(KS2_LPSC_PA))
@@ -807,6 +1052,19 @@ int keystone2_emac_initialize(eth_priv_t *eth_priv)
 		if (psc_enable_module(KS2_LPSC_CRYPTO))
 			return -1;
 		pll_pa_clk_sel(1);
+	} else if (IS_XGE(eth_priv)) {
+		dev->init	= keystone2_xge_open;
+		dev->halt	= keystone2_xge_close;
+		dev->send	= keystone2_xge_send_packet;
+		dev->recv	= keystone2_xge_rcv_packet;
+#ifdef CONFIG_MCAST_TFTP
+		dev->mcast	= keystone2_eth_bcast_addr;
+#endif
+		if (xmac_poweron) {
+			xmac_poweron = 0;
+			if (psc_enable_module(KS2_LPSC_XGE))
+				return -1;
+		}
 	}
 
 	if ((eth_priv->sgmii_link_type == SGMII_LINK_MAC_PHY) &&
@@ -837,4 +1095,3 @@ int keystone2_emac_initialize(eth_priv_t *eth_priv)
 
 	return(0);
 }
-

@@ -64,6 +64,7 @@
 #define K2E_LPSC_EMIF4F_DDR3		23
 #define K2E_LPSC_PCIE_1			27
 #define K2E_LPSC_XGE			50
+#define KS2_LPSC_XGE			K2E_LPSC_XGE
 #define K2E_LPSC_TETRIS			KS2_LPSC_TETRIS
 
 /* DDR3 definitions */
@@ -112,4 +113,7 @@ enum {
 	SPD_RSV
 };
 #endif
+#define RTM_BOC_XGE_RETIMER_I2C_BUS	2
+#define RTM_BOC_XGE_RETIMER1_I2C_ADDR	0x18
+#define RTM_BOC_XGE_RETIMER2_I2C_ADDR	0x19
 #endif /* __ASM_ARCH_HARDWARE_H */

@@ -389,6 +389,7 @@ int mon_power_off(int core_id);
 void pll_pa_clk_sel(int pa_pll);
 void reset_ddrphy(u32 base);
 void sgmii_serdes_setup_156p25mhz(void);
+int xge_serdes_init(void);
 
 extern u32 debug_options;
 #endif

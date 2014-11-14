@@ -119,8 +119,10 @@ struct mac_sl_cfg {
 #define CPSW_CTL_P0_ENABLE              (1 << 2)
 #define CPSW_CTL_VLAN_AWARE             (1 << 1)
 
-#define targetGetSwitchCtl()        CPSW_CTL_P0_ENABLE   /* Enable port 0 */
-#define targetGetSwitchMaxPktSize() 9000
+/* Enable port 0 */
+#define target_get_sw_ctl()		CPSW_CTL_P0_ENABLE
+
+#define target_get_sw_max_pkt_size()	9000
 
 /* Register values */
 #define CPSW_REG_VAL_ALE_CTL_RESET_AND_ENABLE	((u_int32_t)0xc0000000)
@@ -142,6 +144,8 @@ struct mac_sl_cfg {
 #define SGMII_LINK_MAC_MAC_FORCED	2
 #define SGMII_LINK_MAC_FIBER		3
 #define SGMII_LINK_MAC_PHY_FORCED	4
+#define XGMII_LINK_MAC_PHY		10
+#define XGMII_LINK_MAC_MAC_FORCED	11
 
 #define TARGET_SGMII_EXTERNAL_SERDES
 #define TARGET_SGMII_TYPE_2             /* Use second sgmii setup sequence */
@@ -196,6 +200,38 @@ typedef struct
 } eth_priv_t;
 
 void keystone2_eth_open_close(struct eth_device *dev);
+int keystone2_emac_initialize(eth_priv_t *eth_priv);
+
+#define KS2_XGESS_BASE			0x02f00000
+#define DEVICE_CPSWX_BASE		(KS2_XGESS_BASE + 0x1000)
+#define KS2_XMACSL_BASE			(KS2_XGESS_BASE + 0x1400)
+#define DEVICE_CPSWX_NUM_PORTS		3	/* 3 switch ports */
+#define DEVICE_XMACSL_BASE(x)		(KS2_XMACSL_BASE + (x) * 0x40)
+
+#define DEVICE_N_XMACSL_PORTS           (DEVICE_CPSWX_NUM_PORTS - 1)
+
+/* Register offsets */
+#define XGESS_REG_CTL			0x00c
+#define CPSWX_REG_CTL			0x004
+#define CPSWX_REG_STAT_PORT_EN		0x00c
+#define CPSWX_REG_MAXLEN		0x048
+#define CPSWX_REG_ALE_CONTROL		0x708
+#define CPSWX_REG_ALE_PORTCTL(x)	(0x740 + (x) * 4)
+
+#define CPXMACSL_REG_CTL		0x04
+#define CPXMACSL_REG_RESET		0x0c
+#define CPXMACSL_REG_MAXLEN		0x10
+#define CPXMACSL_REG_RX_PRI_MAP		0x24
+
+/* Register values */
+#define XGESS_REG_VAL_XGMII_MODE	0x3
+#define XMACSL_RX_ENABLE_CSF		(1 << 23)
+#define XMACSL_XGMII_ENABLE		(1 << 13)
+#define XMACSL_XGIG_MODE		(1 << 8)
+
+#define CPSWX_REG_VAL_STAT_ENABLE_ALL	0x7
+#define IS_1GE(c)	((c)->sgmii_link_type < XGMII_LINK_MAC_PHY)
+#define IS_XGE(c)	(!IS_1GE(c))
 
 #ifdef CONFIG_SOC_K2HK
 #include <asm/arch/emac_defs_netcp.h>
