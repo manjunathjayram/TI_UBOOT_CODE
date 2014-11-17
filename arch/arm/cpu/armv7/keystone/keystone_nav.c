@@ -44,6 +44,27 @@ struct qm_config ks2_qm_memmap = {
 	.qpool_num	= 4000,
 };
 
+struct qm_config ks2_qm2_memmap = {
+	.stat_cfg	= 0x02a60000,				/* peek */
+	.queue		= (struct qm_reg_queue *)0x02aa0000,	/* push pop */
+	.mngr_vbusm	= 0x23aa0000,
+	.i_lram		= 0x00100000,
+	.proxy		= (struct qm_reg_queue *)0x02ad0000,
+	.status_ram	= 0x02a06400,				/* status */
+	.mngr_cfg	= (struct qm_cfg_reg *)0x02a04000,	/* config */
+	.intd_cfg	= 0x02a0d000,
+	.desc_mem	= (struct descr_mem_setup_reg *)0x02a05000, /* region */
+	.region_num	= 64,
+	.pdsp_cmd	= 0x02a24000,
+	.pdsp_ctl	= 0x02a0f100,
+	.pdsp_iram	= 0x02a11000,
+
+	.i_lram_size	= 0x7fff,
+	.start_queue	= 8192,
+	.num_queues	= 8192,
+	.qpool_num	= 9028,
+};
+
 /*
  * We are going to use only one type of descriptors - host packet
  * descriptors. We staticaly allocate memory for them here
@@ -52,6 +73,7 @@ struct qm_host_desc desc_pool[HDESC_NUM]
 	__attribute__((aligned(sizeof(struct qm_host_desc))));
 
 static struct qm_config *qm_cfg = NULL;
+static struct qm_config *qm2_cfg;
 
 int inline num_of_desc_to_reg(int num_descr)
 {
@@ -88,6 +110,9 @@ static inline struct qm_config *qnum_to_qmgr(u32 qnum)
 {
 	if (qm_cfg && qmgr_manage_qnum(qm_cfg, qnum))
 		return qm_cfg;
+
+	if (qm2_cfg && qmgr_manage_qnum(qm2_cfg, qnum))
+		return qm2_cfg;
 
 	return NULL;
 }
@@ -128,6 +153,10 @@ int qm_init(void)
 	if (qm_cfg)
 		return QM_OK;
 
+	if (qm2_cfg)
+		return QM_ERR;
+
+	memset(desc_pool, 0, sizeof(desc_pool));
 	ks2_qm_memmap.desc_pool_base = (u32)desc_pool;
 	ks2_qm_memmap.desc_pool_size = sizeof(desc_pool);
 	ks2_qm_memmap.num_desc = HDESC_NUM;
@@ -137,6 +166,30 @@ int qm_init(void)
 	ret = _qm_init(qm_cfg);
 	if (ret != QM_OK)
 		qm_cfg = NULL;
+
+	return ret;
+}
+
+int qm2_init(void)
+{
+	int ret;
+
+	if (qm2_cfg)
+		return QM_OK;
+
+	if (qm_cfg)
+		return QM_ERR;
+
+	memset(desc_pool, 0, sizeof(desc_pool));
+	ks2_qm2_memmap.desc_pool_base = (u32)desc_pool;
+	ks2_qm2_memmap.desc_pool_size = sizeof(desc_pool);
+	ks2_qm2_memmap.num_desc = HDESC_NUM;
+
+	qm2_cfg = &ks2_qm2_memmap;
+
+	ret = _qm_init(qm2_cfg);
+	if (ret != QM_OK)
+		qm2_cfg = NULL;
 
 	return ret;
 }
@@ -170,6 +223,15 @@ void qm_close(void)
 
 	_qm_close(qm_cfg);
 	qm_cfg = NULL;
+}
+
+void qm2_close(void)
+{
+	if (!qm2_cfg)
+		return;
+
+	_qm_close(qm2_cfg);
+	qm2_cfg = NULL;
 }
 
 void qm_push(struct qm_host_desc *hd, u32 qnum)
