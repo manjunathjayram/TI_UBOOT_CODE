@@ -82,6 +82,7 @@
 #define K2L_LPSC_DPD4X			48
 #define K2L_LPSC_FFTC_B			49
 #define K2L_LPSC_IQN_AIL		50
+#define KS2_LPSC_XGE			~0UL
 #define K2L_LPSC_TETRIS			KS2_LPSC_TETRIS
 
 /* DDR3 definitions */
