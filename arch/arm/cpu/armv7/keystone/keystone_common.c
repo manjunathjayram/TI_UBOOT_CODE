@@ -25,6 +25,8 @@
 
 #include <asm/arch/hardware.h>
 #include <asm/io.h>
+#include <srss.h>
+#include <tps544.h>
 
 /* Byte swap the 32-bit data if the device is BE */
 int cpu_to_bus(u32 *ptr, u32 length)
@@ -93,6 +95,21 @@ int misc_init_r(void)
 
 	if ((debug_options & DBG_LEAVE_DSPS_ON) == 0)
 		turn_off_all_dsps(KS2_NUM_DSPS);
+
+	/* workarounds:
+	 * 1: select PA PLL clock souce after powering on PA clock domain;
+	 * 2. initialize SRSS after configuring PA clock since SRSS uses PA clk
+	 */
+	if (psc_enable_module(KS2_LPSC_PA))
+		return -1;
+	pll_pa_clk_sel(1);
+
+#ifdef CONFIG_SRSS_C0
+	i2c_init(CONFIG_SYS_I2C_SPEED, CONFIG_SYS_I2C_SLAVE);
+
+	/* inistialize SRSS class 0 */
+	srss_c0_init(KS2_SRSS_BASE, srss_tps544_init);
+#endif
 
 	return 0;
 }
