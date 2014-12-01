@@ -188,14 +188,14 @@ unsigned int read_efuse_bootrom(void)
 #define read_efuse_bootrom() __raw_readl(KS2_EFUSE_BOOTROM)
 #endif
 
-int inline get_max_dev_speed(void)
+int inline get_max_arm_speed(void)
 {
-	return get_max_speed(read_efuse_bootrom() & 0xffff, dev_speeds);
+	return get_max_speed(read_efuse_bootrom() & 0xffff, arm_speeds);
 }
 
 #ifndef CONFIG_SOC_K2E
-int inline get_max_arm_speed(void)
+int inline get_max_dev_speed(void)
 {
-	return get_max_speed((read_efuse_bootrom() >> 16) & 0xffff, arm_speeds);
+	return get_max_speed((read_efuse_bootrom() >> 16) & 0xffff, dev_speeds);
 }
 #endif

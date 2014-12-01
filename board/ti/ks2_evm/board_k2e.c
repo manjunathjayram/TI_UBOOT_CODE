@@ -241,7 +241,7 @@ int board_early_init_f(void)
 {
 	int speed;
 
-	speed = get_max_dev_speed();
+	speed = get_max_arm_speed();
 
 	if (speed != SPD800 && speed != SPD_RSV)
 		init_pll(&core_pll_config[speed]);
