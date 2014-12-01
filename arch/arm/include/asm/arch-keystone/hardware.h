@@ -265,6 +265,7 @@ struct ddr3_emif_config {
 
 /* PSC */
 #define KS2_PSC_BASE			0x02350000
+#define KS2_LPSC_CHIP_SRSS		13
 #define KS2_LPSC_GEM_0			15
 #define KS2_LPSC_TETRIS			52
 #define KS2_TETRIS_PWR_DOMAIN		31
@@ -296,6 +297,12 @@ struct ddr3_emif_config {
 
 /* Logical Queue Manager's number of queues */
 #define KS2_QUEUES_PER_QUEUE_MGR	4096
+
+/* Smart Reflex Sub-System */
+#define KS2_SRSS_BASE			0x02330000
+
+/* SoC SRSS registers */
+#define KS2_KT_VDD_SR_C0		(KS2_DEVICE_STATE_CTRL_BASE + 0x180)
 
 #ifdef CONFIG_SOC_K2HK
 #include <asm/arch/hardware-k2hk.h>
