@@ -54,13 +54,6 @@
 #define THPT5_SHIFT		24
 #define THPT_MASK		0xff
 
-/* Default temperature theshold point values */
-#define THPT1_DEFAULT		0xd8	/* -40 degree C */
-#define THPT2_DEFAULT		0x0	/* 0 degree C */
-#define THPT3_DEFAULT		0x20	/* 32 degree C */
-#define THPT4_DEFAULT		0x50	/* 80 degree C */
-#define THPT5_DEFAULT		0x64	/* 100 degree C */
-
 /* SRSS_VPRM_CTL0 definitions */
 #define VPRM_ENABLE		(0x1 << 0)	/* enables SR C0 */
 #define VPRM_DISABLE		(0x0 << 0)	/* disable VPRM FSM */
@@ -143,11 +136,8 @@ int srss_c0_init(u32 base, int (*pc_init)(u32, u32, u8))
 	/* Check if kt_opp1/kt_opp2 is programmed in efuse or not */
 	opp_sel = (kt_sr_c0 >> OPP_SEL_SHIFT) & OPP_SEL_MASK;
 	if ((opp_sel != 1) && (opp_sel != 2)) {
-		/* by default select OPP-1 (1.2GHz)
-		 * VDDmin 0.7 Volt (VID = 0) */
-		opp_sel = 1;
-		kt_sr_c0 &= ~(OPP_SEL_MASK << OPP_SEL_SHIFT);
-		kt_sr_c0 |= opp_sel << OPP_SEL_SHIFT;
+		srss_vprm_c0_enable(base, 0);	/* disable SRSS C0 */
+		return -1;
 	}
 
 	/* Get the initial VID value (6-bit) */
@@ -190,13 +180,8 @@ int srss_c0_init(u32 base, int (*pc_init)(u32, u32, u8))
 		efuse = 0;
 
 	if (!efuse) {
-		/* Set the default temp_ctl0, disable tm0 & 1,
-		 * hysteresis +/- 1c, volt change step size 12.5mV */
-		temp_ctl0 |= THPT1_DEFAULT << THPT1_SHIFT;
-		temp_ctl1 = (THPT2_DEFAULT << THPT2_SHIFT) | \
-			    (THPT3_DEFAULT << THPT3_SHIFT) | \
-			    (THPT4_DEFAULT << THPT4_SHIFT) | \
-			    (THPT5_DEFAULT << THPT5_SHIFT);
+		srss_vprm_c0_enable(base, 0);	/* disable SRSS C0 */
+		return -1;
 	}
 
 	/* thpts decrement enabled by default if not efused */
