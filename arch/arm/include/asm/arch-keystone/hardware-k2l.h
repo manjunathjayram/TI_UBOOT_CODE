@@ -45,6 +45,7 @@
 /* Power and Sleep Controller (PSC) Domains */
 #define K2L_LPSC_MOD			0
 #define K2L_LPSC_DFE_IQN_SYS		1
+#define KS2_LPSC_USB1			~0UL
 #define K2L_LPSC_USB			2
 #define KS2_LPSC_USB			K2L_LPSC_USB
 #define K2L_LPSC_EMIF25_SPI		3

@@ -55,4 +55,6 @@
 /* U-Boot general configuration */
 #define CONFIG_SYS_PROMPT		"K2E EVM # "
 
+#define CONFIG_USB_MAX_CONTROLLER_COUNT	2
+
 #endif /* __CONFIG_H */

@@ -42,6 +42,10 @@
 #define KEYSTONE2_DEV_USB_PHY_BASE		0x02620738
 #define KEYSTONE2_USB_PHY_CFG_BASE		0x02630000
 
+#define KEYSTONE2_USB1_SS_BASE			0x25000000
+#define KEYSTONE2_USB1_HOST_XHCI_BASE		(KEYSTONE2_USB1_SS_BASE + 0x10000)
+#define KEYSTONE2_DEV_USB1_PHY_BASE		0x02620750
+
 #define BIT(x)					(1 << x)
 
 #define K_USB3_PHY_SSC_EN			BIT(31)
@@ -74,6 +78,13 @@
 #define K_USB3_PHY_PLL_DEFAULT	\
 	(K_USB3_PHY_SSC_REF_CLK_SEL |\
 	 K_USB3_PHY_MPLL_MULTIPLIER << K_USB3_PHY_MPLL_MULTIPLIER_SHIFT)
+
+struct kusb_controller_config {
+	u32	ss_base;
+	u32	host_xhci_base;
+	u32	phy_ctrl_base;
+	u32	lpsc;
+};
 
 /* KEYSTONE2 XHCI PHY register structure */
 struct xhci_phy {
@@ -108,7 +119,23 @@ struct kxhci_ctrl {
 	unsigned int *hcd;
 };
 
-struct kxhci_ctrl kxhci;
+struct kusb_controller_config kusb_ctlr[] = {
+	{
+		.ss_base	= KEYSTONE2_USB_SS_BASE,
+		.host_xhci_base	= KEYSTONE2_USB_HOST_XHCI_BASE,
+		.phy_ctrl_base	= KEYSTONE2_DEV_USB_PHY_BASE,
+		.lpsc		= KS2_LPSC_USB,
+	},
+
+	{
+		.ss_base	= KEYSTONE2_USB1_SS_BASE,
+		.host_xhci_base	= KEYSTONE2_USB1_HOST_XHCI_BASE,
+		.phy_ctrl_base	= KEYSTONE2_DEV_USB1_PHY_BASE,
+		.lpsc		= KS2_LPSC_USB1,
+	},
+};
+
+struct kxhci_ctrl kxhci[CONFIG_USB_MAX_CONTROLLER_COUNT];
 
 static void keystone_xhci_phy_set(struct xhci_phy *phy)
 {
@@ -230,6 +257,7 @@ static int dwc3_core_init(unsigned int *hcd)
 int xhci_hcd_init(int index, struct xhci_hccr **ret_hccr,
 			struct xhci_hcor **ret_hcor)
 {
+	struct kusb_controller_config *ctlr = &kusb_ctlr[index];
 	struct kdwc3_irq_regs *usbss;
 	struct xhci_hccr *hccr;
 	struct xhci_hcor *hcor;
@@ -238,8 +266,8 @@ int xhci_hcd_init(int index, struct xhci_hccr **ret_hccr,
 	int ret;
 	u32 val;
 
-	usbss = (struct kdwc3_irq_regs *)KEYSTONE2_USB_SS_BASE;
-	phy = (struct xhci_phy *)KEYSTONE2_DEV_USB_PHY_BASE;
+	usbss = (struct kdwc3_irq_regs *)ctlr->ss_base;
+	phy = (struct xhci_phy *)ctlr->phy_ctrl_base;
 
 	/* Enable the PHY REFCLK clock gate with phy_ref_ssp_en = 1 */
 	val = readl(&(phy->phy_clock));
@@ -249,7 +277,7 @@ int xhci_hcd_init(int index, struct xhci_hccr **ret_hccr,
 	mdelay(100);
 
 	/* Release USB from reset */
-	ret = psc_enable_module(KS2_LPSC_USB);
+	ret = psc_enable_module(ctlr->lpsc);
 
 	mdelay(100);
 
@@ -265,7 +293,7 @@ int xhci_hcd_init(int index, struct xhci_hccr **ret_hccr,
 	debug("usbss revision %x\n", val);
 
 	/* Initialize usb core */
-	hcd = (unsigned int *)KEYSTONE2_USB_HOST_XHCI_BASE;
+	hcd = (unsigned int *)ctlr->host_xhci_base;
 
 	ret = dwc3_core_init(hcd);
 	if (ret) {
@@ -276,7 +304,7 @@ int xhci_hcd_init(int index, struct xhci_hccr **ret_hccr,
 	dwc3_set_mode(hcd, DWC3_GCTL_PRTCAP_HOST);
 
 	/* set register addresses */
-	hccr = (struct xhci_hccr *)KEYSTONE2_USB_HOST_XHCI_BASE;
+	hccr = (struct xhci_hccr *)ctlr->host_xhci_base;
 	hcor = (struct xhci_hcor *)((uint32_t) hccr
 				+ HC_LENGTH(readl(&hccr->cr_capbase)));
 
@@ -284,11 +312,11 @@ int xhci_hcd_init(int index, struct xhci_hccr **ret_hccr,
 		(u32)hccr, (u32)hcor,
 		(u32)HC_LENGTH(xhci_readl(&hccr->cr_capbase)));
 
-	kxhci.usbss = usbss;
-	kxhci.hccr = hccr;
-	kxhci.hcor = hcor;
-	kxhci.phy = phy;
-	kxhci.hcd = hcd;
+	kxhci[index].usbss = usbss;
+	kxhci[index].hccr = hccr;
+	kxhci[index].hcor = hcor;
+	kxhci[index].phy = phy;
+	kxhci[index].hcd = hcd;
 
 	*ret_hccr = hccr;
 	*ret_hcor = hcor;
@@ -296,7 +324,7 @@ int xhci_hcd_init(int index, struct xhci_hccr **ret_hccr,
 	return 0;
 }
 
-int keystone_xhci_phy_suspend(void)
+static int keystone_xhci_phy_suspend(int index)
 {
 	struct xhci_hcor *hcor;
 	uint32_t *portsc_1 = NULL;
@@ -306,8 +334,8 @@ int keystone_xhci_phy_suspend(void)
 	int loop_cnt = 0;
 
 	/* set register addresses */
-	hcor = kxhci.hcor;
-	hcd = kxhci.hcd;
+	hcor = kxhci[index].hcor;
+	hcd = kxhci[index].hcd;
 
 	/* Bypass Scrambling and Set Shorter Training sequence for simulation */
 	val = DWC3_GCTL_PWRDNSCALE(0x4b0) | DWC3_GCTL_PRTCAPDIR(0x2);
@@ -367,19 +395,21 @@ int keystone_xhci_phy_suspend(void)
 
 void xhci_hcd_stop(int index)
 {
+	struct kusb_controller_config *ctlr = &kusb_ctlr[index];
+
 	/* Disable USB */
-	if (keystone_xhci_phy_suspend())
+	if (keystone_xhci_phy_suspend(index))
 		return;
 
-	if (psc_disable_module(KS2_LPSC_USB)) {
+	if (psc_disable_module(ctlr->lpsc)) {
 		debug("PSC disable module USB failed!\n");
 		return;
 	}
 
 	/* Disable PHY */
-	keystone_xhci_phy_unset(kxhci.phy);
+	keystone_xhci_phy_unset(kxhci[index].phy);
 
-	memset(&kxhci, 0, sizeof(struct kxhci_ctrl));
+	memset(&kxhci[index], 0, sizeof(struct kxhci_ctrl));
 
 	debug("xhci_hcd_stop OK.\n");
 }
