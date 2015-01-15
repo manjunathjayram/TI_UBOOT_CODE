@@ -55,6 +55,13 @@
 /* U-Boot general configuration */
 #define CONFIG_SYS_PROMPT		"K2E EVM # "
 
+/* SRSS configuration */
+#define CONFIG_SRSS_C0
+#define CONFIG_SRSS_I2C_BUS		0x1	/* SoC I2C bus used to
+						   communicate with TA */
+#define CONFIG_PC_I2C_SLAVE		0x9	/* External power controller
+						   I2C slave address */
+
 #define CONFIG_USB_MAX_CONTROLLER_COUNT	2
 
 #endif /* __CONFIG_H */
