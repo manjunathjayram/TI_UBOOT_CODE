@@ -29,6 +29,8 @@
 #include <asm/io.h>
 
 #if defined(CONFIG_OF_LIBFDT) && defined(CONFIG_OF_BOARD_SETUP)
+DECLARE_GLOBAL_DATA_PTR;
+
 void ft_board_setup(void *blob, bd_t *bd)
 {
 	u64 start[2];
@@ -44,9 +46,7 @@ void ft_board_setup(void *blob, bd_t *bd)
 
 	ddr3a_size = 0;
 	if (lpae) {
-		env = getenv("ddr3a_size");
-		if (env)
-			ddr3a_size = simple_strtol(env, NULL, 10);
+		ddr3a_size = gd->ddr3_size;
 		if ((ddr3a_size != 8) && (ddr3a_size != 4))
 			ddr3a_size = 0;
 	}
