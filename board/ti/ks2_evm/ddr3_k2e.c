@@ -31,38 +31,50 @@
 DECLARE_GLOBAL_DATA_PTR;
 
 struct pll_init_data ddr3_400 = DDR3_PLL_400;
+struct pll_init_data ddr3_333 = DDR3_PLL_333;
 
 void init_ddr3(void)
 {
 	char dimm_name[32];
-	u32 tmp;
+	u8	spd_buf[256];
+	int  ddr_speed;
+	int  ddr_size;
 
-	if (~(readl(K2E_PLL_CNTRL_BASE + MAIN_PLL_CTRL_RSTYPE) & 0x1))
-		init_pll(&ddr3_400);
+	struct ddr3_phy_config *phy_cfg = &phy_spd_cfg;
+	struct ddr3_emif_config *emif_cfg = &emif_spd_cfg;
 
-	get_dimm_params(dimm_name);
+	if (get_dimm_params_from_spd(spd_buf, &ddr_speed, &ddr_size)) {
+		printf("Sorry, I don't know how to configure DDR3A.\n"
+		       "Buy :(\n");
+		for (;;)
+			;
+	}
+
+	strncpy(dimm_name, &spd_buf[0x80], 18);
+	dimm_name[18] = '\0';
 
 	printf("Detected SO-DIMM [%s]\n", dimm_name);
+
+	if (__raw_readl(K2E_PLL_CNTRL_BASE + MAIN_PLL_CTRL_RSTYPE) & 0x1) {
+		printf("DDR3 speed %d\n", ddr_speed);
+		if (ddr_speed == 1600)
+			init_pll(&ddr3_400);
+		else
+			init_pll(&ddr3_333);
+	} else
+		printf("Power-on reset was not the last reset to occur !\n");
 
 	/* Reset DDR3 PHY after PLL enabled */
 	reset_ddrphy(KS2_DEVICE_STATE_CTRL_BASE);
 
-	if (!strcmp(dimm_name, "18KSF1G72HZ-1G6E2 ")) {
-		/* 8G SO-DIMM */
-		gd->ddr3_size = 8;
-		printf("DRAM: 8 GiB\n");
-		ddr3phy_1600_8g.zq0cr1 |= 0x10000;
-		ddr3phy_1600_8g.zq1cr1 |= 0x10000;
-		ddr3phy_1600_8g.zq2cr1 |= 0x10000;
-		init_ddrphy(K2E_DDR3_DDRPHYC, &ddr3phy_1600_8g);
-		init_ddremif(K2E_DDR3_EMIF_CTRL_BASE, &ddr3_1600_8g);
-	} else if (!strcmp(dimm_name, "18KSF51272HZ-1G6K2")) {
-		/* 4G SO-DIMM */
-		gd->ddr3_size = 4;
-		printf("DRAM: 4 GiB\n");
-		init_ddrphy(K2E_DDR3_DDRPHYC, &ddr3phy_1600_4g);
-		init_ddremif(K2E_DDR3_EMIF_CTRL_BASE, &ddr3_1600_4g);
-	}
+	phy_cfg->zq0cr1 |= 0x10000;
+	phy_cfg->zq1cr1 |= 0x10000;
+	phy_cfg->zq2cr1 |= 0x10000;
+	init_ddrphy(K2E_DDR3_DDRPHYC, phy_cfg);
+	init_ddremif(K2E_DDR3_EMIF_CTRL_BASE, emif_cfg);
+
+	gd->ddr3_size = ddr_size;
+	printf("DRAM: %d GiB\n", gd->ddr3_size);
 }
 
 /* Get the total segment number of the DDR memory, each segment is 4KB size */

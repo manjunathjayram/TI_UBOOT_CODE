@@ -28,7 +28,7 @@ ifdef CONFIG_K2HK_EVM
 COBJS	+= board_k2hk.o ddr3_k2hk.o ddr3_spd.o
 endif
 ifdef CONFIG_K2E_EVM
-COBJS	+= board_k2e.o ddr3_k2e.o
+COBJS	+= board_k2e.o ddr3_k2e.o ddr3_spd.o
 endif
 ifdef CONFIG_K2L_EVM
 COBJS	+= board_k2l.o ddr3_k2l.o
