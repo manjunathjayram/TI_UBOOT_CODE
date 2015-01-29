@@ -20,6 +20,11 @@
 #ifndef __DDR3_CFG_H
 #define __DDR3_CFG_H
 
+extern struct ddr3_phy_config phy_spd_cfg;
+extern struct ddr3_emif_config emif_spd_cfg;
+int get_dimm_params_from_spd(u8 *spd_params, unsigned int *ddr_clk,
+			     int *ddr_size);
+
 extern struct ddr3_phy_config ddr3phy_1600_8g;
 extern struct ddr3_emif_config ddr3_1600_8g;
 
@@ -37,5 +42,7 @@ extern struct ddr3_emif_config ddr3_1600_4g;
 extern struct ddr3_phy_config ddr3phy_1600_2g;
 extern struct ddr3_emif_config ddr3_1600_2g;
 #endif
+
+
 
 #endif /* __DDR3_CFG_H */

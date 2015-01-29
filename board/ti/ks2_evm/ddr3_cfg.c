@@ -180,6 +180,7 @@ struct ddr3_emif_config ddr3_1600_2g = {
 	.sdrfc		= 0x00001869ul,
 };
 
+#ifndef CONFIG_SOC_K2HK
 int get_dimm_params(char *dimm_name)
 {
 	u8 spd_params[256];
@@ -230,5 +231,5 @@ int get_dimm_params(char *dimm_name)
 
 	return 0;
 }
-
+#endif
 

@@ -134,79 +134,65 @@ struct pll_init_data ddr3b_400 = DDR3_PLL_400(B);
 void init_ddr3(void)
 {
 	char dimm_name[32];
+	u8 spd_buf[256];
+	int  ddr_speed;
+	int  ddr_size;
 
-	if (__raw_readl(K2HK_PLL_CNTRL_BASE + MAIN_PLL_CTRL_RSTYPE) & 0x1) {
-		if (cpu_revision() > 0)
-			init_pll(&ddr3a_400);
-		else
-			init_pll(&ddr3a_333);
+	struct ddr3_phy_config *phy_cfg = &phy_spd_cfg;
+	struct ddr3_emif_config *emif_cfg = &emif_spd_cfg;
+
+	/* First take care of DDR3B - simple case */
+	if (__raw_readl(K2HK_PLL_CNTRL_BASE + MAIN_PLL_CTRL_RSTYPE) & 0x1)
 		init_pll(&ddr3b_333);
-	} else
-		printf("Power-on reset was not the last reset to occur !\n");
 
 	init_ddrphy(K2HK_DDR3B_DDRPHYC, &ddr3phy_1333_2g);
 	init_ddremif(K2HK_DDR3B_EMIF_CTRL_BASE, &ddr3_1333_2g);
 
-	get_dimm_params(dimm_name);
+	if (get_dimm_params_from_spd(spd_buf, &ddr_speed, &ddr_size)) {
+		printf("Sorry, I don't know how to configure DDR3A.\n"
+		       "Bye :(\n");
+		for (;;)
+			;
+	}
+
+	strncpy(dimm_name, &spd_buf[0x80], 18);
+	dimm_name[18] = '\0';
 
 	printf("Detected SO-DIMM [%s]\n", dimm_name);
 
-	if (!strcmp(dimm_name, "18KSF1G72HZ-1G6E2 ")) {
-		/* 8G SO-DIMM */
-		if (cpu_revision() > 0) {
-			if (cpu_revision() > 1) {
-				/* PG 2.0 */
-				/* Reset DDR3A PHY after PLL enabled */
-				reset_ddrphy(KS2_DEVICE_STATE_CTRL_BASE);
-				ddr3phy_1600_8g.zq0cr1 |= 0x10000;
-				ddr3phy_1600_8g.zq1cr1 |= 0x10000;
-				ddr3phy_1600_8g.zq2cr1 |= 0x10000;
-				init_ddrphy(K2HK_DDR3A_DDRPHYC,
-						&ddr3phy_1600_8g);
-			} else {
-				/* PG 1.1 */
-				init_ddrphy(K2HK_DDR3A_DDRPHYC,
-						&ddr3phy_1600_8g);
-			}
-			init_ddremif(K2HK_DDR3A_EMIF_CTRL_BASE,
-					&ddr3_1600_8g);
-			gd->ddr3_size = 8;
-			printf("DRAM:  8 GiB (includes reported below)\n");
-		} else {
-			init_ddrphy(K2HK_DDR3A_DDRPHYC, &ddr3phy_1600_8g);
-			ddr3_1600_8g.sdcfg |= 0x1000;
-			init_ddremif(K2HK_DDR3A_EMIF_CTRL_BASE, &ddr3_1600_8g);
-			gd->ddr3_size = 4;
-			printf("DRAM: 4 GiB (includes reported below)\n");
+	if (__raw_readl(K2HK_PLL_CNTRL_BASE + MAIN_PLL_CTRL_RSTYPE) & 0x1) {
+		printf("DDR3 speed %d\n", ddr_speed);
+		if (ddr_speed == 1600)
+			init_pll(&ddr3a_400);
+		else
+			init_pll(&ddr3a_333);
+	} else
+		printf("Power-on reset was not the last reset to occur !\n");
+
+
+
+	if (cpu_revision() > 0) {
+		if (cpu_revision() > 1) {
+			/* PG 2.0 */
+			/* Reset DDR3A PHY after PLL enabled */
+			reset_ddrphy(KS2_DEVICE_STATE_CTRL_BASE);
+			phy_cfg->zq0cr1 |= 0x10000;
+			phy_cfg->zq1cr1 |= 0x10000;
+			phy_cfg->zq2cr1 |= 0x10000;
+
 		}
+		init_ddrphy(K2HK_DDR3A_DDRPHYC, phy_cfg);
+
+		init_ddremif(K2HK_DDR3A_EMIF_CTRL_BASE, emif_cfg);
+
+		gd->ddr3_size = ddr_size;
 	} else {
-		/* 2G SO-DIMM */
-		if (cpu_revision() > 0) {
-			if (cpu_revision() > 1) {
-				/* PG 2.0 */
-				/* Reset DDR3A PHY after PLL enabled */
-				reset_ddrphy(KS2_DEVICE_STATE_CTRL_BASE);
-				ddr3phy_1333_2g.zq0cr1 |= 0x10000;
-				ddr3phy_1333_2g.zq1cr1 |= 0x10000;
-				ddr3phy_1333_2g.zq2cr1 |= 0x10000;
-				init_ddrphy(K2HK_DDR3A_DDRPHYC,
-						&ddr3phy_1333_2g);
-			} else {
-				/* PG 1.1 */
-				init_ddrphy(K2HK_DDR3A_DDRPHYC,
-						&ddr3phy_1333_2g);
-			}
-			init_ddremif(K2HK_DDR3A_EMIF_CTRL_BASE, &ddr3_1333_2g);
-			gd->ddr3_size = 2;
-			printf("DRAM: 2 GiB\n");
-		} else {
-			init_ddrphy(K2HK_DDR3A_DDRPHYC, &ddr3phy_1333_2g);
-			ddr3_1333_2g.sdcfg |= 0x1000;
-			init_ddremif(K2HK_DDR3A_EMIF_CTRL_BASE, &ddr3_1333_2g);
-			gd->ddr3_size = 1;
-			printf("DRAM: 2 GiB\n");
-		}
+		init_ddrphy(K2HK_DDR3A_DDRPHYC, phy_cfg);
+		emif_cfg->sdcfg |= 0x1000;
+		init_ddremif(K2HK_DDR3A_EMIF_CTRL_BASE, emif_cfg);
+		gd->ddr3_size = ddr_size / 2;
 	}
+	printf("DRAM: %d GiB (includes reported below)\n", gd->ddr3_size);
 
 	/* Apply the workaround for PG 1.0 and 1.1 Silicons */
 	if (cpu_revision() <= 1)
