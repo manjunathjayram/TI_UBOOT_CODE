@@ -54,6 +54,10 @@
 #define THPT5_SHIFT		24
 #define THPT_MASK		0xff
 
+/* SRSS_TEMP_STAT1 fields definitions */
+#define VID_SHIFT		24
+#define VID_MASK		0x3f
+
 /* SRSS_VPRM_CTL0 definitions */
 #define VPRM_ENABLE		(0x1 << 0)	/* enables SR C0 */
 #define VPRM_DISABLE		(0x0 << 0)	/* disable VPRM FSM */
@@ -98,12 +102,17 @@ static void srss_c0_tc(u32 base, u32 enable)
 	if (env)
 		no_src0_tc = simple_strtol(env, NULL, 0);
 
-	if (enable && !no_src0_tc) {
-		temp_ctl0 |= (C0TEMP_ENABLE | TM_ENABLE);
-		printf("Smart Reflex Class 0 temperature "
-			"compensation enabled\n");
-	} else
+	if (enable) {
+		if (!no_src0_tc) {
+			temp_ctl0 |= (C0TEMP_ENABLE | TM_ENABLE);
+			printf("Smart Reflex Class 0 temperature "
+				"compensation enabled\n");
+		}
+	} else {
 		temp_ctl0 &= ~(C0TEMP_ENABLE | TM_ENABLE);
+		printf("Smart Reflex Class 0 temperature "
+			"compensation disabled\n");
+	}
 
 	/* Clear the threshold point interrupt pending flag */
 	__raw_writel((1 << TEMP_THRPT_INT_SHIFT), base + SRSS_EVENT_CLR);
@@ -113,8 +122,13 @@ static void srss_c0_tc(u32 base, u32 enable)
 
 int srss_c0_init(u32 base, int (*pc_init)(u32, u32, u8))
 {
-	u32 kt_sr_c0, opp_sel, vid, efuse = 1;
+	u32 kt_sr_c0, opp_sel, vdd_min, vid, efuse = 1;
 	u32 temp_ctl0, temp_ctl1, thpt1, thpt2, thpt3, thpt4, thpt5;
+	char *env = getenv("srss_vcntl");
+	u32 srss_vcntl = 0;
+
+	if (env)
+		srss_vcntl = simple_strtol(env, NULL, 0);
 
 	/* Enable SRSS clock */
 	if (psc_enable_module(KS2_LPSC_CHIP_SRSS)) {
@@ -141,14 +155,16 @@ int srss_c0_init(u32 base, int (*pc_init)(u32, u32, u8))
 	}
 
 	/* Get the initial VID value (6-bit) */
-	vid = (kt_sr_c0 >> ((opp_sel << 2) + (opp_sel << 1))) & VID_OPP_MASK;
+	vdd_min = (kt_sr_c0 >> ((opp_sel << 2) + (opp_sel << 1))) \
+		  & VID_OPP_MASK;
 	/* cannot set initial voltage to 0.7, otherwise will cause power
 	   failure on the EVM */
-	if (vid == 0) {
-		vid = VID_DEFAULT;
+
+	if (vdd_min == 0) {
+		vdd_min = VID_DEFAULT;
 		kt_sr_c0 &= ~(VID_OPP_MASK << \
 				((opp_sel << 2) + (opp_sel << 1)));
-		kt_sr_c0 |= vid << ((opp_sel << 2) + (opp_sel << 1));
+		kt_sr_c0 |= vdd_min << ((opp_sel << 2) + (opp_sel << 1));
 	}
 	/* write back the default value if efuse is not programmed */
 	__raw_writel(kt_sr_c0, KS2_KT_VDD_SR_C0);
@@ -193,12 +209,18 @@ int srss_c0_init(u32 base, int (*pc_init)(u32, u32, u8))
 	temp_ctl0 &= ~(I2C_REQ_ENABLE | C0TEMP_ENABLE);
 	__raw_writel(temp_ctl0, base + SRSS_TEMP_CTL0);
 
-	/* Send the initial VDD min to external power controller */
-	if ((*pc_init)(vid, CONFIG_SRSS_I2C_BUS, CONFIG_PC_I2C_SLAVE) == 0)
-		srss_c0_tc(base, 1);	/* enable temperature compensation */
-	else
-		srss_vprm_c0_enable(base, 0);	/* disable SRSS C0 */
+	srss_c0_tc(base, 1);	/* enable temperature compensation */
 
+	if (!srss_vcntl) {
+		vid = (__raw_readl(base + SRSS_TEMP_STAT1) >> VID_SHIFT) & \
+			VID_MASK;
+		/* Send the VID to external power controller */
+		if ((*pc_init)(vid, CONFIG_SRSS_I2C_BUS, CONFIG_PC_I2C_SLAVE) \
+				!= 0) {
+			srss_c0_tc(base, 0);	/* disable TC */
+			srss_vprm_c0_enable(base, 0);	/* disable SRSS C0 */
+		}
+	}
 	return 0;
 }
 

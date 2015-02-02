@@ -73,6 +73,7 @@ int srss_tps544_init(u32 vid, u32 i2c_bus, u8 i2c_addr)
 	i2c_set_bus_num(old_bus);
 	return 0;
 err:
+	printf("tps544_init i2c write error\n");
 	i2c_set_bus_num(old_bus);
 	return -1;
 }
