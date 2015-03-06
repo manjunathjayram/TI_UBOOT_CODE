@@ -176,21 +176,34 @@ int get_eth_env_param(char *env_name)
 
 static int board_has_xge(void)
 {
-	int ret;
+	int ret, current_bus, has_xge = 1, restore = 0;
 
-	ret = i2c_set_bus_num(RTM_BOC_XGE_RETIMER_I2C_BUS);
-	if (ret)
-		return 0;
+	current_bus = i2c_get_bus_num();
+
+	if (current_bus != RTM_BOC_XGE_RETIMER_I2C_BUS) {
+		ret = i2c_set_bus_num(RTM_BOC_XGE_RETIMER_I2C_BUS);
+		if (ret) {
+			has_xge = 0;
+			goto done;
+		}
+		restore = 1;
+	}
 
 	ret = i2c_probe(RTM_BOC_XGE_RETIMER1_I2C_ADDR);
 	if (!ret)
-		return 1;
+		goto done;
 
 	ret = i2c_probe(RTM_BOC_XGE_RETIMER2_I2C_ADDR);
 	if (!ret)
-		return 1;
+		goto done;
 
-	return 0;
+	has_xge = 0;
+done:
+	/* restore previous bus num */
+	if (restore)
+		i2c_set_bus_num(current_bus);
+
+	return has_xge;
 }
 
 int board_eth_init(bd_t *bis)
