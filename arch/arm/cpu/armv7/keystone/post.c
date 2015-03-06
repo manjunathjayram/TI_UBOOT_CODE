@@ -60,13 +60,17 @@ int post_test_external_memory(void)
 int post_test_eeprom(void)
 {
 	u8 test_buf[POST_EEPROM_TEST_READ_LENGTH];
+	int	ret;
 
 	puts("POST I2C eeprom read ... ");
-	if (eeprom_read(POST_EEPROM_TEST_DEVICE_ID,
-			POST_EEPROM_TEST_READ_ADDRESS,
-			test_buf, POST_EEPROM_TEST_READ_LENGTH)) {
-		puts("FAILED\r\n");
-		WAIT_OR_RETURN;
+	ret = i2c_set_bus_num(0);
+	if (!ret) {
+		if (eeprom_read(POST_EEPROM_TEST_DEVICE_ID,
+				POST_EEPROM_TEST_READ_ADDRESS,
+				test_buf, POST_EEPROM_TEST_READ_LENGTH)) {
+			puts("FAILED\r\n");
+			WAIT_OR_RETURN;
+		}
 	}
 	puts("PASSED\r\n");
 	return 0;
