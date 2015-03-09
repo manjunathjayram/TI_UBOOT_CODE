@@ -212,6 +212,7 @@ s32 init_sgmii(u32 port)
 u8 pkt_buf[PKT_SIZE] __aligned(16);
 int post_eth_loopback_test(struct eth_device *dev)
 {
+	eth_priv_t *tmp_priv;
 	int ret = 0;
 	void *hd;
 	u32  pkt_size, j;
@@ -237,15 +238,22 @@ int post_eth_loopback_test(struct eth_device *dev)
 
 	memcpy(mac_addr, dev->enetaddr, 6);
 	for (j = 0; j < get_num_eth_ports(); j++) {
+		tmp_priv = get_eth_priv_ptr(j);
+		if (tmp_priv->sgmii_link_type != SGMII_LINK_MAC_PHY)
+			continue;
 		init_sgmii(j);
 		init_mac(0, dev->enetaddr, 1518);
 		mac_addr[5]++;
 	}
 
 	DEVICE_REG32_W(DEVICE_CPSW_BASE + CPSW_REG_ALE_CONTROL, 0x80000010);
-	for (j = 0; j <= get_num_eth_ports(); j++)
+	for (j = 0; j <= get_num_eth_ports(); j++) {
+		tmp_priv = get_eth_priv_ptr(j);
+		if (tmp_priv->sgmii_link_type != SGMII_LINK_MAC_PHY)
+			continue;
 		DEVICE_REG32_W(DEVICE_CPSW_BASE + CPSW_REG_ALE_PORTCTL(j),
 				0x13);
+	}
 
 	memset(pkt_buf, 0, PKT_SIZE);
 	memset(pkt_buf, 0xff, 6);
@@ -290,6 +298,11 @@ int post_emac_test(void)
 	for (port = 0; port < get_num_eth_ports(); port++) {
 		printf("POST EMAC TEST for port %d ... ", port);
 		eth_priv = get_eth_priv_ptr(port);
+
+		if (eth_priv->sgmii_link_type >= XGMII_LINK_MAC_PHY) {
+			printf("Port is 10G - test skipped\n");
+			continue;
+		}
 
 		if (eth_priv->sgmii_link_type != SGMII_LINK_MAC_PHY) {
 			printf("Port doesn't have mdio - test skipped\n");
