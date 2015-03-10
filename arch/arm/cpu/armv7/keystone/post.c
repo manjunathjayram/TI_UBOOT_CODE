@@ -329,15 +329,42 @@ int post_emac_test(void)
 /******************************************************************************
  * Function:    main function for POST
  ******************************************************************************/
+int abortpost(int postdelay)
+{
+	int abort = 0;
+
+	if (postdelay >= 0)
+		printf("Hit any key to stop POST: %2d ", postdelay);
+
+	while ((postdelay > 0) && (!abort)) {
+		int i;
+
+		--postdelay;
+		/* delay 100 * 10ms */
+		for (i=0; !abort && i<100; ++i) {
+			if (tstc()) {	/* we got a key press	*/
+				abort  = 1;	/* don't auto boot	*/
+				postdelay = 0;	/* no more delay	*/
+				(void) getc();  /* consume input	*/
+				break;
+			}
+			udelay(10000);
+		}
+
+		printf("\b\b\b%2d ", postdelay);
+	}
+
+	putc('\n');
+
+	return abort;
+}
+
 void ks2_post(void)
 {
-	u32	reset_type;
 	int	i;
 	char	msg[9];
 	u8	mac_addr[6];
-	u32	sa_enable;
 	u32	acc_fail;
-	char	serial_num[16];
 	char	*s;
 	u32	no_post;
 
@@ -347,6 +374,10 @@ void ks2_post(void)
 		if (no_post == 1)
 			return;
 	}
+
+	/* last chance */
+	if (abortpost(3))
+		return;
 
 	acc_fail = 0;
 
