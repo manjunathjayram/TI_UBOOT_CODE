@@ -38,6 +38,7 @@ void ft_board_setup(void *blob, bd_t *bd)
 	char name[32], *env, *endp;
 	int lpae, nodeoffset, nbanks, unitrd_fixup = 0;
 	u32 ddr3a_size;
+	u32 ddr3a_size_env;
 
 	env = getenv("mem_lpae");
 	lpae = env && simple_strtol(env, NULL, 0);
@@ -49,6 +50,15 @@ void ft_board_setup(void *blob, bd_t *bd)
 		ddr3a_size = gd->ddr3_size;
 		if ((ddr3a_size != 8) && (ddr3a_size != 4))
 			ddr3a_size = 0;
+
+		if (ddr3a_size == 8) {
+			env = getenv("ddr3a_size");
+			if (env) {
+				ddr3a_size_env = simple_strtol(env, NULL, 10);
+				if (ddr3a_size_env == 4)
+					ddr3a_size = ddr3a_size_env;
+			}
+		}
 	}
 
 	nbanks = 1;
