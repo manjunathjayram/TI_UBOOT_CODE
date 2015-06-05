@@ -1019,6 +1019,7 @@ int keystone2_emac_initialize(eth_priv_t *eth_priv)
 	static int phy_registered = 0;
 	static int emac_poweron = 1;
 	static int xmac_poweron = 1;
+	unsigned int temp;
 
 	dev = malloc(sizeof *dev);
 	if (dev == NULL)
@@ -1044,6 +1045,27 @@ int keystone2_emac_initialize(eth_priv_t *eth_priv)
 
 	if (emac_poweron && IS_1GE(eth_priv)) {
 		emac_poweron = 0;
+
+		/* Workaround to resolve a PA RX path issue in the Ethernet
+		 * boot mode by turning off PA/CPGMAC/CRYPTO clock modules */
+
+		/* Set the streaming switch to forward the RX packets to CPSW */
+		hwConfigStreamingSwitch();
+
+		/* Turn off rx/tx packet DMA channels */
+		for (temp = 0; temp < DEVICE_PA_CDMA_RX_NUM_CHANNELS; temp++)
+			writel(0x0, DEVICE_PA_CDMA_RX_CHAN_CFG_BASE + 8 * temp);
+		for (temp = 0; temp < DEVICE_PA_CDMA_TX_NUM_CHANNELS; temp++)
+			writel(0x0, DEVICE_PA_CDMA_TX_CHAN_CFG_BASE + 8 * temp);
+
+		/* Power off PA/CPGMAC/CRYPTO */
+		if (psc_disable_module(KS2_LPSC_CRYPTO))
+			return -1;
+		if (psc_disable_module(KS2_LPSC_CPGMAC))
+			return -1;
+		if (psc_disable_module(KS2_LPSC_PA))
+			return -1;
+
 		/* By default, select PA PLL clock as PA clock source */
 		if (psc_enable_module(KS2_LPSC_PA))
 			return -1;
