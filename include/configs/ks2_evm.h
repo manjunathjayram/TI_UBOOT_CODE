@@ -263,7 +263,8 @@
 		"rdinit=/sbin/init rw root=/dev/ram0\0"			\
 	"no_post=1\0"							\
 	"mtdparts=mtdparts=davinci_nand.0:"				\
-		"1024k(bootloader)ro,512k(params)ro,-(ubifs)\0"
+		"1024k(bootloader)ro,512k(params)ro,-(ubifs)\0"		\
+	"uinitrd_fixup=1\0"
 #define CONFIG_BOOTCOMMAND						\
 	"run init_${boot} get_fdt_${boot} get_mon_${boot} "		\
 		"get_kern_${boot} run_mon run_kern"
