@@ -81,6 +81,6 @@ void init_ddr3(void)
 u32 get_ddr_seg_num(void)
 {
 	/* DDR3 size in segments (4KB seg size) */
-	return (u32)CONFIG_MAX_RAM_BANK_SIZE >> MSMC_SEG_SIZE_SHIFT;
+	return gd->ddr3_size << (30 - MSMC_SEG_SIZE_SHIFT);
 }
 
