@@ -35,29 +35,20 @@ struct pll_init_data ddr3_333 = DDR3_PLL_333;
 
 void init_ddr3(void)
 {
-	char dimm_name[32];
-	u8	spd_buf[256];
-	int  ddr_speed;
-	int  ddr_size;
+	struct ddr3_spd_cb spd_cb;
 
-	struct ddr3_phy_config *phy_cfg = &phy_spd_cfg;
-	struct ddr3_emif_config *emif_cfg = &emif_spd_cfg;
-
-	if (get_dimm_params_from_spd(spd_buf, &ddr_speed, &ddr_size)) {
+	if (get_dimm_params_from_spd(&spd_cb)) {
 		printf("Sorry, I don't know how to configure DDR3A.\n"
 		       "Buy :(\n");
 		for (;;)
 			;
 	}
 
-	strncpy(dimm_name, &spd_buf[0x80], 18);
-	dimm_name[18] = '\0';
-
-	printf("Detected SO-DIMM [%s]\n", dimm_name);
+	printf("Detected SO-DIMM [%s]\n", spd_cb.dimm_name);
 
 	if (__raw_readl(K2E_PLL_CNTRL_BASE + MAIN_PLL_CTRL_RSTYPE) & 0x1) {
-		printf("DDR3 speed %d\n", ddr_speed);
-		if (ddr_speed == 1600)
+		printf("DDR3 speed %d\n", spd_cb.ddrspdclock);
+		if (spd_cb.ddrspdclock == 1600)
 			init_pll(&ddr3_400);
 		else
 			init_pll(&ddr3_333);
@@ -67,13 +58,13 @@ void init_ddr3(void)
 	/* Reset DDR3 PHY after PLL enabled */
 	reset_ddrphy(KS2_DEVICE_STATE_CTRL_BASE);
 
-	phy_cfg->zq0cr1 |= 0x10000;
-	phy_cfg->zq1cr1 |= 0x10000;
-	phy_cfg->zq2cr1 |= 0x10000;
-	init_ddrphy(K2E_DDR3_DDRPHYC, phy_cfg);
-	init_ddremif(K2E_DDR3_EMIF_CTRL_BASE, emif_cfg);
+	spd_cb.phy_cfg.zq0cr1 |= 0x10000;
+	spd_cb.phy_cfg.zq1cr1 |= 0x10000;
+	spd_cb.phy_cfg.zq2cr1 |= 0x10000;
+	init_ddrphy(K2E_DDR3_DDRPHYC, &(spd_cb.phy_cfg));
+	init_ddremif(K2E_DDR3_EMIF_CTRL_BASE, &(spd_cb.emif_cfg));
 
-	gd->ddr3_size = ddr_size;
+	gd->ddr3_size = spd_cb.ddr_size_gbyte;
 	printf("DRAM: %d GiB\n", gd->ddr3_size);
 }
 

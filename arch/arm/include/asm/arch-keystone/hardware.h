@@ -103,6 +103,14 @@ struct ddr3_emif_config {
 	unsigned int sdrfc;
 };
 
+struct ddr3_spd_cb {
+	char   dimm_name[32];
+	struct ddr3_phy_config phy_cfg;
+	struct ddr3_emif_config emif_cfg;
+	unsigned int ddrspdclock;
+	int    ddr_size_gbyte;
+};
+
 #endif
 
 #define		BIT(x)	(1 << (x))
